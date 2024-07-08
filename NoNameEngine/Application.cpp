@@ -4,15 +4,6 @@ std::clock_t lastFrameTime;
 NNE::Application* NNE::Application::Instance = nullptr;
 int NNE::Application::_genericID = 0;
 
-//const std::vector<const char*> validationLayers = {
-//    "VK_LAYER_KHRONOS_validation"
-//};
-//
-//#ifdef NDEBUG
-//const bool enableValidationLayers = false;
-//#else
-//const bool enableValidationLayers = true;
-//#endif
 
 
 NNE::Application::Application()
@@ -38,6 +29,7 @@ void NNE::Application::Init()
     glfwInit();
     VKManager->CreateVulkanInstance();
     VKManager->pickPhysicalDevice();
+    VKManager->createLogicalDevice();
     Open();
 
     uint32_t extensionCount = 0;
@@ -79,6 +71,8 @@ void NNE::Application::Open()
 void NNE::Application::Quit()
 {
     vkDestroyInstance(VKManager->instance, nullptr);
+
+    VKManager->CleanUp();
 
     glfwDestroyWindow(window);
 
