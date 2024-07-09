@@ -1,11 +1,10 @@
 #include "VulkanManager.h"
+#include <string>
+
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
-
-
-
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
 #else
@@ -18,6 +17,7 @@ NNE::VulkanManager::VulkanManager()
 
 NNE::VulkanManager::~VulkanManager()
 {
+    CleanUp();
 }
 
 NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice device)
@@ -30,13 +30,22 @@ NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice d
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
+
+
     std::cout << "Begin Find queue " << std::endl;
 
     int i = 0;
     for (const auto& queueFamily : queueFamilies) {
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+
+        if (presentSupport) {
+            indices.presentFamily = i;
+        }
+
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
-            std::cout << "Indices : " + indices.graphicsFamily.value() << std::endl;
+            std::cout << "Indices : " + std::to_string(indices.graphicsFamily.value()) << std::endl;
         }
 
         if (indices.isComplete()) {
@@ -66,6 +75,21 @@ void NNE::VulkanManager::CreateVulkanInstance()
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
+    createInfo.pApplicationInfo = &appInfo;
+
+    // Get GLFW required extensions
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+    if (enableValidationLayers) {
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    }
+
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
+
     if (enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -75,7 +99,7 @@ void NNE::VulkanManager::CreateVulkanInstance()
     }
 
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-        std::cout << "failed to create instance!" << std::endl;
+        throw std::runtime_error("failed to create instance!");
     }
 }
 
@@ -138,6 +162,38 @@ void NNE::VulkanManager::createLogicalDevice()
 {
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+    float queuePriority = 1.0f;
+    for (uint32_t queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = queueFamily;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    VkDeviceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+    createInfo.pQueueCreateInfos = queueCreateInfos.data();
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    
+
+    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+
+    /*QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
     VkDeviceQueueCreateInfo queueCreateInfo{};
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
@@ -165,27 +221,28 @@ void NNE::VulkanManager::createLogicalDevice()
         createInfo.enabledLayerCount = 0;
     }
 
-    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+    vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);*/
 }
 
-void NNE::VulkanManager::createSurface()
+void NNE::VulkanManager::createSurface(GLFWwindow* window)
 {
-
+    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create window surface!");
+    }
 }
 
 void NNE::VulkanManager::CleanUp()
-{
-    vkDestroyDevice(device, nullptr);
+{    
+    vkDestroyDevice(device, nullptr);  
+    vkDestroySurfaceKHR(instance, surface, nullptr);
+    vkDestroyInstance(instance, nullptr);
 }
 
 bool NNE::VulkanManager::isDeviceSuitable(VkPhysicalDevice device)
 {
-    QueueFamilyIndices indices = findQueueFamilies(device);
+    QueueFamilyIndices indices = findQueueFamilies(device);   
 
-    std::cout << indices.isComplete() << std::endl;
-
-    //return indices.isComplete();
-    return true;
+    return indices.isComplete();
 }
 
 int NNE::VulkanManager::rateDeviceSuitability(VkPhysicalDevice device)

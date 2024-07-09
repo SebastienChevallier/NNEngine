@@ -53,7 +53,7 @@ namespace NNE {
 		template<typename T>
 		T* AddComponent(AEntity* entity);
 		
-		GLFWwindow* CreateWindow(int width, int height);
+		GLFWwindow* CreateGLFWWindow(int width, int height);
 		
 	};
 

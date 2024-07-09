@@ -27,10 +27,12 @@ NNE::Application::~Application()
 void NNE::Application::Init()
 {
     glfwInit();
-    VKManager->CreateVulkanInstance();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    Open();
+    VKManager->CreateVulkanInstance();    
+    VKManager->createSurface(window);
     VKManager->pickPhysicalDevice();
     VKManager->createLogicalDevice();
-    Open();
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -65,17 +67,13 @@ void NNE::Application::Update()
 
 void NNE::Application::Open()
 {
-    CreateWindow(800, 600);
+    CreateGLFWWindow(800, 600);
 }
 
 void NNE::Application::Quit()
 {
-    vkDestroyInstance(VKManager->instance, nullptr);
-
     VKManager->CleanUp();
-
     glfwDestroyWindow(window);
-
     glfwTerminate();
 }
 
@@ -93,7 +91,7 @@ float NNE::Application::GetDeltaTime()
     return deltaTime;
 }
 
-GLFWwindow* NNE::Application::CreateWindow(int width, int height)
+GLFWwindow* NNE::Application::CreateGLFWWindow(int width, int height)
 {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

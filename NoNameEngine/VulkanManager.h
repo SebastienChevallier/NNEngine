@@ -5,8 +5,12 @@
 #include <map>
 #include <optional>
 #include <cstdint>
+#include <set>
+
 
 #define VK_USE_PLATFORM_WIN32_KHR
+#define VK_KHR_surface
+#define VK_KHR_win32_surface
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -16,9 +20,10 @@ namespace NNE {
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
 
 		bool isComplete() {
-			return graphicsFamily.has_value();
+			return graphicsFamily.has_value() && presentFamily.has_value();
 		}
 	};
 
@@ -26,11 +31,13 @@ namespace NNE {
 	{
 	protected:
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-		VkDevice device;
-		VkQueue graphicsQueue;
+		VkDevice device = VK_NULL_HANDLE;
+		VkQueue graphicsQueue = VK_NULL_HANDLE;
+		VkSurfaceKHR surface = VK_NULL_HANDLE;
+		VkQueue presentQueue = VK_NULL_HANDLE;
 
 	public :
-		VkInstance instance;
+		VkInstance instance = VK_NULL_HANDLE;
 
 		VulkanManager();
 		~VulkanManager();
@@ -39,7 +46,7 @@ namespace NNE {
 		bool checkValidationLayerSupport();
 		void pickPhysicalDevice();
 		void createLogicalDevice();
-		void createSurface();
+		void createSurface(GLFWwindow* window);
 
 		void CleanUp();
 
