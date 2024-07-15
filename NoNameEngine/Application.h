@@ -17,7 +17,7 @@ namespace NNE {
 		std::vector<AComponent*> _components;
 		std::map<int, int> _link;
 		static Application* Instance;
-		GLFWwindow* window;
+		/*GLFWwindow* window;*/
 		float delta;
 		float GetDeltaTime();
 
@@ -53,7 +53,7 @@ namespace NNE {
 		template<typename T>
 		T* AddComponent(AEntity* entity);
 		
-		GLFWwindow* CreateGLFWWindow(int width, int height);
+		/*GLFWwindow* CreateGLFWWindow(int width, int height);*/
 		
 	};
 

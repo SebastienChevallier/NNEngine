@@ -19,6 +19,9 @@
     <Filter Include="Fichiers sources\VulkanScripts">
       <UniqueIdentifier>{c1f6ffba-5caf-4932-827c-60c158c870c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\Shaders">
+      <UniqueIdentifier>{ebfd1915-ea35-4971-b718-287f7d1f1b42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -56,5 +59,16 @@
     <ClInclude Include="VulkanManager.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shader.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="compile.bat">
+      <Filter>Fichiers sources</Filter>
+    </None>
   </ItemGroup>
 </Project>
