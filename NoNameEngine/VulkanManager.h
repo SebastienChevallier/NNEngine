@@ -58,6 +58,13 @@ namespace NNE {
 
 		VkRenderPass renderPass;
 		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
+		std::vector<VkFramebuffer> swapChainFramebuffers;
+		VkCommandPool commandPool;
+		VkCommandBuffer commandBuffer;
+		VkSemaphore imageAvailableSemaphore;
+		VkSemaphore renderFinishedSemaphore;
+		VkFence inFlightFence;
 
 	public :
 		VkInstance instance = VK_NULL_HANDLE;
@@ -77,6 +84,12 @@ namespace NNE {
 		void createImageViews();
 		void createRenderPass();
 		void createGraphicsPipeline();
+		void createFramebuffers();
+		void createCommandPool();
+		void createCommandBuffer();
+		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		void drawFrame();
+		void createSyncObjects();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
 		static std::vector<char> readFile(const std::string& filename);

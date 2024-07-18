@@ -52,6 +52,8 @@ void NNE::Application::Update()
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
         glfwPollEvents();
+        VKManager->drawFrame();
+        
 
         //Update
         for(AEntity* entity : _entities)
@@ -64,7 +66,7 @@ void NNE::Application::Update()
         {
             entity->LateUpdate(delta);
         }
-    }
+    }    
 }
 
 void NNE::Application::Open()
