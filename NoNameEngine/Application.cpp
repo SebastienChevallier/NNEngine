@@ -25,15 +25,8 @@ NNE::Application::~Application()
 
 
 void NNE::Application::Init()
-{
-    glfwInit();
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    Open();
-
-    /*VKManager->CreateVulkanInstance();    
-    VKManager->createSurface();
-    VKManager->pickPhysicalDevice();
-    VKManager->createLogicalDevice();*/
+{    
+    Open();    
     VKManager->initVulkan();
 
     uint32_t extensionCount = 0;
@@ -66,7 +59,8 @@ void NNE::Application::Update()
         {
             entity->LateUpdate(delta);
         }
-    }    
+    }   
+    vkDeviceWaitIdle(VKManager->device);
 }
 
 void NNE::Application::Open()

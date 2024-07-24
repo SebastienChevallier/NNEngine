@@ -23,7 +23,7 @@ namespace NNE {
 
 		static int _genericID;
 		
-		NNE::VulkanManager* VKManager;
+		
 
 	private:
 		/*VkInstance instance;*/
@@ -33,7 +33,7 @@ namespace NNE {
 		static Application* GetInstance();
 		Application();
 		~Application();
-
+		NNE::VulkanManager* VKManager;
 		/*void CreateVulkanInstance();
 		bool checkValidationLayerSupport();
 		void pickPhysicalDevice();*/

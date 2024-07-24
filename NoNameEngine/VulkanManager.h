@@ -43,8 +43,9 @@ namespace NNE {
 	class VulkanManager
 	{
 	protected:
+		const int MAX_FRAMES_IN_FLIGHT = 2;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-		VkDevice device = VK_NULL_HANDLE;
+		//VkDevice device = VK_NULL_HANDLE;
 		VkQueue graphicsQueue = VK_NULL_HANDLE;
 		VkSurfaceKHR surface = VK_NULL_HANDLE;
 		VkQueue presentQueue = VK_NULL_HANDLE;
@@ -61,17 +62,19 @@ namespace NNE {
 		VkPipeline graphicsPipeline;
 		std::vector<VkFramebuffer> swapChainFramebuffers;
 		VkCommandPool commandPool;
-		VkCommandBuffer commandBuffer;
-		VkSemaphore imageAvailableSemaphore;
-		VkSemaphore renderFinishedSemaphore;
-		VkFence inFlightFence;
+		std::vector<VkCommandBuffer> commandBuffers;
+		std::vector < VkSemaphore> imageAvailableSemaphores;
+		std::vector < VkSemaphore> renderFinishedSemaphores;
+		std::vector < VkFence> inFlightFences;
+		uint32_t currentFrame = 0;
+		bool framebufferResized = false;
 
 	public :
 		VkInstance instance = VK_NULL_HANDLE;
 		GLFWwindow* window;
 		VulkanManager();
 		~VulkanManager();
-
+		VkDevice device = VK_NULL_HANDLE;
 		void initVulkan();
 
 		void CreateVulkanInstance();
@@ -79,6 +82,7 @@ namespace NNE {
 		void pickPhysicalDevice();
 		void createLogicalDevice();
 		GLFWwindow* CreateGLFWWindow(int width, int height);
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		void createSurface();
 		void createSwapChain();
 		void createImageViews();
@@ -86,15 +90,17 @@ namespace NNE {
 		void createGraphicsPipeline();
 		void createFramebuffers();
 		void createCommandPool();
-		void createCommandBuffer();
+		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void drawFrame();
 		void createSyncObjects();
+		void recreateSwapChain();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
 		static std::vector<char> readFile(const std::string& filename);
 
 		void CleanUp();
+		void cleanupSwapChain();
 
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		int rateDeviceSuitability(VkPhysicalDevice device);
