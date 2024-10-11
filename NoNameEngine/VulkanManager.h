@@ -128,6 +128,7 @@ namespace NNE {
 		void createImageViews();
 		void createRenderPass();
 		void createGraphicsPipeline();
+		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void createVertexBuffer();
 		void createFramebuffers();
 		void createCommandPool();
