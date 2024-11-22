@@ -24,6 +24,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <chrono>
 
 namespace NNE {
 
@@ -121,8 +124,15 @@ namespace NNE {
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
 
+		std::vector<VkBuffer> uniformBuffers;
+		std::vector<VkDeviceMemory> uniformBuffersMemory;
+		std::vector<void*> uniformBuffersMapped;
+
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
+
+		VkDescriptorSetLayout descriptorSetLayout;
+		VkPipelineLayout pipelineLayout;
 
 	public :
 		VkInstance instance = VK_NULL_HANDLE;
@@ -150,7 +160,10 @@ namespace NNE {
 		void createFramebuffers();
 		void createCommandPool();
 		void createCommandBuffers();
+		void createUniformBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		void updateUniformBuffer(uint32_t currentImage);
+		void createDescriptorSetLayout();
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
