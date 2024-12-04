@@ -20,6 +20,7 @@
 #define VK_KHR_surface
 #define VK_KHR_win32_surface
 #define GLFW_INCLUDE_VULKAN
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -75,7 +76,8 @@ namespace NNE {
 	};
 
 	struct UniformBufferObject {
-		glm::mat4 model;
+		glm::vec2 foo;
+		alignas(16) glm::mat4 model;
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
@@ -131,8 +133,10 @@ namespace NNE {
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 
-		VkDescriptorSetLayout descriptorSetLayout;
-		VkPipelineLayout pipelineLayout;
+		VkDescriptorSetLayout descriptorSetLayout;	
+
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
 
 	public :
 		VkInstance instance = VK_NULL_HANDLE;
@@ -164,6 +168,8 @@ namespace NNE {
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void updateUniformBuffer(uint32_t currentImage);
 		void createDescriptorSetLayout();
+		void createDescriptorPool();
+		void createDescriptorSets();
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
