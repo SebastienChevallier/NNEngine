@@ -4,15 +4,6 @@ std::clock_t lastFrameTime;
 NNE::Application* NNE::Application::Instance = nullptr;
 int NNE::Application::_genericID = 0;
 
-//const std::vector<const char*> validationLayers = {
-//    "VK_LAYER_KHRONOS_validation"
-//};
-//
-//#ifdef NDEBUG
-//const bool enableValidationLayers = false;
-//#else
-//const bool enableValidationLayers = true;
-//#endif
 
 
 NNE::Application::Application()
@@ -34,11 +25,9 @@ NNE::Application::~Application()
 
 
 void NNE::Application::Init()
-{
-    glfwInit();
-    VKManager->CreateVulkanInstance();
-    VKManager->pickPhysicalDevice();
-    Open();
+{    
+    Open();    
+    VKManager->initVulkan();
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -53,9 +42,11 @@ void NNE::Application::Init()
 void NNE::Application::Update()
 {
     
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
         glfwPollEvents();
+        VKManager->drawFrame();
+        
 
         //Update
         for(AEntity* entity : _entities)
@@ -68,20 +59,19 @@ void NNE::Application::Update()
         {
             entity->LateUpdate(delta);
         }
-    }
+    }   
+    vkDeviceWaitIdle(VKManager->device);
 }
 
 void NNE::Application::Open()
 {
-    CreateWindow(800, 600);
+    VKManager->CreateGLFWWindow(800, 600);
 }
 
 void NNE::Application::Quit()
 {
-    vkDestroyInstance(VKManager->instance, nullptr);
-
-    glfwDestroyWindow(window);
-
+    VKManager->CleanUp();
+    /*glfwDestroyWindow(window);*/
     glfwTerminate();
 }
 
@@ -99,13 +89,13 @@ float NNE::Application::GetDeltaTime()
     return deltaTime;
 }
 
-GLFWwindow* NNE::Application::CreateWindow(int width, int height)
-{
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
-    return window;
-}
+//GLFWwindow* NNE::Application::CreateGLFWWindow(int width, int height)
+//{
+//    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+//    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+//    window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
+//    return window;
+//}
 
 NNE::Application* NNE::Application::GetInstance()
 {

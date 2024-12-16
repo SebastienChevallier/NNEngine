@@ -7,11 +7,6 @@
 #include "AComponent.h"
 #include "VulkanManager.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 
 namespace NNE {
@@ -22,13 +17,13 @@ namespace NNE {
 		std::vector<AComponent*> _components;
 		std::map<int, int> _link;
 		static Application* Instance;
-		GLFWwindow* window;
+		/*GLFWwindow* window;*/
 		float delta;
 		float GetDeltaTime();
 
 		static int _genericID;
 		
-		NNE::VulkanManager* VKManager;
+		
 
 	private:
 		/*VkInstance instance;*/
@@ -38,7 +33,7 @@ namespace NNE {
 		static Application* GetInstance();
 		Application();
 		~Application();
-
+		NNE::VulkanManager* VKManager;
 		/*void CreateVulkanInstance();
 		bool checkValidationLayerSupport();
 		void pickPhysicalDevice();*/
@@ -58,7 +53,7 @@ namespace NNE {
 		template<typename T>
 		T* AddComponent(AEntity* entity);
 		
-		GLFWwindow* CreateWindow(int width, int height);
+		/*GLFWwindow* CreateGLFWWindow(int width, int height);*/
 		
 	};
 

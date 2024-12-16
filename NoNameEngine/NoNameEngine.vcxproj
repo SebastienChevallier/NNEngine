@@ -33,6 +33,9 @@
     <ClInclude Include="AScene.h" />
     <ClInclude Include="VulkanManager.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="compile.bat" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
