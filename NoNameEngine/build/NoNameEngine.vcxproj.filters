@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\VulkanManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\Application.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\AEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\AComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\AScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\VulkanManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{29A86C02-A8D1-3C75-B624-19CF037858BC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6E70EAAD-FB2C-3866-BEB9-FC15B3115FC0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
