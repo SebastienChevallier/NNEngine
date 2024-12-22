@@ -1,3 +1,5 @@
 C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/build/CMakeFiles/NoNameEngine.dir
+C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/build/CMakeFiles/TestApp.dir
+C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/build/CMakeFiles/RUN_TESTS.dir
 C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/build/CMakeFiles/ALL_BUILD.dir
 C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/build/CMakeFiles/ZERO_CHECK.dir
