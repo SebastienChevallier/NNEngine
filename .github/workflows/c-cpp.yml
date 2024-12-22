@@ -24,7 +24,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B build -S NoNameEngine/NoNameEngine -DCMAKE_TOOLCHAIN_FILE=$(pwd)/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B build -S ./NoNameEngine -DCMAKE_TOOLCHAIN_FILE=$(pwd)/vcpkg/scripts/buildsystems/vcpkg.cmake
 
     - name: Build project
       run: cmake --build build
