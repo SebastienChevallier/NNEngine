@@ -19,9 +19,8 @@ jobs:
     - name: Setup VCPKG
       run: |
         git clone https://github.com/microsoft/vcpkg.git
-        cd vcpkg
-        bootstrap-vcpkg.bat
-        .\vcpkg install glfw3 glm stb vulkan-sdk:x64-windows
+        cd vcpkg        
+        vcpkg install glfw3 glm stb vulkan-sdk:x64-windows
 
     - name: Configure CMake
       run: |
