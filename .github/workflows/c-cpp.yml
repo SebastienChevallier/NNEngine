@@ -23,7 +23,8 @@ jobs:
     - name: Setup VCPKG
       run: |
         git clone https://github.com/microsoft/vcpkg.git
-        ./vcpkg/bootstrap-vcpkg.sh
+        cd vcpkg
+        ./bootstrap-vcpkg.sh  # Crée l'exécutable vcpkg        
         ./vcpkg install glfw3 glm stb vulkan-sdk tinyobjloader
 
     - name: Configure CMake
