@@ -1,4 +1,5 @@
 #pragma once
+
 #include <corecrt.h>
 #include <iostream>
 #include <vector>
@@ -12,7 +13,7 @@
 #include <string>
 #include <fstream>
 #include <array>
-
+#include <unordered_map>
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -22,16 +23,26 @@
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define STB_IMAGE_IMPLEMENTATION
 
+//#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
+
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <chrono>
 
+
+
 namespace NNE {
+
+	const std::string MODEL_PATH = "../models/viking_room.obj";
+	const std::string TEXTURE_PATH = "../textures/viking_room.png";
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
@@ -76,6 +87,10 @@ namespace NNE {
 
 			return attributeDescriptions;
 		}
+
+		bool operator==(const Vertex& other) const {
+			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		}
 	};
 
 	struct SwapChainSupportDetails {
@@ -119,23 +134,8 @@ namespace NNE {
 		uint32_t currentFrame = 0;
 		bool framebufferResized = false;
 
-		const std::vector<Vertex> vertices = {
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-			{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-			{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-		};
-
-		const std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0,
-			4, 5, 6, 6, 7, 4
-		};
-
+		std::vector<Vertex> vertices;
+		std::vector<uint32_t> indices;
 		
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
@@ -150,6 +150,7 @@ namespace NNE {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
+		uint32_t mipLevels;
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
 		VkImageView textureImageView;
@@ -180,7 +181,7 @@ namespace NNE {
 		void createSurface();
 		void createSwapChain();
 		void createImageViews();
-		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 		void createRenderPass();
 		void createGraphicsPipeline();
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
@@ -200,16 +201,19 @@ namespace NNE {
 		void createSyncObjects();
 		void recreateSwapChain();
 		void createTextureImage();
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void createTextureImageView();
 		void createTextureSampler();
 		void createDepthResources();
+		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+		void loadModel();
+
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		VkFormat findDepthFormat();
 		bool hasStencilComponent(VkFormat format);
 		VkCommandBuffer beginSingleTimeCommands();
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
@@ -230,6 +234,16 @@ namespace NNE {
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+	};
+}
+
+namespace std {
+	template<> struct hash<NNE::Vertex> {
+		size_t operator()(NNE::Vertex const& vertex) const {
+			return ((hash<glm::vec3>()(vertex.pos) ^
+				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+				(hash<glm::vec2>()(vertex.texCoord) << 1);
+		}
 	};
 }
 
