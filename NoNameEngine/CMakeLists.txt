@@ -15,7 +15,7 @@ set(SOURCES
     src/Application.cpp
     src/AEntity.cpp
     src/AComponent.cpp
-    src/AScene.cpp
+    src/AScene.cpp    
 )
 
 
@@ -42,7 +42,7 @@ find_package(Vulkan REQUIRED)
 
 target_include_directories(NoNameEngine PRIVATE ${VCPKG_ROOT}/installed/x64-windows/include)
 
-target_link_libraries(NoNameEngine PRIVATE glfw glm::glm Vulkan::Vulkan)
+target_link_libraries(NoNameEngine PRIVATE glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader)
 
 enable_testing()
 

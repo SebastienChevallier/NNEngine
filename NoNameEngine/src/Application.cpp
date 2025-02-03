@@ -65,7 +65,7 @@ void NNE::Application::Update()
 
 void NNE::Application::Open()
 {
-    VKManager->CreateGLFWWindow(800, 600);
+    VKManager->CreateGLFWWindow(WIDTH, HEIGHT);
 }
 
 void NNE::Application::Quit()
