@@ -25,8 +25,6 @@
 
 //#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
-
-
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -36,10 +34,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <chrono>
-
+#include "AEntity.h"
 
 
 namespace NNE {
+	class AEntity;  // Déclaration avancée pour éviter l'inclusion circulaire
+	class MeshComponent;  // On indique que MeshComponent existe
 
 	const std::string MODEL_PATH = "../models/viking_room.obj";
 	const std::string TEXTURE_PATH = "../textures/viking_room.png";
@@ -100,13 +100,10 @@ namespace NNE {
 	};
 
 	struct UniformBufferObject {		
-		alignas(16) glm::mat4 model;		
+		alignas(16) glm::mat4 model;
+		alignas(16) glm::mat4 view;
+		alignas(16) glm::mat4 proj;
 	};	
-
-	struct GlobalUniformBufferObject {
-		alignas(16)glm::mat4 view;
-		alignas(16)glm::mat4 proj;
-	};
 
 	class VulkanManager
 	{
@@ -208,24 +205,17 @@ namespace NNE {
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
-		void createTextureImage();
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void createTextureImageView();
 		void createTextureSampler();
 		void createDepthResources();
-		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-		void loadModel();
+		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);		
 		void createColorResources();
 
-<<<<<<< Updated upstream
-=======
 		void loadModel(const std::string& modelPath);
 		void createTextureImage(const std::string& texturePath);
 		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
 
-		void UpdateScene(const std::vector<AEntity*>& entities);
-
->>>>>>> Stashed changes
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

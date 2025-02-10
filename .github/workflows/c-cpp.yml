@@ -1,0 +1,33 @@
+name: Build and Test (Windows)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup VCPKG
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg        
+        vcpkg install glfw3 glm stb vulkan:x64-windows tinyobjloader
+
+    - name: Configure CMake
+      run: |
+        # Print the current working directory to debug the path
+        echo "Current working directory: $(pwd)"
+        cmake -B build -S ${{ github.workspace }}/NoNameEngine -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+
+    - name: Build project
+      run: cmake --build build
+    

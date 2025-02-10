@@ -1,5 +1,5 @@
 #include "AEntity.h"
-#include "Application.h"
+
 
 NNE::AEntity::AEntity()
 {
@@ -8,6 +8,9 @@ NNE::AEntity::AEntity()
 
 NNE::AEntity::~AEntity()
 {
+	for (AComponent* comp : NNE::AEntity::components) {
+		delete comp;
+	}
 }
 
 int NNE::AEntity::GetID()
@@ -18,16 +21,36 @@ int NNE::AEntity::GetID()
 
 void NNE::AEntity::Awake()
 {
+	if (!components.empty()) {
+		for (AComponent* component : components) {
+			component->Awake();
+		}
+	}
 }
 
 void NNE::AEntity::Start()
 {
+	if (!components.empty()) {
+		for (AComponent* component : components) {
+			component->Start();
+		}
+	}
 }
 
 void NNE::AEntity::Update(float delta)
 {
+	if (!components.empty()) {
+		for (AComponent* component : components) {
+			component->Update(delta);
+		}
+	}
 }
 
 void NNE::AEntity::LateUpdate(float delta)
 {
+	if (!components.empty()) {
+		for (AComponent* component : components) {
+			component->LateUpdate(delta);
+		}
+	}
 }
