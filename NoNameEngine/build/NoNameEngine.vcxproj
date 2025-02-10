@@ -96,12 +96,14 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild></MinimalRebuild>
+      <MinimalRebuild>
+      </MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;GLFW_DLL;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -155,12 +157,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild></MinimalRebuild>
+      <MinimalRebuild>
+      </MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -216,12 +220,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild></MinimalRebuild>
+      <MinimalRebuild>
+      </MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -278,12 +284,14 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild></MinimalRebuild>
+      <MinimalRebuild>
+      </MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
@@ -328,6 +336,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+<<<<<<< Updated upstream
     <CustomBuild Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/schev/source/repos/Git-NNE/NoNameEngine/NoNameEngine/CMakeLists.txt</Message>
@@ -396,6 +405,23 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AComponent.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AEntity.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AScene.h" />
+=======
+    <ClCompile Include="..\src\TransformComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\main.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\VulkanManager.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\Application.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AEntity.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AScene.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\MeshComponent.cpp" />
+    <ClInclude Include="..\include\TransformComponent.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\VulkanManager.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\Application.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AComponent.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AEntity.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AScene.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\MeshComponent.h" />
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

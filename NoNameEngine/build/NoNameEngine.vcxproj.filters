@@ -19,6 +19,9 @@
     <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\src\AScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\TransformComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\VulkanManager.h">
@@ -34,6 +37,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\NoNameEngine\include\AScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

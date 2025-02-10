@@ -100,10 +100,13 @@ namespace NNE {
 	};
 
 	struct UniformBufferObject {		
-		alignas(16) glm::mat4 model;
-		alignas(16) glm::mat4 view;
-		alignas(16) glm::mat4 proj;
+		alignas(16) glm::mat4 model;		
 	};	
+
+	struct GlobalUniformBufferObject {
+		alignas(16)glm::mat4 view;
+		alignas(16)glm::mat4 proj;
+	};
 
 	class VulkanManager
 	{
@@ -214,6 +217,15 @@ namespace NNE {
 		void loadModel();
 		void createColorResources();
 
+<<<<<<< Updated upstream
+=======
+		void loadModel(const std::string& modelPath);
+		void createTextureImage(const std::string& texturePath);
+		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
+
+		void UpdateScene(const std::vector<AEntity*>& entities);
+
+>>>>>>> Stashed changes
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

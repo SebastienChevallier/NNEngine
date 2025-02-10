@@ -5,6 +5,11 @@
 
 #include "AEntity.h"
 #include "AComponent.h"
+<<<<<<< Updated upstream
+=======
+#include "MeshComponent.h"
+#include "TransformComponent.h"
+>>>>>>> Stashed changes
 #include "VulkanManager.h"
 
 
