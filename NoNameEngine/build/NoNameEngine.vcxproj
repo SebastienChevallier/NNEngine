@@ -285,11 +285,13 @@
     <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AEntity.cpp" />
     <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AComponent.cpp" />
     <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AScene.cpp" />
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\MeshComponent.cpp" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\VulkanManager.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\Application.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AComponent.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AEntity.h" />
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AScene.h" />
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\MeshComponent.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

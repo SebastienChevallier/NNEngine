@@ -17,10 +17,7 @@ NNE::Application::~Application()
 {
     for (AEntity* entity : _entities) {
         delete entity;
-    }
-    for (AComponent* comp : _components) {
-        delete comp;
-    }
+    }    
 }
 
 
@@ -28,6 +25,8 @@ void NNE::Application::Init()
 {    
     Open();    
     VKManager->initVulkan();
+
+    //VKManager->LoadEntitiesModels(_entities);
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -79,6 +78,13 @@ int NNE::Application::GenerateID()
 {
     _genericID++;
     return _genericID;
+}
+
+NNE::AEntity* NNE::Application::CreateEntity()
+{
+    AEntity* entity = new AEntity();
+    _entities.push_back(entity);
+    return entity;
 }
 
 float NNE::Application::GetDeltaTime()

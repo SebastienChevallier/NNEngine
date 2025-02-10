@@ -19,6 +19,7 @@ set(SOURCES
     src/AEntity.cpp
     src/AComponent.cpp
     src/AScene.cpp    
+    src/MeshComponent.cpp
 )
 
 
@@ -27,7 +28,8 @@ set(HEADERS
     include/Application.h
     include/AComponent.h
     include/AEntity.h
-    include/AScene.h    
+    include/AScene.h  
+    include/MeshComponent.h  
 )
 
 # Créer l'exécutable

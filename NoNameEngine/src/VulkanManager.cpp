@@ -1,4 +1,4 @@
-#include "VulkanManager.h"
+﻿#include "VulkanManager.h"
 #include "Application.h"
 #include <stb_image.h>
 
@@ -30,7 +30,7 @@ NNE::VulkanManager::~VulkanManager()
 }
 
 void NNE::VulkanManager::initVulkan()
-{
+{    
     CreateVulkanInstance();
     createSurface();
     pickPhysicalDevice();
@@ -44,14 +44,13 @@ void NNE::VulkanManager::initVulkan()
     createColorResources();
     createDepthResources();
     createFramebuffers();
-    createTextureImage();
-    createTextureImageView();
-    createTextureSampler();
-    loadModel();
+    LoadEntitiesModels(Application::GetInstance()->_entities);
     createVertexBuffer();
     createIndexBuffer();
     createUniformBuffers();
-    createDescriptorPool();
+    createDescriptorPool();  
+    createTextureImageView();
+    createTextureSampler();
     createDescriptorSets();
     createCommandBuffers();
     createSyncObjects();
@@ -643,6 +642,7 @@ void NNE::VulkanManager::createGraphicsPipeline()
 
 void NNE::VulkanManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
+
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
@@ -868,14 +868,14 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }
 
-void NNE::VulkanManager::loadModel()
+void NNE::VulkanManager::loadModel(const std::string& modelPath)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
         throw std::runtime_error(warn + err);
     }
 
@@ -896,7 +896,7 @@ void NNE::VulkanManager::loadModel()
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
-            vertex.color = { 1.0f, 1.0f, 1.0f };            
+            vertex.color = { 1.0f, 1.0f, 1.0f };
 
             if (uniqueVertices.count(vertex) == 0) {
                 uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
@@ -905,7 +905,7 @@ void NNE::VulkanManager::loadModel()
 
             indices.push_back(uniqueVertices[vertex]);
         }
-    }    
+    }
 }
 
 void NNE::VulkanManager::createDescriptorSetLayout()
@@ -967,6 +967,8 @@ void NNE::VulkanManager::createDescriptorSets()
     if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
+
+    std::cout << "Taille de uniformBuffers: " << uniformBuffers.size() << std::endl;
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         VkDescriptorBufferInfo bufferInfo{};
@@ -1111,16 +1113,27 @@ void NNE::VulkanManager::recreateSwapChain()
     createFramebuffers();
 }
 
-void NNE::VulkanManager::createTextureImage()
+void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    stbi_uc* pixels;
 
-    if (!pixels) {
-        throw std::runtime_error("failed to load texture image!");
+    if (texturePath.empty()) {
+        // ✅ Générer une texture blanche 1x1 pixel
+        texWidth = texHeight = 1;
+        texChannels = 4;
+        pixels = new stbi_uc[4]{ 255, 255, 255, 255 }; // Blanc RGBA
+        std::cout << "Creating default white texture..." << std::endl;
+    }
+    else {
+        pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        if (!pixels) {
+            throw std::runtime_error("Failed to load texture: " + texturePath);
+        }
+        std::cout << "Loaded texture: " << texturePath << std::endl;
     }
 
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
     VkBuffer stagingBuffer;
@@ -1132,19 +1145,32 @@ void NNE::VulkanManager::createTextureImage()
     memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(device, stagingBufferMemory);
 
-    stbi_image_free(pixels);
+    if (!texturePath.empty()) {
+        stbi_image_free(pixels);
+    }
+    else {
+        delete[] pixels;  // Libérer la mémoire de la texture blanche
+    }
 
     createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
-
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
     copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-    //transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+}
+
+void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entities)
+{
+    for (AEntity* entity : entities) {
+        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
+        if (mesh) {
+            loadModel(mesh->GetModelPath());
+            createTextureImage(mesh->GetTexturePath());
+        }
+    }
 }
 
 void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
