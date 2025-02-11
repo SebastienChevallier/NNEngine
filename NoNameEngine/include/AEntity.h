@@ -1,7 +1,7 @@
 #pragma once
-#include "Application.h"
-//#include <iostream>
+#include <iostream>
 #include "AComponent.h"
+#include "Application.h"
 
 namespace NNE {	
 	class AComponent;	

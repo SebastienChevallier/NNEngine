@@ -1,5 +1,4 @@
 #pragma once
-
 #include <corecrt.h>
 #include <iostream>
 #include <vector>
@@ -34,15 +33,13 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <chrono>
-#include "AEntity.h"
+
 
 
 namespace NNE {
-	class AEntity;  // Déclaration avancée pour éviter l'inclusion circulaire
-	class MeshComponent;  // On indique que MeshComponent existe
-
-	const std::string MODEL_PATH = "../models/viking_room.obj";
-	const std::string TEXTURE_PATH = "../textures/viking_room.png";
+	class AEntity;
+	//const std::string MODEL_PATH = "../models/viking_room.obj";
+	//const std::string TEXTURE_PATH = "../textures/viking_room.png";
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
@@ -100,14 +97,18 @@ namespace NNE {
 	};
 
 	struct UniformBufferObject {		
-		alignas(16) glm::mat4 model;
-		alignas(16) glm::mat4 view;
-		alignas(16) glm::mat4 proj;
+		alignas(16) glm::mat4 model;		
 	};	
+
+	struct GlobalUniformBufferObject {
+		alignas(16)glm::mat4 view;
+		alignas(16)glm::mat4 proj;
+	};
 
 	class VulkanManager
 	{
 	protected:
+		const size_t MAX_OBJECTS = 100;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		//VkDevice device = VK_NULL_HANDLE;
@@ -143,6 +144,10 @@ namespace NNE {
 		std::vector<VkBuffer> uniformBuffers;
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 		std::vector<void*> uniformBuffersMapped;
+
+		std::vector<VkBuffer> objectUniformBuffers;
+		std::vector<VkDeviceMemory> objectUniformBuffersMemory;
+		std::vector<void*> objectUniformBuffersMapped;
 
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
@@ -205,16 +210,20 @@ namespace NNE {
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
+		
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void createTextureImageView();
 		void createTextureSampler();
 		void createDepthResources();
-		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);		
+		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+		
 		void createColorResources();
 
 		void loadModel(const std::string& modelPath);
 		void createTextureImage(const std::string& texturePath);
 		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
+
+		void UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities);
 
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 

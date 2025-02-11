@@ -22,6 +22,9 @@
     <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\MeshComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\TransformComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\VulkanManager.h">
@@ -40,6 +43,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\MeshComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
