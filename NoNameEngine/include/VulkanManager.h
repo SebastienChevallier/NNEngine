@@ -1,5 +1,4 @@
 #pragma once
-#include "AEntity.h"
 #include <corecrt.h>
 #include <iostream>
 #include <vector>
@@ -25,8 +24,6 @@
 
 //#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
-
-
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -40,7 +37,7 @@
 
 
 namespace NNE {
-
+	class AEntity;
 	//const std::string MODEL_PATH = "../models/viking_room.obj";
 	//const std::string TEXTURE_PATH = "../textures/viking_room.png";
 
@@ -111,6 +108,7 @@ namespace NNE {
 	class VulkanManager
 	{
 	protected:
+		const size_t MAX_OBJECTS = 100;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		//VkDevice device = VK_NULL_HANDLE;
@@ -146,6 +144,10 @@ namespace NNE {
 		std::vector<VkBuffer> uniformBuffers;
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 		std::vector<void*> uniformBuffersMapped;
+
+		std::vector<VkBuffer> objectUniformBuffers;
+		std::vector<VkDeviceMemory> objectUniformBuffersMemory;
+		std::vector<void*> objectUniformBuffersMapped;
 
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
@@ -221,7 +223,7 @@ namespace NNE {
 		void createTextureImage(const std::string& texturePath);
 		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
 
-		void UpdateScene(const std::vector<AEntity*>& entities);
+		void UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities);
 
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 

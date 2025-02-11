@@ -1,5 +1,7 @@
 #pragma once
-#include <VulkanManager.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include "AComponent.h"
 
 namespace NNE {
 	class TransformComponent : public AComponent

@@ -31,23 +31,39 @@ NNE::VulkanManager::~VulkanManager()
 
 void NNE::VulkanManager::initVulkan()
 {
-    CreateVulkanInstance();
-    createSurface();
-    pickPhysicalDevice();
-    createColorResources();
-    createDepthResources();
-    createFramebuffers();   
-    LoadEntitiesModels(Application::GetInstance()->_entities);
-    createVertexBuffer();
-    createIndexBuffer();
-    createUniformBuffers();
-    createDescriptorPool();
-    createTextureImageView();
-    createTextureSampler();
-    createDescriptorSets();
-    createCommandBuffers();
-    createSyncObjects();
+    CreateVulkanInstance();        // 1️⃣ Créer une instance Vulkan
+    createSurface();               // 2️⃣ Créer la surface de rendu
+    pickPhysicalDevice();           // 3️⃣ Sélectionner un GPU (et vérifier si valide !)
+
+    createLogicalDevice();          // 4️⃣ Créer le device logique et récupérer les queues
+    createSwapChain();              // 5️⃣ 🔥 (Manquant !) Créer le swapchain
+    createImageViews();             // 6️⃣ Créer les vues d’image pour le swapchain
+
+    createRenderPass();             // 7️⃣ Définir le pipeline de rendu
+    createDescriptorSetLayout();    // 8️⃣ Configurer les descripteurs de shaders
+    createGraphicsPipeline();       // 9️⃣ Charger les shaders et construire le pipeline
+
+    createCommandPool();            // 🔟 Pool pour gérer les commandes GPU
+    createColorResources();         // 🎨 Créer une image pour le multisampling (si activé)
+    createDepthResources();         // 📏 Créer une image de profondeur
+
+    createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
+
+    LoadEntitiesModels(Application::GetInstance()->_entities); // 📦 Charger les modèles 3D
+    createVertexBuffer();           // 📦 Stocker les sommets des modèles
+    createIndexBuffer();            // 📌 Stocker les indices des modèles
+    createUniformBuffers();         // 🎭 Créer les buffers uniformes pour les shaders
+
+    createTextureImageView();       // 🖼 Convertir la texture en une vue utilisable
+    createTextureSampler();         // 🔎 Créer un échantillonneur de texture
+
+    createDescriptorPool();         // 🎛 Allouer la mémoire pour les descripteurs shaders
+    createDescriptorSets();         // 🎛 Remplir les descripteurs avec les textures et buffers    
+
+    createCommandBuffers();         // 🎬 Générer les commandes de rendu
+    createSyncObjects();            // 🕐 Gérer la synchronisation CPU/GPU
 }
+
 
 NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice device)
 {
@@ -300,6 +316,7 @@ void NNE::VulkanManager::createLogicalDevice()
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     deviceFeatures.sampleRateShading = VK_TRUE;
+    deviceFeatures.robustBufferAccess = VK_TRUE;
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -599,10 +616,17 @@ void NNE::VulkanManager::createGraphicsPipeline()
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
+    VkPushConstantRange pushConstantRange{};
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Le vertex shader utilisera la matrice modèle
+    pushConstantRange.offset = 0;
+    pushConstantRange.size = sizeof(glm::mat4);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
     if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -676,6 +700,8 @@ void NNE::VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDe
 void NNE::VulkanManager::createIndexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+    std::cout << "Nombre d'indices : " << indices.size() << std::endl;
+    std::cout << "Taille du buffer : " << bufferSize << " octets" << std::endl;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -773,28 +799,38 @@ void NNE::VulkanManager::createCommandBuffers()
 
 void NNE::VulkanManager::createUniformBuffers()
 {
-    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-
-    if (bufferSize == 0) {
-        std::cerr << "[ERREUR] BufferSize est 0 ! Vérifiez l'initialisation." << std::endl;
-        return;
-    }
-
+    // Pour l'UBO global (vue/projection)
+    VkDeviceSize globalBufferSize = sizeof(UniformBufferObject); // Ici, UniformBufferObject pour la vue/projection
     uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+        createBuffer(globalBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            uniformBuffers[i], uniformBuffersMemory[i]);
+        vkMapMemory(device, uniformBuffersMemory[i], 0, globalBufferSize, 0, &uniformBuffersMapped[i]);
+    }
 
-        vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+    // Pour l'UBO dynamique des objets
+    VkDeviceSize objectBufferSize = MAX_OBJECTS * sizeof(glm::mat4); // Chaque objet : une matrice 4x4
+    objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    objectUniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    objectUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        createBuffer(objectBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            objectUniformBuffers[i], objectUniformBuffersMemory[i]);
+        vkMapMemory(device, objectUniformBuffersMemory[i], 0, objectBufferSize, 0, &objectUniformBuffersMapped[i]);
     }
 }
 
 void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
-{
+{   
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;    
 
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
@@ -838,8 +874,13 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
 
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);  
+    for (size_t i = 0; i < Application::GetInstance()->_entities.size() && i < MAX_OBJECTS; i++) {
+        uint32_t dynamicOffset = static_cast<uint32_t>(i * sizeof(glm::mat4));
+        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+            0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
+    }
 
+    //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);  
 
     vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
@@ -853,33 +894,22 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
 void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
-
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    // 📌 1. Stocker la transformation globale (vue/projection)
-    GlobalUniformBufferObject ubo{};
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
-    ubo.proj[1][1] *= -1; // Correction Vulkan (axe Y inversé)
+    // Mise à jour de l'UBO global (vue et projection)
+    GlobalUniformBufferObject globalUBO{};
+    globalUBO.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 0.0f, 1.0f));
+    globalUBO.proj = glm::perspective(glm::radians(45.0f),
+        swapChainExtent.width / (float)swapChainExtent.height,
+        0.1f, 10.0f);
+    globalUBO.proj[1][1] *= -1; // Correction pour Vulkan (axe Y inversé)
+    memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
-    // 📌 2. Copier la vue/projection dans le début du buffer
-    memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
-
-    // 📌 3. Stocker chaque transformation d'objet APRÈS
-    size_t offset = sizeof(ubo); // Décalage après le Global UBO
-
-    for (AEntity* entity : Application::GetInstance()->_entities) {
-        TransformComponent* transform = entity->GetComponent<TransformComponent>();
-        if (transform) {
-            UniformBufferObject objectUBO{};
-            objectUBO.model = transform->getModelMatrix();
-
-            // Copier la transformation de l'objet après le Global UBO
-            memcpy((char*)uniformBuffersMapped[currentImage] + offset, &objectUBO, sizeof(objectUBO));
-            offset += sizeof(objectUBO); // Mise à jour de l'offset pour le prochain objet
-        }
-    }
+    // Mise à jour du buffer dynamique pour les objets
+    UpdateObjectUniformBuffer(currentImage, Application::GetInstance()->_entities);
 }
 
 void NNE::VulkanManager::loadModel(const std::string& modelPath)
@@ -924,7 +954,7 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
 
 void NNE::VulkanManager::createDescriptorSetLayout()
 {
-    // UBO pour la View/Projection (binding 0)
+    // Binding 0 : UBO global pour la vue/projection
     VkDescriptorSetLayoutBinding globalUboLayoutBinding{};
     globalUboLayoutBinding.binding = 0;
     globalUboLayoutBinding.descriptorCount = 1;
@@ -932,23 +962,22 @@ void NNE::VulkanManager::createDescriptorSetLayout()
     globalUboLayoutBinding.pImmutableSamplers = nullptr;
     globalUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // UBO pour les objets (binding 1)
+    // Binding 1 : UBO dynamique pour les transformations d'objets
     VkDescriptorSetLayoutBinding objectUboLayoutBinding{};
     objectUboLayoutBinding.binding = 1;
     objectUboLayoutBinding.descriptorCount = 1;
-    objectUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    objectUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     objectUboLayoutBinding.pImmutableSamplers = nullptr;
-    objectUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Assurez-vous que le vertex shader peut l'utiliser
+    objectUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Sampler pour la texture (binding 2)
+    // Binding 2 : Combined image sampler pour la texture
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 1;
+    samplerLayoutBinding.binding = 2;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
-    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; // Seulement le fragment shader en a besoin
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    // Regrouper les bindings
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
         globalUboLayoutBinding,
         objectUboLayoutBinding,
@@ -958,7 +987,7 @@ void NNE::VulkanManager::createDescriptorSetLayout()
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
-    layoutInfo.pBindings = bindings.data();    
+    layoutInfo.pBindings = bindings.data();
 
     if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
@@ -967,11 +996,13 @@ void NNE::VulkanManager::createDescriptorSetLayout()
 
 void NNE::VulkanManager::createDescriptorPool()
 {
-    std::array<VkDescriptorPoolSize, 2> poolSizes{};
+    std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[2].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -999,33 +1030,54 @@ void NNE::VulkanManager::createDescriptorSets()
     }
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkDescriptorBufferInfo bufferInfo{};
-        bufferInfo.buffer = uniformBuffers[i];
-        bufferInfo.offset = 0;
-        bufferInfo.range = sizeof(UniformBufferObject);
+        // Binding 0 : Global UBO
+        VkDescriptorBufferInfo globalBufferInfo{};
+        globalBufferInfo.buffer = uniformBuffers[i];
+        globalBufferInfo.offset = 0;
+        globalBufferInfo.range = sizeof(UniformBufferObject);
 
+        // Binding 1 : Object UBO (dynamique)
+        VkDescriptorBufferInfo objectBufferInfo{};
+        // Note : La plage totale du buffer dynamique est la taille du buffer (pour MAX_OBJECTS matrices)
+        objectBufferInfo.buffer = objectUniformBuffers[i];
+        objectBufferInfo.offset = 0;
+        //objectBufferInfo.range = MAX_OBJECTS * sizeof(glm::mat4);
+        objectBufferInfo.range = sizeof(glm::mat4);
+
+        // Binding 2 : Sampler pour la texture
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = textureImageView;
         imageInfo.sampler = textureSampler;
 
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+        std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
+        // Mise à jour du binding 0 (Global UBO)
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
         descriptorWrites[0].dstArrayElement = 0;
         descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &bufferInfo;
+        descriptorWrites[0].pBufferInfo = &globalBufferInfo;
 
+        // Mise à jour du binding 1 (Object UBO dynamique)
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = descriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
         descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
+        descriptorWrites[1].pBufferInfo = &objectBufferInfo;
+
+        // Mise à jour du binding 2 (Sampler)
+        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[2].dstSet = descriptorSets[i];
+        descriptorWrites[2].dstBinding = 2;
+        descriptorWrites[2].dstArrayElement = 0;
+        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[2].descriptorCount = 1;
+        descriptorWrites[2].pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
@@ -1097,6 +1149,10 @@ void NNE::VulkanManager::drawFrame()
         throw std::runtime_error("failed to present swap chain image!");
     }
 
+    uint32_t dynamicOffset = 0;
+    vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+        0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
+
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -1146,12 +1202,23 @@ void NNE::VulkanManager::recreateSwapChain()
 void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    stbi_uc* pixels;
 
-    if (!pixels) {
-        throw std::runtime_error("failed to load texture image!");
+    if (texturePath.empty()) {        
+        texWidth = texHeight = 1;
+        texChannels = 4;
+        pixels = new stbi_uc[4]{ 255, 255, 255, 255 }; // Blanc RGBA
+        std::cout << "Creating default white texture..." << std::endl;
     }
+    else {
+        pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        if (!pixels) {
+            throw std::runtime_error("Failed to load texture: " + texturePath);
+        }
+        std::cout << "Loaded texture: " << texturePath << std::endl;
+    }
+
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
@@ -1164,7 +1231,12 @@ void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
     memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(device, stagingBufferMemory);
 
-    stbi_image_free(pixels);
+    if (!texturePath.empty()) {
+        stbi_image_free(pixels);
+    }
+    else {
+        delete[] pixels;  // Libérer la mémoire de la texture blanche
+    }
 
     createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
@@ -1190,34 +1262,20 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
     }
 }
 
-void NNE::VulkanManager::UpdateScene(const std::vector<AEntity*>& entities)
+void NNE::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities)
 {
-    // 1. Mise à jour globale : vue et projection
-    GlobalUniformBufferObject globalUBO{};
-    globalUBO.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f));
-    globalUBO.proj = glm::perspective(glm::radians(45.0f),
-        swapChainExtent.width / (float)swapChainExtent.height,
-        0.1f, 10.0f);
-    globalUBO.proj[1][1] *= -1; 
-
-    
-    for (AEntity* entity : entities) {
-        // On suppose que chaque entité possède un TransformComponent.
-        auto transform = entity->GetComponent<TransformComponent>();
+    // On suppose ici que pour chaque entité, on souhaite copier sa matrice modèle dans le buffer.
+    // Le buffer est supposé être de taille MAX_OBJECTS * sizeof(glm::mat4).
+    size_t offset = 0;
+    // Parcourir les entités (attention : si le nombre d'entités dépasse MAX_OBJECTS, il faudra gérer ce cas)
+    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
+        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
         if (transform) {
-            UniformBufferObject objectUBO{};
-            objectUBO.model = transform->getModelMatrix();
-
-            // Calculer l'offset dans le buffer dynamique
-            size_t objectIndex = entity->GetID();
-            void* mappedMemoryObjects;
-            memcpy(reinterpret_cast<char*>(mappedMemoryObjects) + objectIndex * sizeof(UniformBufferObject),
-                &objectUBO, sizeof(objectUBO));
+            glm::mat4 modelMatrix = transform->getModelMatrix();
+            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
+            offset += sizeof(glm::mat4);
         }
     }
-
 }
 
 void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
@@ -1626,6 +1684,11 @@ void NNE::VulkanManager::CleanUp()
         vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
     }
 
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
+        vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
+    }
+
     vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 
     vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
@@ -1666,13 +1729,19 @@ void NNE::VulkanManager::CleanUp()
 
 void NNE::VulkanManager::cleanupSwapChain()
 {
+    // 🔥 Libérer toutes les images Vulkan restantes
+    vkDestroyImageView(device, depthImageView, nullptr);
+    vkDestroyImage(device, depthImage, nullptr);
+    vkFreeMemory(device, depthImageMemory, nullptr);
+
     vkDestroyImageView(device, colorImageView, nullptr);
     vkDestroyImage(device, colorImage, nullptr);
     vkFreeMemory(device, colorImageMemory, nullptr);
 
-    vkDestroyImageView(device, depthImageView, nullptr);
-    vkDestroyImage(device, depthImage, nullptr);
-    vkFreeMemory(device, depthImageMemory, nullptr);
+    // 🔥 Vérifier et libérer la mémoire des textures
+    vkDestroyImageView(device, textureImageView, nullptr);
+    vkDestroyImage(device, textureImage, nullptr);
+    vkFreeMemory(device, textureImageMemory, nullptr);
 
     for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);

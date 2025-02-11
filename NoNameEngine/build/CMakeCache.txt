@@ -208,9 +208,6 @@ Vulkan_INCLUDE_DIR:PATH=C:/VulkanSDK/1.3.283.0/Include
 //Path to a library.
 Vulkan_LIBRARY:FILEPATH=C:/VulkanSDK/1.3.283.0/Lib/vulkan-1.lib
 
-//The directory containing a CMake configuration file for glfw3.
-glfw3_DIR:PATH=glfw3_DIR-NOTFOUND
-
 //The directory containing a CMake configuration file for glm.
 glm_DIR:PATH=C:/vcpkg/installed/x64-windows/share/glm
 

@@ -11,6 +11,7 @@
 
 
 namespace NNE {
+	class VulkanManager;
 	class Application
 	{
 	protected:
