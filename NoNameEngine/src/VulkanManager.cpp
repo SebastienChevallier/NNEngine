@@ -34,24 +34,16 @@ void NNE::VulkanManager::initVulkan()
     CreateVulkanInstance();
     createSurface();
     pickPhysicalDevice();
-    createLogicalDevice();
-    createSwapChain();
-    createImageViews();
-    createRenderPass();
-    createDescriptorSetLayout();
-    createGraphicsPipeline();
-    createCommandPool();
     createColorResources();
     createDepthResources();
-    createFramebuffers();
-    createTextureImage();
-    createTextureImageView();
-    createTextureSampler();
-    loadModel();
+    createFramebuffers();   
+    LoadEntitiesModels(Application::GetInstance()->_entities);
     createVertexBuffer();
     createIndexBuffer();
     createUniformBuffers();
     createDescriptorPool();
+    createTextureImageView();
+    createTextureSampler();
     createDescriptorSets();
     createCommandBuffers();
     createSyncObjects();
@@ -890,14 +882,14 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     }
 }
 
-void NNE::VulkanManager::loadModel()
+void NNE::VulkanManager::loadModel(const std::string& modelPath)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
         throw std::runtime_error(warn + err);
     }
 
@@ -950,7 +942,7 @@ void NNE::VulkanManager::createDescriptorSetLayout()
 
     // Sampler pour la texture (binding 2)
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 2;
+    samplerLayoutBinding.binding = 1;
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
@@ -1151,10 +1143,10 @@ void NNE::VulkanManager::recreateSwapChain()
     createFramebuffers();
 }
 
-void NNE::VulkanManager::createTextureImage()
+void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
     VkDeviceSize imageSize = texWidth * texHeight * 4;
 
     if (!pixels) {
@@ -1187,8 +1179,6 @@ void NNE::VulkanManager::createTextureImage()
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 }
 
-<<<<<<< Updated upstream
-=======
 void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entities)
 {
     for (AEntity* entity : entities) {
@@ -1230,7 +1220,6 @@ void NNE::VulkanManager::UpdateScene(const std::vector<AEntity*>& entities)
 
 }
 
->>>>>>> Stashed changes
 void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
     VkImageCreateInfo imageInfo{};

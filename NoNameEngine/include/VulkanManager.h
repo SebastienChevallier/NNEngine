@@ -1,5 +1,5 @@
 #pragma once
-
+#include "AEntity.h"
 #include <corecrt.h>
 #include <iostream>
 #include <vector>
@@ -41,8 +41,8 @@
 
 namespace NNE {
 
-	const std::string MODEL_PATH = "../models/viking_room.obj";
-	const std::string TEXTURE_PATH = "../textures/viking_room.png";
+	//const std::string MODEL_PATH = "../models/viking_room.obj";
+	//const std::string TEXTURE_PATH = "../textures/viking_room.png";
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
@@ -208,24 +208,21 @@ namespace NNE {
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
-		void createTextureImage();
+		
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void createTextureImageView();
 		void createTextureSampler();
 		void createDepthResources();
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
-		void loadModel();
+		
 		void createColorResources();
 
-<<<<<<< Updated upstream
-=======
 		void loadModel(const std::string& modelPath);
 		void createTextureImage(const std::string& texturePath);
 		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
 
 		void UpdateScene(const std::vector<AEntity*>& entities);
 
->>>>>>> Stashed changes
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

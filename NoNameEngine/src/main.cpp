@@ -5,9 +5,6 @@
 int main() {
     
     NNE::Application* app = new NNE::Application();
-
-<<<<<<< Updated upstream
-=======
     NNE::AEntity* entity = app->CreateEntity();
     NNE::TransformComponent* transform = entity->AddComponent<NNE::TransformComponent>();
     NNE::MeshComponent* mesh = entity->AddComponent<NNE::MeshComponent>();
@@ -21,7 +18,7 @@ int main() {
     mesh->SetTexturePath("C:/Users/schev/source/repos/Git-NNE/NoNameEngine/textures/viking_room.png");
     mesh1->SetTexturePath("");
 
->>>>>>> Stashed changes
+
     app->Init();
 
     app->Update();
