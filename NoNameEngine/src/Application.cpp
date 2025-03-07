@@ -26,7 +26,7 @@ void NNE::Application::Init()
     Open();    
     VKManager->initVulkan();
 
-    VKManager->LoadEntitiesModels(_entities);
+    //VKManager->LoadEntitiesModels(_entities);
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);

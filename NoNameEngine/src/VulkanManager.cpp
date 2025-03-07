@@ -12,12 +12,13 @@ const std::vector<const char*> deviceExtensions = {
 
 
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
+//#ifdef NDEBUG
+//const bool enableValidationLayers = false;
+//#else
+//const bool enableValidationLayers = true;
+//#endif
 
+const bool enableValidationLayers = true;
 
 
 NNE::VulkanManager::VulkanManager()
@@ -331,6 +332,15 @@ void NNE::VulkanManager::createLogicalDevice()
         throw std::runtime_error("failed to create logical device!");
     }
 
+    VkPhysicalDeviceProperties deviceProperties;
+    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+    size_t minUboAlignment = deviceProperties.limits.minUniformBufferOffsetAlignment;
+    dynamicAlignment = sizeof(glm::mat4);
+    if (minUboAlignment > 0) {
+        dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+    }
+    std::cout << "Dynamic alignment for UBO: " << dynamicAlignment << " bytes" << std::endl;
+
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);    
 }
@@ -525,6 +535,8 @@ void NNE::VulkanManager::createGraphicsPipeline()
 {
     auto vertShaderCode = readFile("../shaders/vert.spv");
     auto fragShaderCode = readFile("../shaders/frag.spv");
+    std::cout << "Taille shader vert: " << vertShaderCode.size() << " octets" << std::endl;
+    std::cout << "Taille shader frag: " << fragShaderCode.size() << " octets" << std::endl;
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -556,8 +568,8 @@ void NNE::VulkanManager::createGraphicsPipeline()
 
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_TRUE;
-    depthStencil.depthWriteEnable = VK_TRUE;
+    depthStencil.depthTestEnable = VK_FALSE;
+    depthStencil.depthWriteEnable = VK_FALSE;
     depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.minDepthBounds = 0.0f; // Optional
@@ -582,7 +594,8 @@ void NNE::VulkanManager::createGraphicsPipeline()
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    // Désactiver le culling pour le debug
+    rasterizer.cullMode = VK_CULL_MODE_NONE; // Au lieu de VK_CULL_MODE_BACK_BIT
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -724,6 +737,8 @@ void NNE::VulkanManager::createVertexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
+    std::cout << "Création du buffer des sommets, taille : " << bufferSize << " octets" << std::endl;
+
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
@@ -799,8 +814,8 @@ void NNE::VulkanManager::createCommandBuffers()
 
 void NNE::VulkanManager::createUniformBuffers()
 {
-    // Pour l'UBO global (vue/projection)
-    VkDeviceSize globalBufferSize = sizeof(UniformBufferObject); // Ici, UniformBufferObject pour la vue/projection
+    // UBO global (vue/projection)
+    VkDeviceSize globalBufferSize = sizeof(GlobalUniformBufferObject);
     uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
     uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
@@ -812,8 +827,8 @@ void NNE::VulkanManager::createUniformBuffers()
         vkMapMemory(device, uniformBuffersMemory[i], 0, globalBufferSize, 0, &uniformBuffersMapped[i]);
     }
 
-    // Pour l'UBO dynamique des objets
-    VkDeviceSize objectBufferSize = MAX_OBJECTS * sizeof(glm::mat4); // Chaque objet : une matrice 4x4
+    // UBO dynamique pour les objets
+    VkDeviceSize objectBufferSize = MAX_OBJECTS * dynamicAlignment; // Utilise dynamicAlignment !
     objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     objectUniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
     objectUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
@@ -830,7 +845,7 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
 {   
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;    
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
         throw std::runtime_error("failed to begin recording command buffer!");
@@ -844,14 +859,13 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     renderPassInfo.renderArea.extent = swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+    clearValues[0].color = { {1.0f, 0.0f, 0.0f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
     VkViewport viewport{};
@@ -871,21 +885,26 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     VkBuffer vertexBuffers[] = { vertexBuffer };
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-    for (size_t i = 0; i < Application::GetInstance()->_entities.size() && i < MAX_OBJECTS; i++) {
-        uint32_t dynamicOffset = static_cast<uint32_t>(i * sizeof(glm::mat4));
-        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+    const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
+    //std::cout << "Nombre d'entités : " << entities.size() << std::endl;
+    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
+        // Calcul du dynamic offset (doit être multiple de dynamicAlignment)
+        uint32_t dynamicOffset = static_cast<uint32_t>(i * dynamicAlignment);
+
+
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
             0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
+
+        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
+        if (mesh) {
+            //std::cout << "Entité " << i << " dessinée avec " << mesh->getIndexCount() << " indices." << std::endl;
+            vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
+        }
     }
 
-    //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);  
-
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-
     vkCmdEndRenderPass(commandBuffer);
-
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
     }
@@ -899,9 +918,11 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     // Mise à jour de l'UBO global (vue et projection)
     GlobalUniformBufferObject globalUBO{};
-    globalUBO.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f));
+    globalUBO.view = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, 2.0f), // Position de la caméra (par exemple, rapprochée et à l'intérieur)
+        glm::vec3(0.0f, 0.0f, 0.0f), // Point regardé
+        glm::vec3(0.0f, 1.0f, 0.0f)  // Vecteur up
+    );
     globalUBO.proj = glm::perspective(glm::radians(45.0f),
         swapChainExtent.width / (float)swapChainExtent.height,
         0.1f, 10.0f);
@@ -909,7 +930,22 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
     // Mise à jour du buffer dynamique pour les objets
-    UpdateObjectUniformBuffer(currentImage, Application::GetInstance()->_entities);
+    size_t offset = 0;
+    const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
+    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
+        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
+        if (transform) {           
+
+            glm::mat4 modelMatrix = transform->getModelMatrix();            
+
+            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
+            offset += dynamicAlignment;
+            
+        }
+    }
+
+    // Mise à jour du buffer dynamique pour les objets
+    //UpdateObjectUniformBuffer(currentImage, Application::GetInstance()->_entities);
 }
 
 void NNE::VulkanManager::loadModel(const std::string& modelPath)
@@ -918,6 +954,9 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
+
+    std::cout << "Chargement du modèle : " << modelPath << std::endl;
+    std::cout << "Nombre de sommets avant chargement : " << vertices.size() << std::endl;
 
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
         throw std::runtime_error(warn + err);
@@ -949,7 +988,10 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
 
             indices.push_back(uniqueVertices[vertex]);
         }
-    }    
+    }   
+
+    std::cout << "Nombre de sommets après chargement : " << vertices.size() << std::endl;
+    std::cout << "Nombre d'indices : " << indices.size() << std::endl;
 }
 
 void NNE::VulkanManager::createDescriptorSetLayout()
@@ -1034,15 +1076,13 @@ void NNE::VulkanManager::createDescriptorSets()
         VkDescriptorBufferInfo globalBufferInfo{};
         globalBufferInfo.buffer = uniformBuffers[i];
         globalBufferInfo.offset = 0;
-        globalBufferInfo.range = sizeof(UniformBufferObject);
+        globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
 
         // Binding 1 : Object UBO (dynamique)
         VkDescriptorBufferInfo objectBufferInfo{};
-        // Note : La plage totale du buffer dynamique est la taille du buffer (pour MAX_OBJECTS matrices)
         objectBufferInfo.buffer = objectUniformBuffers[i];
         objectBufferInfo.offset = 0;
-        //objectBufferInfo.range = MAX_OBJECTS * sizeof(glm::mat4);
-        objectBufferInfo.range = sizeof(glm::mat4);
+        objectBufferInfo.range = dynamicAlignment;
 
         // Binding 2 : Sampler pour la texture
         VkDescriptorImageInfo imageInfo{};
@@ -1085,75 +1125,73 @@ void NNE::VulkanManager::createDescriptorSets()
 
 void NNE::VulkanManager::drawFrame()
 {
-    vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    try {
+        vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-    uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+        uint32_t imageIndex;
+        VkResult result = vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        recreateSwapChain();
-        return;
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+            return;
+        }
+        else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire swap chain image!");
+        }
+
+        updateUniformBuffer(currentFrame);
+
+        vkResetFences(device, 1, &inFlightFences[currentFrame]);
+
+        vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+        recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+
+        VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+        if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to submit draw command buffer!");
+        }
+
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = signalSemaphores;
+
+        VkSwapchainKHR swapChains[] = { swapChain };
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
+
+        result = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
+            framebufferResized = false;
+            recreateSwapChain();
+        }
+        else if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to present swap chain image!");
+        }
+
+        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to acquire swap chain image!");
+    catch (const std::exception& e) {
+        std::cerr << "Failed to draw frame: " << e.what() << std::endl;
+        throw;
     }
-
-    updateUniformBuffer(currentFrame);
-
-    vkResetFences(device, 1, &inFlightFences[currentFrame]);
-
-    vkResetCommandBuffer(commandBuffers[currentFrame], /*VkCommandBufferResetFlagBits*/ 0);
-    recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
-
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-    VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
-    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.pWaitDstStageMask = waitStages;
-
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
-
-    VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
-
-    if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
-        throw std::runtime_error("failed to submit draw command buffer!");
-    }
-
-    //std::cout << "[DEBUG] Commandes Vulkan soumises avec succès !" << std::endl;
-
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
-
-    VkSwapchainKHR swapChains[] = { swapChain };
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
-
-    presentInfo.pImageIndices = &imageIndex;
-
-    result = vkQueuePresentKHR(presentQueue, &presentInfo);    
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
-        framebufferResized = false;
-        recreateSwapChain();
-    }
-    else if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to present swap chain image!");
-    }
-
-    uint32_t dynamicOffset = 0;
-    vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-        0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
-
-    currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void NNE::VulkanManager::createSyncObjects()
@@ -1255,9 +1293,22 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
 {
     for (AEntity* entity : entities) {
         MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
-        if (mesh) {
+        // On charge le modèle seulement si ce MeshComponent n'a pas encore été initialisé
+        if (mesh && mesh->getIndexCount() == 0) {
+            uint32_t startOffset = static_cast<uint32_t>(indices.size());
+            //std::cout << "Chargement du modèle : " << mesh->GetModelPath() << std::endl;
             loadModel(mesh->GetModelPath());
-            createTextureImage(mesh->GetTexturePath());
+            std::string texPath = mesh->GetTexturePath();
+            /*if (!texPath.empty())
+                std::cout << "Loaded texture: " << texPath << std::endl;
+            else
+                std::cout << "Creating default white texture..." << std::endl;*/
+            createTextureImage(texPath);
+            uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
+            mesh->setIndexOffset(startOffset);
+            mesh->setIndexCount(count);
+            /*std::cout << "Nombre d'indices : " << count << std::endl;
+            std::cout << "Taille du buffer : " << (indices.size() * sizeof(uint32_t)) << " octets" << std::endl;*/
         }
     }
 }
@@ -1672,59 +1723,163 @@ std::vector<char> NNE::VulkanManager::readFile(const std::string& filename)
 
 void NNE::VulkanManager::CleanUp()
 {    
-    cleanupSwapChain();
+    vkDeviceWaitIdle(device);
 
-    vkDestroySampler(device, textureSampler, nullptr);
-    vkDestroyImageView(device, textureImageView, nullptr);
-    vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
-
+    // Détruire les synchronisations
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-        vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+        if (inFlightFences[i] != VK_NULL_HANDLE) {
+            vkDestroyFence(device, inFlightFences[i], nullptr);
+            inFlightFences[i] = VK_NULL_HANDLE;
+        }
+        if (imageAvailableSemaphores[i] != VK_NULL_HANDLE) {
+            vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+            imageAvailableSemaphores[i] = VK_NULL_HANDLE;
+        }
+        if (renderFinishedSemaphores[i] != VK_NULL_HANDLE) {
+            vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+            renderFinishedSemaphores[i] = VK_NULL_HANDLE;
+        }
     }
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
-        vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
+    // Command pool
+    if (commandPool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(device, commandPool, nullptr);
+        commandPool = VK_NULL_HANDLE;
     }
 
-    vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-
-    vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
-
-    vkDestroyBuffer(device, indexBuffer, nullptr);
-    vkFreeMemory(device, indexBufferMemory, nullptr);
-
-    vkDestroyBuffer(device, vertexBuffer, nullptr);
-    vkFreeMemory(device, vertexBufferMemory, nullptr);
-
-    vkDestroyPipeline(device, graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-
-    vkDestroyRenderPass(device, renderPass, nullptr);
-
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
-        vkDestroyFence(device, inFlightFences[i], nullptr);
+    // Pipeline et layout
+    if (graphicsPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        graphicsPipeline = VK_NULL_HANDLE;
+    }
+    if (pipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        pipelineLayout = VK_NULL_HANDLE;
+    }
+    if (renderPass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        renderPass = VK_NULL_HANDLE;
     }
 
-    vkDestroyCommandPool(device, commandPool, nullptr);
+    // Descripteurs
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+        descriptorPool = VK_NULL_HANDLE;
+    }
+    if (descriptorSetLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+        descriptorSetLayout = VK_NULL_HANDLE;
+    }
 
+    // Buffers uniformes
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        if (uniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+            uniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (uniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+            uniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+        if (objectUniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
+            objectUniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
+            objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+    }
 
-    vkDestroyDevice(device, nullptr);
+    // Buffers de vertex et d'index
+    if (vertexBuffer != VK_NULL_HANDLE) {
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vertexBuffer = VK_NULL_HANDLE;
+    }
+    if (vertexBufferMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
+        vertexBufferMemory = VK_NULL_HANDLE;
+    }
+    if (indexBuffer != VK_NULL_HANDLE) {
+        vkDestroyBuffer(device, indexBuffer, nullptr);
+        indexBuffer = VK_NULL_HANDLE;
+    }
+    if (indexBufferMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, indexBufferMemory, nullptr);
+        indexBufferMemory = VK_NULL_HANDLE;
+    }
 
-    /*if (enableValidationLayers) {
-        DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-    }*/
+    // Ressources de texture
+    if (textureSampler != VK_NULL_HANDLE) {
+        vkDestroySampler(device, textureSampler, nullptr);
+        textureSampler = VK_NULL_HANDLE;
+    }
+    if (textureImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(device, textureImageView, nullptr);
+        textureImageView = VK_NULL_HANDLE;
+    }
+    if (textureImage != VK_NULL_HANDLE) {
+        vkDestroyImage(device, textureImage, nullptr);
+        textureImage = VK_NULL_HANDLE;
+    }
+    if (textureImageMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, textureImageMemory, nullptr);
+        textureImageMemory = VK_NULL_HANDLE;
+    }
 
-    vkDestroySurfaceKHR(instance, surface, nullptr);
-    vkDestroyInstance(instance, nullptr);
+    // Ressources de profondeur
+    if (depthImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(device, depthImageView, nullptr);
+        depthImageView = VK_NULL_HANDLE;
+    }
+    if (depthImage != VK_NULL_HANDLE) {
+        vkDestroyImage(device, depthImage, nullptr);
+        depthImage = VK_NULL_HANDLE;
+    }
+    if (depthImageMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, depthImageMemory, nullptr);
+        depthImageMemory = VK_NULL_HANDLE;
+    }
 
-    glfwDestroyWindow(window);
+    // Framebuffers
+    for (auto& framebuffer : swapChainFramebuffers) {
+        if (framebuffer != VK_NULL_HANDLE) {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+            framebuffer = VK_NULL_HANDLE;
+        }
+    }
 
-    glfwTerminate();
+    // Image views de la swapchain
+    for (auto& imageView : swapChainImageViews) {
+        if (imageView != VK_NULL_HANDLE) {
+            vkDestroyImageView(device, imageView, nullptr);
+            imageView = VK_NULL_HANDLE;
+        }
+    }
+
+    // Swapchain
+    if (swapChain != VK_NULL_HANDLE) {
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
+        swapChain = VK_NULL_HANDLE;
+    }
+
+    // Surface
+    if (surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        surface = VK_NULL_HANDLE;
+    }
+
+    // Device
+    if (device != VK_NULL_HANDLE) {
+        vkDestroyDevice(device, nullptr);
+        device = VK_NULL_HANDLE;
+    }
+
+    // Instance Vulkan
+    if (instance != VK_NULL_HANDLE) {
+        vkDestroyInstance(instance, nullptr);
+        instance = VK_NULL_HANDLE;
+    }
 }
 
 void NNE::VulkanManager::cleanupSwapChain()

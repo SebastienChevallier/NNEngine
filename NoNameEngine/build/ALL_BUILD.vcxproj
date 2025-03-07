@@ -25,9 +25,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A7005173-5685-3CEA-BF4F-929575BC94E0}</ProjectGuid>
+    <ProjectGuid>{EBC780B9-8FBE-39DB-9CE4-98F690F834CB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
     <ProjectName>ALL_BUILD</ProjectName>
     <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
@@ -111,8 +111,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\build\NoNameEngine.vcxproj">
-      <Project>{09D007A1-689D-3FFC-93CA-9001E73267F9}</Project>
+    <ProjectReference Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\build\NoNameEngine.vcxproj">
+      <Project>{AC7348C8-62B0-3407-9BA9-90CFC21786AF}</Project>
       <Name>NoNameEngine</Name>
     </ProjectReference>
   </ItemGroup>

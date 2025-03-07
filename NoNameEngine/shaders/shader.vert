@@ -17,7 +17,14 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = globalUBO.proj * globalUBO.view * objectUBO.model * vec4(inPosition, 1.0);
+    // Transformation complète du vertex (Modèle -> Vue -> Projection)
+    vec4 transformed = globalUBO.proj * globalUBO.view * objectUBO.model * vec4(inPosition, 1.0);
+
+    // Normalisation manuelle pour éviter les problèmes de perspective
+    transformed.xyz /= transformed.w; 
+
+    gl_Position = transformed;
+
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

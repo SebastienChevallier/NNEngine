@@ -108,6 +108,7 @@ namespace NNE {
 	class VulkanManager
 	{
 	protected:
+		size_t dynamicAlignment;
 		const size_t MAX_OBJECTS = 100;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

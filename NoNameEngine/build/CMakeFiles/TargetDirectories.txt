@@ -1,2 +1,2 @@
-C:/Users/schev/source/repos/Git-NNE/NoNameEngine/build/CMakeFiles/NoNameEngine.dir
-C:/Users/schev/source/repos/Git-NNE/NoNameEngine/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/build/CMakeFiles/NoNameEngine.dir
+C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/build/CMakeFiles/ALL_BUILD.dir

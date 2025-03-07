@@ -7,5 +7,9 @@ layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 2) uniform sampler2D texSampler;
 
 void main() {
-    outColor = texture(texSampler, fragTexCoord);
+    // Appliquer la texture
+    vec4 texColor = texture(texSampler, fragTexCoord);
+
+    // Mélanger la texture avec la couleur du vertex
+    outColor = texColor * vec4(fragColor, 1.0);
 }

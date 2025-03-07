@@ -8,7 +8,7 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_SUPPRESS_REGENERATION ON)
-set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
+#set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
 set(glfw3_DIR "C:/vcpkg/installed/x64-windows/share/glfw3")
 
 # Inclure les sources et en-têtes
