@@ -8,6 +8,7 @@ namespace NNE {
 
 	public:
 		AComponent();
+		~AComponent() = default;
 		
 		virtual void Awake();
 		virtual void Start();

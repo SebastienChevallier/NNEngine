@@ -11,6 +11,7 @@ NNE::AEntity::~AEntity()
 	for (AComponent* comp : NNE::AEntity::components) {
 		delete comp;
 	}
+	components.clear();
 }
 
 int NNE::AEntity::GetID()

@@ -868,6 +868,11 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
+    // IMPORTANT : Lier le descriptor set pour l'UBO global (set 0)
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+        pipelineLayout, 0, 1, &descriptorSets[currentFrame],
+        0, nullptr);
+
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
@@ -887,19 +892,17 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+    // Pour chaque entité, utiliser push constants pour transmettre la matrice modèle
     const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
-    //std::cout << "Nombre d'entités : " << entities.size() << std::endl;
     for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
-        // Calcul du dynamic offset (doit être multiple de dynamicAlignment)
-        uint32_t dynamicOffset = static_cast<uint32_t>(i * dynamicAlignment);
-
-
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-            0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
+        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
+        if (transform) {
+            glm::mat4 modelMatrix = transform->getModelMatrix();
+            vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &modelMatrix);
+        }
 
         MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
         if (mesh) {
-            //std::cout << "Entité " << i << " dessinée avec " << mesh->getIndexCount() << " indices." << std::endl;
             vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
         }
     }
@@ -916,36 +919,37 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    // Mise à jour de l'UBO global (vue et projection)
+    // Mise à jour de l'UBO global (vue/projection)
     GlobalUniformBufferObject globalUBO{};
     globalUBO.view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f), // Position de la caméra (par exemple, rapprochée et à l'intérieur)
-        glm::vec3(0.0f, 0.0f, 0.0f), // Point regardé
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Vecteur up
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
     );
     globalUBO.proj = glm::perspective(glm::radians(45.0f),
         swapChainExtent.width / (float)swapChainExtent.height,
         0.1f, 10.0f);
-    globalUBO.proj[1][1] *= -1; // Correction pour Vulkan (axe Y inversé)
+    globalUBO.proj[1][1] *= -1; // Correction pour Vulkan
+
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
-    // Mise à jour du buffer dynamique pour les objets
+    // === Désactivation temporaire de l'écriture dans l'UBO dynamique pour tester ===
+    /*
     size_t offset = 0;
     const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
     for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
         TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
-        if (transform) {           
-
-            glm::mat4 modelMatrix = transform->getModelMatrix();            
-
+        if (transform) {
+            glm::mat4 modelMatrix = transform->getModelMatrix();
+            std::cout << "Mise à jour de la matrice modèle de l'entité " << entities[i]->GetID()
+                      << " à l'offset " << offset << " dans le buffer dynamique" << std::endl;
+            std::cout << "Adresse cible: " << (char*)objectUniformBuffersMapped[currentImage] + offset << std::endl;
             memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
             offset += dynamicAlignment;
-            
         }
     }
-
-    // Mise à jour du buffer dynamique pour les objets
-    //UpdateObjectUniformBuffer(currentImage, Application::GetInstance()->_entities);
+    */
+    // ============================================================
 }
 
 void NNE::VulkanManager::loadModel(const std::string& modelPath)
@@ -1004,25 +1008,16 @@ void NNE::VulkanManager::createDescriptorSetLayout()
     globalUboLayoutBinding.pImmutableSamplers = nullptr;
     globalUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 1 : UBO dynamique pour les transformations d'objets
-    VkDescriptorSetLayoutBinding objectUboLayoutBinding{};
-    objectUboLayoutBinding.binding = 1;
-    objectUboLayoutBinding.descriptorCount = 1;
-    objectUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    objectUboLayoutBinding.pImmutableSamplers = nullptr;
-    objectUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-    // Binding 2 : Combined image sampler pour la texture
+    // Binding 1 : Combined image sampler pour la texture
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-    samplerLayoutBinding.binding = 2;
+    samplerLayoutBinding.binding = 1; // On passe à binding 1
     samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
         globalUboLayoutBinding,
-        objectUboLayoutBinding,
         samplerLayoutBinding
     };
 
@@ -1078,21 +1073,14 @@ void NNE::VulkanManager::createDescriptorSets()
         globalBufferInfo.offset = 0;
         globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
 
-        // Binding 1 : Object UBO (dynamique)
-        VkDescriptorBufferInfo objectBufferInfo{};
-        objectBufferInfo.buffer = objectUniformBuffers[i];
-        objectBufferInfo.offset = 0;
-        objectBufferInfo.range = dynamicAlignment;
-
-        // Binding 2 : Sampler pour la texture
+        // Binding 1 : Sampler pour la texture
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = textureImageView;
         imageInfo.sampler = textureSampler;
 
-        std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
-        // Mise à jour du binding 0 (Global UBO)
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
@@ -1101,23 +1089,13 @@ void NNE::VulkanManager::createDescriptorSets()
         descriptorWrites[0].descriptorCount = 1;
         descriptorWrites[0].pBufferInfo = &globalBufferInfo;
 
-        // Mise à jour du binding 1 (Object UBO dynamique)
         descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[1].dstSet = descriptorSets[i];
         descriptorWrites[1].dstBinding = 1;
         descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pBufferInfo = &objectBufferInfo;
-
-        // Mise à jour du binding 2 (Sampler)
-        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[2].dstSet = descriptorSets[i];
-        descriptorWrites[2].dstBinding = 2;
-        descriptorWrites[2].dstArrayElement = 0;
-        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[2].descriptorCount = 1;
-        descriptorWrites[2].pImageInfo = &imageInfo;
+        descriptorWrites[1].pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }

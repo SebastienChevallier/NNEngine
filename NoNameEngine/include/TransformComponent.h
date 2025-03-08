@@ -5,12 +5,12 @@
 #include <iostream>
 
 namespace NNE {
-	class TransformComponent : public AComponent
+	class alignas(16) TransformComponent : public AComponent
 	{
 	public:
-		glm::vec3 position;
-		glm::vec3 rotation; // en degrés ou radians selon votre convention
-		glm::vec3 scale;
+		alignas(16) glm::vec3 position;
+		alignas(16) glm::vec3 rotation; // en degrés ou radians selon votre convention
+		alignas(16) glm::vec3 scale;
 
 		TransformComponent();
 
@@ -23,9 +23,9 @@ namespace NNE {
 			model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
 			std::cout << "Rotation : " << rotation.x << " " << rotation.y << " " << rotation.z << std::endl;
 			
-
+			std::cout << "Adresse de scale: " << &scale << " | Valeur: " << scale.x << " " << scale.y << " " << scale.z << std::endl;
 			model = glm::scale(model, scale); // Échelle fixe (pas d'écrasement)
-			std::cout << "scale : " << scale.x << " " << scale.y << " " << scale.z << std::endl;
+			//std::cout << "scale : " << scale.x << " " << scale.y << " " << scale.z << std::endl;
 			return model;
         }
 	};
