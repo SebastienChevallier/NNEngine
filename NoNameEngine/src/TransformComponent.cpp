@@ -9,3 +9,7 @@ NNE::TransformComponent::TransformComponent()
 	std::cout << "📢 Constructeur TransformComponent appelé. Scale : "
 		<< scale.x << " " << scale.y << " " << scale.z << std::endl;
 }
+
+
+
+

@@ -1,6 +1,7 @@
 #include "VulkanManager.h"
 #include "Application.h"
 #include <stb_image.h>
+#include <cmath>
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -335,7 +336,7 @@ void NNE::VulkanManager::createLogicalDevice()
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
     size_t minUboAlignment = deviceProperties.limits.minUniformBufferOffsetAlignment;
-    dynamicAlignment = sizeof(glm::mat4);
+    dynamicAlignment = 256;
     if (minUboAlignment > 0) {
         dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
     }
@@ -827,18 +828,40 @@ void NNE::VulkanManager::createUniformBuffers()
         vkMapMemory(device, uniformBuffersMemory[i], 0, globalBufferSize, 0, &uniformBuffersMapped[i]);
     }
 
-    // UBO dynamique pour les objets
-    VkDeviceSize objectBufferSize = MAX_OBJECTS * dynamicAlignment; // Utilise dynamicAlignment !
+    // Object UBO (model) par entité
+    VkDeviceSize objectSize = sizeof(UniformBufferObject);
     objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     objectUniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
     objectUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        createBuffer(objectBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-            objectUniformBuffers[i], objectUniformBuffersMemory[i]);
-        vkMapMemory(device, objectUniformBuffersMemory[i], 0, objectBufferSize, 0, &objectUniformBuffersMapped[i]);
+        objectUniformBuffers[i].resize(MAX_OBJECTS);
+        objectUniformBuffersMemory[i].resize(MAX_OBJECTS);
+        objectUniformBuffersMapped[i].resize(MAX_OBJECTS);
+
+        for (size_t j = 0; j < MAX_OBJECTS; j++) {
+            createBuffer(objectSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                objectUniformBuffers[i][j], objectUniformBuffersMemory[i][j]);
+
+            vkMapMemory(device, objectUniformBuffersMemory[i][j], 0, objectSize, 0, &objectUniformBuffersMapped[i][j]);
+        }
     }
+
+    //// UBO dynamique pour les objets
+    //VkDeviceSize objectBufferSize = MAX_OBJECTS * dynamicAlignment; // Utilise dynamicAlignment !
+    //objectUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    //objectUniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    //objectUniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    ////std::cout << "Dynamic Alignment: " << dynamicAlignment << " bytes" << std::endl;
+
+    //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    //    createBuffer(objectBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    //        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    //        objectUniformBuffers[i], objectUniformBuffersMemory[i]);
+    //    vkMapMemory(device, objectUniformBuffersMemory[i], 0, objectBufferSize, 0, &objectUniformBuffersMapped[i]);
+    //}
 }
 
 void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
@@ -890,20 +913,19 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
     //std::cout << "Nombre d'entités : " << entities.size() << std::endl;
     for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
-        // Calcul du dynamic offset (doit être multiple de dynamicAlignment)
-        uint32_t dynamicOffset = static_cast<uint32_t>(i * dynamicAlignment);
-
-
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
-            0, 1, &descriptorSets[currentFrame], 1, &dynamicOffset);
-
         MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
         if (mesh) {
-            //std::cout << "Entité " << i << " dessinée avec " << mesh->getIndexCount() << " indices." << std::endl;
-            vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
-        }
-    }
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout,
+                0, 1, &descriptorSets[currentFrame][i], 0, nullptr);
 
+            vkCmdDrawIndexed(commandBuffer,
+                mesh->getIndexCount(),
+                1,
+                mesh->getIndexOffset(),
+                mesh->getVertexOffset(),
+                0);
+        }
+	}
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to record command buffer!");
@@ -912,40 +934,42 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
 
 void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
-    static auto startTime = std::chrono::high_resolution_clock::now();
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-    // Mise à jour de l'UBO global (vue et projection)
     GlobalUniformBufferObject globalUBO{};
-    globalUBO.view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f), // Position de la caméra (par exemple, rapprochée et à l'intérieur)
-        glm::vec3(0.0f, 0.0f, 0.0f), // Point regardé
-        glm::vec3(0.0f, 1.0f, 0.0f)  // Vecteur up
-    );
+    globalUBO.view = glm::lookAt(glm::vec3(0, 0, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     globalUBO.proj = glm::perspective(glm::radians(45.0f),
-        swapChainExtent.width / (float)swapChainExtent.height,
-        0.1f, 10.0f);
-    globalUBO.proj[1][1] *= -1; // Correction pour Vulkan (axe Y inversé)
+        swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+    globalUBO.proj[1][1] *= -1;
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
-    // Mise à jour du buffer dynamique pour les objets
-    size_t offset = 0;
+    // Accès sécurisé à tes uniform buffers pour éviter la corruption mémoire
+    // Mise à jour des UBO par entité
     const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
     for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
         TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
-        if (transform) {           
+        if (!transform)
+            continue;
+        // Copie locale pour isoler d'éventuelles corruptions dans la zone mémoire du composant
+        TransformComponent safeTransform = *transform;
 
-            glm::mat4 modelMatrix = transform->getModelMatrix();            
+        // Valider explicitement les composantes de scale
+        safeTransform.scale.x = std::isfinite(safeTransform.scale.x) ? safeTransform.scale.x : 1.0f;
+        safeTransform.scale.y = std::isfinite(safeTransform.scale.y) ? safeTransform.scale.y : 1.0f;
+        safeTransform.scale.z = std::isfinite(safeTransform.scale.z) ? safeTransform.scale.z : 1.0f;
 
-            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
-            offset += dynamicAlignment;
-            
+        UniformBufferObject objectUBO{};
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, safeTransform.position);
+        model = glm::rotate(model, glm::radians(safeTransform.rotation.z), glm::vec3(0, 0, 1));
+        model = glm::rotate(model, glm::radians(safeTransform.rotation.y), glm::vec3(0, 1, 0));
+        model = glm::rotate(model, glm::radians(safeTransform.rotation.x), glm::vec3(1, 0, 0));
+        model = glm::scale(model, safeTransform.scale);
+        objectUBO.model = model;
+
+        if (currentImage < objectUniformBuffersMapped.size() &&
+            i < objectUniformBuffersMapped[currentImage].size()) {
+            memcpy(objectUniformBuffersMapped[currentImage][i], &objectUBO, sizeof(objectUBO));
         }
     }
-
-    // Mise à jour du buffer dynamique pour les objets
-    //UpdateObjectUniformBuffer(currentImage, Application::GetInstance()->_entities);
 }
 
 void NNE::VulkanManager::loadModel(const std::string& modelPath)
@@ -996,28 +1020,25 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
 
 void NNE::VulkanManager::createDescriptorSetLayout()
 {
-    // Binding 0 : UBO global pour la vue/projection
+    // Global UBO
     VkDescriptorSetLayoutBinding globalUboLayoutBinding{};
     globalUboLayoutBinding.binding = 0;
-    globalUboLayoutBinding.descriptorCount = 1;
     globalUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    globalUboLayoutBinding.pImmutableSamplers = nullptr;
+    globalUboLayoutBinding.descriptorCount = 1;
     globalUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 1 : UBO dynamique pour les transformations d'objets
+    // Object UBO
     VkDescriptorSetLayoutBinding objectUboLayoutBinding{};
     objectUboLayoutBinding.binding = 1;
+    objectUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     objectUboLayoutBinding.descriptorCount = 1;
-    objectUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    objectUboLayoutBinding.pImmutableSamplers = nullptr;
     objectUboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
-    // Binding 2 : Combined image sampler pour la texture
+    // Texture sampler
     VkDescriptorSetLayoutBinding samplerLayoutBinding{};
     samplerLayoutBinding.binding = 2;
-    samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.descriptorCount = 1;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
@@ -1041,16 +1062,17 @@ void NNE::VulkanManager::createDescriptorPool()
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * MAX_OBJECTS);
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[2].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[2].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * MAX_OBJECTS);    
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT * MAX_OBJECTS);
+
 
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
@@ -1059,68 +1081,123 @@ void NNE::VulkanManager::createDescriptorPool()
 
 void NNE::VulkanManager::createDescriptorSets()
 {
-    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    allocInfo.pSetLayouts = layouts.data();
-
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate descriptor sets!");
-    }
-
+    
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        // Binding 0 : Global UBO
-        VkDescriptorBufferInfo globalBufferInfo{};
-        globalBufferInfo.buffer = uniformBuffers[i];
-        globalBufferInfo.offset = 0;
-        globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+        descriptorSets[i].resize(MAX_OBJECTS);
 
-        // Binding 1 : Object UBO (dynamique)
-        VkDescriptorBufferInfo objectBufferInfo{};
-        objectBufferInfo.buffer = objectUniformBuffers[i];
-        objectBufferInfo.offset = 0;
-        objectBufferInfo.range = dynamicAlignment;
+        for (size_t j = 0; j < MAX_OBJECTS; j++) {
+            VkDescriptorSetAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = descriptorPool;
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &descriptorSetLayout;
 
-        // Binding 2 : Sampler pour la texture
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = textureImageView;
-        imageInfo.sampler = textureSampler;
+            vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i][j]);
 
-        std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+            VkDescriptorBufferInfo globalBufferInfo{};
+            globalBufferInfo.buffer = uniformBuffers[i];
+            globalBufferInfo.offset = 0;
+            globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
 
-        // Mise à jour du binding 0 (Global UBO)
-        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = descriptorSets[i];
-        descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].pBufferInfo = &globalBufferInfo;
+            VkDescriptorBufferInfo objectBufferInfo{};
+            objectBufferInfo.buffer = objectUniformBuffers[i][j];
+            objectBufferInfo.offset = 0;
+            objectBufferInfo.range = sizeof(UniformBufferObject);
 
-        // Mise à jour du binding 1 (Object UBO dynamique)
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pBufferInfo = &objectBufferInfo;
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = textureImageView;
+            imageInfo.sampler = textureSampler;
 
-        // Mise à jour du binding 2 (Sampler)
-        descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[2].dstSet = descriptorSets[i];
-        descriptorWrites[2].dstBinding = 2;
-        descriptorWrites[2].dstArrayElement = 0;
-        descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[2].descriptorCount = 1;
-        descriptorWrites[2].pImageInfo = &imageInfo;
+            std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
-        vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+            descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[0].dstSet = descriptorSets[i][j];
+            descriptorWrites[0].dstBinding = 0;
+            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[0].descriptorCount = 1;
+            descriptorWrites[0].pBufferInfo = &globalBufferInfo;
+
+            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[1].dstSet = descriptorSets[i][j];
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[1].descriptorCount = 1; // <- à rajouter absolument !
+            descriptorWrites[1].pBufferInfo = &objectBufferInfo;
+
+            descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[2].dstSet = descriptorSets[i][j];
+            descriptorWrites[2].dstBinding = 2;
+            descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[2].descriptorCount = 1;
+            descriptorWrites[2].pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+        }
     }
+    //std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    //VkDescriptorSetAllocateInfo allocInfo{};
+    //allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    //allocInfo.descriptorPool = descriptorPool;
+    //allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    //allocInfo.pSetLayouts = layouts.data();
+
+    //descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    //if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+    //    throw std::runtime_error("failed to allocate descriptor sets!");
+    //}
+
+    //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+    //    // Binding 0 : Global UBO
+    //    VkDescriptorBufferInfo globalBufferInfo{};
+    //    globalBufferInfo.buffer = uniformBuffers[i];
+    //    globalBufferInfo.offset = 0;
+    //    globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+
+    //    // Binding 1 : Object UBO (dynamique)
+    //    VkDescriptorBufferInfo objectBufferInfo{};
+    //    objectBufferInfo.buffer = objectUniformBuffers[i];
+    //    objectBufferInfo.offset = 0;
+    //    objectBufferInfo.range = dynamicAlignment;
+
+    //    // Binding 2 : Sampler pour la texture
+    //    VkDescriptorImageInfo imageInfo{};
+    //    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    //    imageInfo.imageView = textureImageView;
+    //    imageInfo.sampler = textureSampler;
+
+    //    std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+
+    //    // Mise à jour du binding 0 (Global UBO)
+    //    descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    //    descriptorWrites[0].dstSet = descriptorSets[i];
+    //    descriptorWrites[0].dstBinding = 0;
+    //    descriptorWrites[0].dstArrayElement = 0;
+    //    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    //    descriptorWrites[0].descriptorCount = 1;
+    //    descriptorWrites[0].pBufferInfo = &globalBufferInfo;
+
+    //    // Mise à jour du binding 1 (Object UBO dynamique)
+    //    descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    //    descriptorWrites[1].dstSet = descriptorSets[i];
+    //    descriptorWrites[1].dstBinding = 1;
+    //    descriptorWrites[1].dstArrayElement = 0;
+    //    descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    //    descriptorWrites[1].descriptorCount = 1;
+    //    descriptorWrites[1].pBufferInfo = &objectBufferInfo;
+
+    //    // Mise à jour du binding 2 (Sampler)
+    //    descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    //    descriptorWrites[2].dstSet = descriptorSets[i];
+    //    descriptorWrites[2].dstBinding = 2;
+    //    descriptorWrites[2].dstArrayElement = 0;
+    //    descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    //    descriptorWrites[2].descriptorCount = 1;
+    //    descriptorWrites[2].pImageInfo = &imageInfo;
+
+    //    vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    //}
 }
 
 void NNE::VulkanManager::drawFrame()
@@ -1291,24 +1368,23 @@ void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
 
 void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entities)
 {
+    vertices.clear();
+    indices.clear();
+
     for (AEntity* entity : entities) {
         MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
-        // On charge le modèle seulement si ce MeshComponent n'a pas encore été initialisé
         if (mesh && mesh->getIndexCount() == 0) {
-            uint32_t startOffset = static_cast<uint32_t>(indices.size());
-            //std::cout << "Chargement du modèle : " << mesh->GetModelPath() << std::endl;
+            uint32_t startVertexOffset = static_cast<uint32_t>(vertices.size());
+            uint32_t startIndexOffset = static_cast<uint32_t>(indices.size());
+
             loadModel(mesh->GetModelPath());
-            std::string texPath = mesh->GetTexturePath();
-            /*if (!texPath.empty())
-                std::cout << "Loaded texture: " << texPath << std::endl;
-            else
-                std::cout << "Creating default white texture..." << std::endl;*/
-            createTextureImage(texPath);
-            uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
-            mesh->setIndexOffset(startOffset);
-            mesh->setIndexCount(count);
-            /*std::cout << "Nombre d'indices : " << count << std::endl;
-            std::cout << "Taille du buffer : " << (indices.size() * sizeof(uint32_t)) << " octets" << std::endl;*/
+
+            mesh->setVertexOffset(startVertexOffset);
+            mesh->setVertexCount(static_cast<uint32_t>(vertices.size()) - startVertexOffset);
+            mesh->setIndexOffset(startIndexOffset);
+            mesh->setIndexCount(static_cast<uint32_t>(indices.size()) - startIndexOffset);
+
+            createTextureImage(mesh->GetTexturePath());
         }
     }
 }
@@ -1323,7 +1399,7 @@ void NNE::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const 
         TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
         if (transform) {
             glm::mat4 modelMatrix = transform->getModelMatrix();
-            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
+            memcpy(objectUniformBuffersMapped[currentImage][i], &modelMatrix, sizeof(glm::mat4));
             offset += sizeof(glm::mat4);
         }
     }
@@ -1781,13 +1857,22 @@ void NNE::VulkanManager::CleanUp()
             vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
             uniformBuffersMemory[i] = VK_NULL_HANDLE;
         }
-        if (objectUniformBuffers[i] != VK_NULL_HANDLE) {
-            vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
-            objectUniformBuffers[i] = VK_NULL_HANDLE;
-        }
-        if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
-            vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
-            objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        
+
+        for (size_t i = 0; i < objectUniformBuffers.size(); ++i) {
+            for (size_t j = 0; j < objectUniformBuffers[i].size(); ++j) {
+                if (objectUniformBuffers[i][j] != VK_NULL_HANDLE) {
+                    vkDestroyBuffer(device, objectUniformBuffers[i][j], nullptr);
+                    objectUniformBuffers[i][j] = VK_NULL_HANDLE;
+                }
+
+                if (objectUniformBuffersMemory[i][j] != VK_NULL_HANDLE) {
+                    vkFreeMemory(device, objectUniformBuffersMemory[i][j], nullptr);
+                    objectUniformBuffersMemory[i][j] = VK_NULL_HANDLE;
+                }
+            }
+            objectUniformBuffers[i].clear();
+            objectUniformBuffersMemory[i].clear();
         }
     }
 

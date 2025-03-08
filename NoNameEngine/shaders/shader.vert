@@ -1,13 +1,13 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform GlobalUBO {
+layout(binding = 0) uniform GlobalUBO {
     mat4 view;
     mat4 proj;
 } globalUBO;
 
-layout(set = 0, binding = 1) uniform ObjectUBO {
+layout(binding = 1) uniform ObjectUBO {
     mat4 model;
-} objectUBO; // Ce buffer est dynamique
+} objectUBO;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -17,14 +17,5 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    // Transformation complète du vertex (Modèle -> Vue -> Projection)
-    vec4 transformed = globalUBO.proj * globalUBO.view * objectUBO.model * vec4(inPosition, 1.0);
-
-    // Normalisation manuelle pour éviter les problèmes de perspective
-    transformed.xyz /= transformed.w; 
-
-    gl_Position = transformed;
-
-    fragColor = inColor;
-    fragTexCoord = inTexCoord;
+    gl_Position = globalUBO.proj * globalUBO.view * objectUBO.model * vec4(inPosition, 1.0);
 }

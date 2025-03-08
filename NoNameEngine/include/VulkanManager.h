@@ -146,9 +146,15 @@ namespace NNE {
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 		std::vector<void*> uniformBuffersMapped;
 
-		std::vector<VkBuffer> objectUniformBuffers;
+		//BufferDynamic
+		/*std::vector<VkBuffer> objectUniformBuffers;
 		std::vector<VkDeviceMemory> objectUniformBuffersMemory;
-		std::vector<void*> objectUniformBuffersMapped;
+		std::vector<void*> objectUniformBuffersMapped;*/
+
+		// Object (Model) un par entité
+		std::vector<std::vector<VkBuffer>> objectUniformBuffers;
+		std::vector<std::vector<VkDeviceMemory>> objectUniformBuffersMemory;
+		std::vector<std::vector<void*>> objectUniformBuffersMapped;
 
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
@@ -168,7 +174,8 @@ namespace NNE {
 		VkImageView colorImageView;
 
 		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
+		//std::vector<VkDescriptorSet> descriptorSets;
+		std::vector<std::vector<VkDescriptorSet>> descriptorSets;
 
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;

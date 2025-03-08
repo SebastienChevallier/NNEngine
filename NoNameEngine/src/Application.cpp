@@ -90,6 +90,12 @@ NNE::AEntity* NNE::Application::CreateEntity()
 float NNE::Application::GetDeltaTime()
 {
     std::clock_t currentFrameTime = std::clock();
+
+    if (lastFrameTime == 0) {
+        lastFrameTime = currentFrameTime; // Initialisation obligatoire première frame
+        return 0.0f; // première frame deltaTime = 0
+    }
+
     float deltaTime = float(currentFrameTime - lastFrameTime) / CLOCKS_PER_SEC;
     lastFrameTime = currentFrameTime;
     return deltaTime;

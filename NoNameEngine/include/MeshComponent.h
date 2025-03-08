@@ -9,8 +9,12 @@ namespace NNE {
     private:
         std::string modelPath;
         std::string texturePath;
+
         uint32_t indexOffset = 0;
         uint32_t indexCount = 0;
+
+        uint32_t vertexOffset = 0;
+        uint32_t vertexCount = 0;
 
     public:
         MeshComponent();   
@@ -29,6 +33,11 @@ namespace NNE {
         void setIndexCount(uint32_t count) { indexCount = count; }
         uint32_t getIndexOffset() const { return indexOffset; }
         uint32_t getIndexCount() const { return indexCount; }
+
+        void setVertexOffset(uint32_t offset) { vertexOffset = offset; }
+        void setVertexCount(uint32_t count) { vertexCount = count; }
+        uint32_t getVertexOffset() const { return vertexOffset; }
+        uint32_t getVertexCount() const { return vertexCount; }
 	};
 }
 	
