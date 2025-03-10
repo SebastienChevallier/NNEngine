@@ -13,6 +13,7 @@
 #include <fstream>
 #include <array>
 #include <unordered_map>
+#include "CameraComponent.h"
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -37,9 +38,7 @@
 
 
 namespace NNE {
-	class AEntity;
-	//const std::string MODEL_PATH = "../models/viking_room.obj";
-	//const std::string TEXTURE_PATH = "../textures/viking_room.png";
+	class AEntity;	
 
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
@@ -176,6 +175,7 @@ namespace NNE {
 		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	public :
+		CameraComponent* activeCamera = nullptr;
 		VkInstance instance = VK_NULL_HANDLE;
 		GLFWwindow* window;
 		VulkanManager();
@@ -213,15 +213,15 @@ namespace NNE {
 		void recreateSwapChain();
 		
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-		void createTextureImageView();
-		void createTextureSampler();
+		void createTextureImageView(VkImage textureImage, VkImageView& textureImageView);
+		void createTextureSampler(VkSampler& textureSampler);
 		void createDepthResources();
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 		
 		void createColorResources();
 
 		void loadModel(const std::string& modelPath);
-		void createTextureImage(const std::string& texturePath);
+		void createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory);
 		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
 
 		void UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities);

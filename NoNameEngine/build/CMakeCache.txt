@@ -229,10 +229,10 @@ VCPKG_TRACE_FIND_PACKAGE:BOOL=OFF
 VCPKG_VERBOSE:BOOL=OFF
 
 //Path to a program.
-Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=Vulkan_GLSLANG_VALIDATOR_EXECUTABLE-NOTFOUND
+Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=C:/VulkanSDK/1.4.304.1/Bin/glslangValidator.exe
 
 //Path to a program.
-Vulkan_GLSLC_EXECUTABLE:FILEPATH=Vulkan_GLSLC_EXECUTABLE-NOTFOUND
+Vulkan_GLSLC_EXECUTABLE:FILEPATH=C:/VulkanSDK/1.4.304.1/Bin/glslc.exe
 
 //Path to a file.
 Vulkan_INCLUDE_DIR:PATH=C:/Users/schev/vcpkg/installed/x64-windows/include
@@ -411,7 +411,7 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding Vulkan
-FIND_PACKAGE_MESSAGE_DETAILS_Vulkan:INTERNAL=[C:/Users/schev/vcpkg/installed/x64-windows/debug/lib/vulkan-1.lib][C:/Users/schev/vcpkg/installed/x64-windows/include][ missing components: glslc glslangValidator][v1.4.304()]
+FIND_PACKAGE_MESSAGE_DETAILS_Vulkan:INTERNAL=[C:/Users/schev/vcpkg/installed/x64-windows/debug/lib/vulkan-1.lib][C:/Users/schev/vcpkg/installed/x64-windows/include][found components: glslc glslangValidator ][v1.4.304()]
 //Install the dependencies listed in your manifest:
 //\n    If this is off, you will have to manually install your dependencies.
 //\n    See https://github.com/microsoft/vcpkg/tree/master/docs/specifications/manifests.md

@@ -21,6 +21,7 @@ set(SOURCES
     src/AScene.cpp    
     src/MeshComponent.cpp
     src/TransformComponent.cpp
+    src/CameraComponent.cpp
 )
 
 
@@ -32,6 +33,7 @@ set(HEADERS
     include/AScene.h  
     include/MeshComponent.h  
     include/TransformComponent.h  
+    include/CameraComponent.h  
 )
 
 # Créer l'exécutable
@@ -56,3 +58,28 @@ target_link_libraries(NoNameEngine PRIVATE glfw glm::glm Vulkan::Vulkan tinyobjl
 #add_executable(TestApp test/test_main.cpp)
 #target_link_libraries(TestApp PRIVATE glfw glm::glm Vulkan::Vulkan)
 #add_test(NAME TestApp COMMAND TestApp)
+
+#1. Supprimer le dossier build/ et le recréer
+#Avant de régénérer les fichiers de projet, supprimez complètement le dossier build/ :
+
+#cmd
+#Copier
+#Modifier
+#cd C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine
+#rmdir /s /q build
+#mkdir build
+#cd build
+#2. Générez les fichiers de projet avec la bonne version de Visual Studio
+#Comme vous utilisez MSBuild, assurez-vous que Visual Studio 2022 est installé et utilisez le bon générateur :
+
+#cmd
+#Copier
+#Modifier
+#cmake .. -G "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE=C:/Users/schev/vcpkg/scripts/buildsystems/vcpkg.cmake
+#3. Compiler avec Visual Studio
+#Une fois la génération terminée, compilez avec :
+
+#cmd
+#Copier
+#Modifier
+#make --build . --config Release

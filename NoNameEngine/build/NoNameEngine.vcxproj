@@ -336,6 +336,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\AScene.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\MeshComponent.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\TransformComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\CameraComponent.cpp" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\VulkanManager.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\Application.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AComponent.h" />
@@ -343,6 +344,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AScene.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\MeshComponent.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\TransformComponent.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\CameraComponent.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

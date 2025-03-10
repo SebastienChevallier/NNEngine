@@ -1,6 +1,7 @@
 #pragma once
 #include "AComponent.h" 
 #include <string>
+#include <vulkan/vulkan.h>
 
 namespace NNE {
     class AComponent;
@@ -12,8 +13,17 @@ namespace NNE {
         uint32_t indexOffset = 0;
         uint32_t indexCount = 0;
 
+        
+
+
     public:
         MeshComponent();   
+
+        // Ajout des ressources Vulkan propres à chaque entité
+        VkImage textureImage = VK_NULL_HANDLE;
+        VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
+        VkImageView textureImageView = VK_NULL_HANDLE;
+        VkSampler textureSampler = VK_NULL_HANDLE;
 
         /*virtual void Awake() override;
         virtual void Start() override;

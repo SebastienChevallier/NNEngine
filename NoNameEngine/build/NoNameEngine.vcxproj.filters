@@ -25,6 +25,9 @@
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\TransformComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\CameraComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\VulkanManager.h">
@@ -46,6 +49,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\TransformComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

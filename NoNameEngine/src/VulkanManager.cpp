@@ -1,6 +1,7 @@
 #include "VulkanManager.h"
 #include "Application.h"
 #include <stb_image.h>
+#include <glm/gtx/hash.hpp>
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -55,8 +56,8 @@ void NNE::VulkanManager::initVulkan()
     createIndexBuffer();            // 📌 Stocker les indices des modèles
     createUniformBuffers();         // 🎭 Créer les buffers uniformes pour les shaders
 
-    createTextureImageView();       // 🖼 Convertir la texture en une vue utilisable
-    createTextureSampler();         // 🔎 Créer un échantillonneur de texture
+    //createTextureImageView();       // 🖼 Convertir la texture en une vue utilisable
+    //createTextureSampler();         // 🔎 Créer un échantillonneur de texture
 
     createDescriptorPool();         // 🎛 Allouer la mémoire pour les descripteurs shaders
     createDescriptorSets();         // 🎛 Remplir les descripteurs avec les textures et buffers    
@@ -848,7 +849,7 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
     if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-        throw std::runtime_error("failed to begin recording command buffer!");
+        throw std::runtime_error("❌ Erreur : Échec de l'enregistrement de la commande buffer !");
     }
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -859,7 +860,7 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     renderPassInfo.renderArea.extent = swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {1.0f, 0.0f, 0.0f, 1.0f} };
+    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} }; // Fond noir
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -868,16 +869,18 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-    // IMPORTANT : Lier le descriptor set pour l'UBO global (set 0)
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipelineLayout, 0, 1, &descriptorSets[currentFrame],
-        0, nullptr);
+    // 🔥 Correction : Bind du vertex et index buffer AVANT de dessiner
+    VkBuffer vertexBuffers[] = { vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
+    // 🔥 Correction : Définition du viewport et du scissor
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float)swapChainExtent.width;
-    viewport.height = (float)swapChainExtent.height;
+    viewport.width = static_cast<float>(swapChainExtent.width);
+    viewport.height = static_cast<float>(swapChainExtent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
@@ -887,29 +890,47 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    VkBuffer vertexBuffers[] = { vertexBuffer };
-    VkDeviceSize offsets[] = { 0 };
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-    // Pour chaque entité, utiliser push constants pour transmettre la matrice modèle
+    // 🔥 Boucle pour dessiner les entités
     const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
-    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
+    for (size_t i = 0; i < entities.size(); i++) {
         TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
+        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
+
+        if (!mesh || mesh->getIndexCount() == 0) continue;
+
+        // Envoyer la matrice modèle via Push Constants
         if (transform) {
             glm::mat4 modelMatrix = transform->getModelMatrix();
             vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &modelMatrix);
         }
 
-        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
-        if (mesh) {
-            vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
-        }
+        // 🔥 Mise à jour du `descriptorSet` avec la bonne texture
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = mesh->textureImageView;
+        imageInfo.sampler = mesh->textureSampler;
+
+        VkWriteDescriptorSet descriptorWrite{};
+        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrite.dstSet = descriptorSets[currentFrame];
+        descriptorWrite.dstBinding = 1;
+        descriptorWrite.descriptorCount = 1;
+        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrite.pImageInfo = &imageInfo;
+
+        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+
+        // 🔥 Correction : Lier le `descriptorSet` avant de dessiner
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+
+        // 🔥 Correction : Dessin avec `vkCmdDrawIndexed()`
+        vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
     }
 
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-        throw std::runtime_error("failed to record command buffer!");
+        throw std::runtime_error("❌ Erreur : Échec de la finalisation du command buffer !");
     }
 }
 
@@ -919,37 +940,14 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    // Mise à jour de l'UBO global (vue/projection)
+    if (!activeCamera) return;
+
     GlobalUniformBufferObject globalUBO{};
-    globalUBO.view = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-    globalUBO.proj = glm::perspective(glm::radians(45.0f),
-        swapChainExtent.width / (float)swapChainExtent.height,
-        0.1f, 10.0f);
-    globalUBO.proj[1][1] *= -1; // Correction pour Vulkan
+    globalUBO.view = activeCamera->GetViewMatrix();
+    globalUBO.proj = activeCamera->GetProjectionMatrix();    
 
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
-
-    // === Désactivation temporaire de l'écriture dans l'UBO dynamique pour tester ===
-    /*
-    size_t offset = 0;
-    const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
-    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
-        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
-        if (transform) {
-            glm::mat4 modelMatrix = transform->getModelMatrix();
-            std::cout << "Mise à jour de la matrice modèle de l'entité " << entities[i]->GetID()
-                      << " à l'offset " << offset << " dans le buffer dynamique" << std::endl;
-            std::cout << "Adresse cible: " << (char*)objectUniformBuffersMapped[currentImage] + offset << std::endl;
-            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
-            offset += dynamicAlignment;
-        }
-    }
-    */
-    // ============================================================
+        
 }
 
 void NNE::VulkanManager::loadModel(const std::string& modelPath)
@@ -1054,48 +1052,32 @@ void NNE::VulkanManager::createDescriptorPool()
 
 void NNE::VulkanManager::createDescriptorSets()
 {
-    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool;
-    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-    allocInfo.pSetLayouts = layouts.data();
-
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate descriptor sets!");
-    }
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        // Binding 0 : Global UBO
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = descriptorPool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &descriptorSetLayout;
+
+        if (vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i]) != VK_SUCCESS) {
+            throw std::runtime_error("❌ Impossible d'allouer un descriptor set !");
+        }
+
+        // Associer le buffer UBO global (Vue/Projection)
         VkDescriptorBufferInfo globalBufferInfo{};
         globalBufferInfo.buffer = uniformBuffers[i];
         globalBufferInfo.offset = 0;
         globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
 
-        // Binding 1 : Sampler pour la texture
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = textureImageView;
-        imageInfo.sampler = textureSampler;
-
-        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-
+        std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
         descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWrites[0].dstSet = descriptorSets[i];
         descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].dstArrayElement = 0;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         descriptorWrites[0].pBufferInfo = &globalBufferInfo;
-
-        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[1].dstSet = descriptorSets[i];
-        descriptorWrites[1].dstBinding = 1;
-        descriptorWrites[1].dstArrayElement = 0;
-        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrites[1].descriptorCount = 1;
-        descriptorWrites[1].pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
@@ -1215,51 +1197,36 @@ void NNE::VulkanManager::recreateSwapChain()
     createFramebuffers();
 }
 
-void NNE::VulkanManager::createTextureImage(const std::string& texturePath)
+void NNE::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
 {
     int texWidth, texHeight, texChannels;
-    stbi_uc* pixels;
-
-    if (texturePath.empty()) {        
-        texWidth = texHeight = 1;
-        texChannels = 4;
-        pixels = new stbi_uc[4]{ 255, 255, 255, 255 }; // Blanc RGBA
-        std::cout << "Creating default white texture..." << std::endl;
-    }
-    else {
-        pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        if (!pixels) {
-            throw std::runtime_error("Failed to load texture: " + texturePath);
-        }
-        std::cout << "Loaded texture: " << texturePath << std::endl;
+    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    if (!pixels) {
+        throw std::runtime_error("Failed to load texture: " + texturePath);
     }
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
-
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer, stagingBufferMemory);
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(device, stagingBufferMemory);
 
-    if (!texturePath.empty()) {
-        stbi_image_free(pixels);
-    }
-    else {
-        delete[] pixels;  // Libérer la mémoire de la texture blanche
-    }
+    stbi_image_free(pixels);
 
-    createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
+    createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB,
+        VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
     copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-    //transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
@@ -1271,23 +1238,27 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
 {
     for (AEntity* entity : entities) {
         MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
-        // On charge le modèle seulement si ce MeshComponent n'a pas encore été initialisé
-        if (mesh && mesh->getIndexCount() == 0) {
-            uint32_t startOffset = static_cast<uint32_t>(indices.size());
-            //std::cout << "Chargement du modèle : " << mesh->GetModelPath() << std::endl;
-            loadModel(mesh->GetModelPath());
-            std::string texPath = mesh->GetTexturePath();
-            /*if (!texPath.empty())
-                std::cout << "Loaded texture: " << texPath << std::endl;
-            else
-                std::cout << "Creating default white texture..." << std::endl;*/
-            createTextureImage(texPath);
-            uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
-            mesh->setIndexOffset(startOffset);
-            mesh->setIndexCount(count);
-            /*std::cout << "Nombre d'indices : " << count << std::endl;
-            std::cout << "Taille du buffer : " << (indices.size() * sizeof(uint32_t)) << " octets" << std::endl;*/
+        if (!mesh || mesh->getIndexCount() != 0) continue;
+
+        uint32_t startOffset = static_cast<uint32_t>(indices.size());
+
+        // Charger le modèle
+        loadModel(mesh->GetModelPath());
+
+        // Vérifier si une texture est définie, sinon utiliser une texture par défaut
+        if (mesh->GetTexturePath().empty()) {
+            std::cerr << "⚠️ Aucune texture définie pour " << mesh->GetModelPath() << ", utilisation d'une texture blanche par défaut.\n";
+            mesh->SetTexturePath("../textures/texture.jpg");
         }
+
+        // Charger une texture propre à chaque entité
+        createTextureImage(mesh->GetTexturePath(), mesh->textureImage, mesh->textureImageMemory);
+        createTextureImageView(mesh->textureImage, mesh->textureImageView);
+        createTextureSampler(mesh->textureSampler);
+
+        uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
+        mesh->setIndexOffset(startOffset);
+        mesh->setIndexCount(count);
     }
 }
 
@@ -1343,12 +1314,12 @@ void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t m
     vkBindImageMemory(device, image, imageMemory, 0);
 }
 
-void NNE::VulkanManager::createTextureImageView()
+void NNE::VulkanManager::createTextureImageView(VkImage textureImage, VkImageView& textureImageView)
 {
     textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 }
 
-void NNE::VulkanManager::createTextureSampler()
+void NNE::VulkanManager::createTextureSampler(VkSampler& textureSampler)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
