@@ -13,6 +13,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Clean CMake Cache
+      run: rm -rf build/CMakeCache.txt
+  
     - name: Checkout repository
       uses: actions/checkout@v3
 
