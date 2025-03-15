@@ -22,5 +22,10 @@ namespace NNE {
 
         glm::mat4 GetViewMatrix() const { return viewMatrix; }
         glm::mat4 GetProjectionMatrix() const { return projectionMatrix; }
+		float GetFOV() { return fov; }
+		float GetAspectRatio() { return aspectRatio; }
+		float GetNearPlane() { return nearPlane; }
+		float GetFarPlane() { return farPlane; }
+
     };
 }

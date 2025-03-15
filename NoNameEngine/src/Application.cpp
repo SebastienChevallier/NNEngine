@@ -17,7 +17,14 @@ NNE::Application::~Application()
 {
     for (AEntity* entity : _entities) {
         delete entity;
-    }    
+    }   
+    _entities.clear();
+
+    if (VKManager) {
+        VKManager->CleanUp();
+        delete VKManager;
+        VKManager = nullptr;
+    }
 }
 
 
@@ -68,9 +75,7 @@ void NNE::Application::Open()
 }
 
 void NNE::Application::Quit()
-{
-    VKManager->CleanUp();
-    /*glfwDestroyWindow(window);*/
+{    
     glfwTerminate();
 }
 

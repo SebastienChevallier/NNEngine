@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/schev/Documents/GitHub/NNEngine/build/cmake_install.cmake",
+		"C:/Users/schev/Documents/GitHub/NNEngine/build/NoNameEngine/cmake_install.cmake",
+		"C:/Users/schev/Documents/GitHub/NNEngine/build/NNE_GameTemplate/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

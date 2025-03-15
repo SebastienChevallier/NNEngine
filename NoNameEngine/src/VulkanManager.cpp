@@ -24,6 +24,39 @@ const bool enableValidationLayers = true;
 
 NNE::VulkanManager::VulkanManager()
 {
+    device = VK_NULL_HANDLE;
+    instance = VK_NULL_HANDLE;
+    physicalDevice = VK_NULL_HANDLE;
+    swapChain = VK_NULL_HANDLE;
+    renderPass = VK_NULL_HANDLE;
+    pipelineLayout = VK_NULL_HANDLE;
+    graphicsPipeline = VK_NULL_HANDLE;
+    commandPool = VK_NULL_HANDLE;
+    descriptorPool = VK_NULL_HANDLE;
+    descriptorSetLayout = VK_NULL_HANDLE;
+    depthImage = VK_NULL_HANDLE;
+    depthImageMemory = VK_NULL_HANDLE;
+    depthImageView = VK_NULL_HANDLE;
+    colorImage = VK_NULL_HANDLE;
+    colorImageMemory = VK_NULL_HANDLE;
+    colorImageView = VK_NULL_HANDLE;
+    vertexBuffer = VK_NULL_HANDLE;
+    vertexBufferMemory = VK_NULL_HANDLE;
+    indexBuffer = VK_NULL_HANDLE;
+    indexBufferMemory = VK_NULL_HANDLE;
+    stagingBuffer = VK_NULL_HANDLE;
+    stagingBufferMemory = VK_NULL_HANDLE;
+
+    window = nullptr;
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        uniformBuffers.push_back(VK_NULL_HANDLE);
+        uniformBuffersMemory.push_back(VK_NULL_HANDLE);
+        uniformBuffersMapped.push_back(nullptr);
+        objectUniformBuffers.push_back(VK_NULL_HANDLE);
+        objectUniformBuffersMemory.push_back(VK_NULL_HANDLE);
+        objectUniformBuffersMapped.push_back(nullptr);
+    }
 }
 
 NNE::VulkanManager::~VulkanManager()
@@ -359,8 +392,8 @@ GLFWwindow* NNE::VulkanManager::CreateGLFWWindow(int width, int height)
 
 void NNE::VulkanManager::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
-    auto app = reinterpret_cast<Application*>(glfwGetWindowUserPointer(window));
-    app->VKManager->framebufferResized = true;
+    auto app = reinterpret_cast<VulkanManager*>(glfwGetWindowUserPointer(window));
+    app->framebufferResized = true;
 }
 
 void NNE::VulkanManager::createSurface()
@@ -569,8 +602,8 @@ void NNE::VulkanManager::createGraphicsPipeline()
 
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_FALSE;
-    depthStencil.depthWriteEnable = VK_FALSE;
+    depthStencil.depthTestEnable = VK_TRUE;
+    depthStencil.depthWriteEnable = VK_TRUE;
     depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.minDepthBounds = 0.0f; // Optional
@@ -597,7 +630,7 @@ void NNE::VulkanManager::createGraphicsPipeline()
     rasterizer.lineWidth = 1.0f;
     // Désactiver le culling pour le debug
     rasterizer.cullMode = VK_CULL_MODE_NONE; // Au lieu de VK_CULL_MODE_BACK_BIT
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -1181,20 +1214,43 @@ void NNE::VulkanManager::recreateSwapChain()
 {
     int width = 0, height = 0;
     glfwGetFramebufferSize(window, &width, &height);
+
     while (width == 0 || height == 0) {
         glfwGetFramebufferSize(window, &width, &height);
         glfwWaitEvents();
     }
 
-    vkDeviceWaitIdle(device);
+    vkDeviceWaitIdle(device); // Attendre l'inactivité du GPU avant la mise à jour
 
-    cleanupSwapChain();
+    cleanupSwapChain(); // Nettoyer correctement les ressources liées au swapchain
 
+    // 🔥 Recréer les ressources du swapchain
     createSwapChain();
     createImageViews();
+    createRenderPass();   // Assurez-vous que le render pass est bien recréé !
     createColorResources();
     createDepthResources();
     createFramebuffers();
+
+    // 🔥 Recréer les buffers uniformes et le pipeline si nécessaire
+    createUniformBuffers();
+    createDescriptorPool();
+    createDescriptorSets();
+    createCommandBuffers();
+
+	updateCameraAspectRatio();
+}
+
+void NNE::VulkanManager::updateCameraAspectRatio()
+{
+    if (activeCamera) {
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+        if (width == 0 || height == 0) return; // Éviter les divisions par zéro
+
+        float newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        activeCamera->SetPerspective(activeCamera->GetFOV(), newAspectRatio, activeCamera->GetNearPlane(), activeCamera->GetFarPlane());
+    }
 }
 
 void NNE::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
@@ -1672,14 +1728,35 @@ std::vector<char> NNE::VulkanManager::readFile(const std::string& filename)
 
 void NNE::VulkanManager::CleanUp()
 {    
+    if (device == VK_NULL_HANDLE) return;
+
     vkDeviceWaitIdle(device);
 
-    // Détruire les synchronisations
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (inFlightFences[i] != VK_NULL_HANDLE) {
-            vkDestroyFence(device, inFlightFences[i], nullptr);
-            inFlightFences[i] = VK_NULL_HANDLE;
+    // Ressources MeshComponent (très important !)
+    for (AEntity* entity : Application::GetInstance()->_entities) {
+        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
+        if (mesh) {
+            if (mesh->textureSampler != VK_NULL_HANDLE) {
+                vkDestroySampler(device, mesh->textureSampler, nullptr);
+                mesh->textureSampler = VK_NULL_HANDLE;
+            }
+            if (mesh->textureImageView != VK_NULL_HANDLE) {
+                vkDestroyImageView(device, mesh->textureImageView, nullptr);
+                mesh->textureImageView = VK_NULL_HANDLE;
+            }
+            if (mesh->textureImage != VK_NULL_HANDLE) {
+                vkDestroyImage(device, mesh->textureImage, nullptr);
+                mesh->textureImage = VK_NULL_HANDLE;
+            }
+            if (mesh->textureImageMemory != VK_NULL_HANDLE) {
+                vkFreeMemory(device, mesh->textureImageMemory, nullptr);
+                mesh->textureImageMemory = VK_NULL_HANDLE;
+            }
         }
+    }
+
+    // Libération des synchronisations (sémaphores et fences)
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         if (imageAvailableSemaphores[i] != VK_NULL_HANDLE) {
             vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
             imageAvailableSemaphores[i] = VK_NULL_HANDLE;
@@ -1688,59 +1765,19 @@ void NNE::VulkanManager::CleanUp()
             vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
             renderFinishedSemaphores[i] = VK_NULL_HANDLE;
         }
-    }
-
-    // Command pool
-    if (commandPool != VK_NULL_HANDLE) {
-        vkDestroyCommandPool(device, commandPool, nullptr);
-        commandPool = VK_NULL_HANDLE;
-    }
-
-    // Pipeline et layout
-    if (graphicsPipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device, graphicsPipeline, nullptr);
-        graphicsPipeline = VK_NULL_HANDLE;
-    }
-    if (pipelineLayout != VK_NULL_HANDLE) {
-        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-        pipelineLayout = VK_NULL_HANDLE;
-    }
-    if (renderPass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(device, renderPass, nullptr);
-        renderPass = VK_NULL_HANDLE;
-    }
-
-    // Descripteurs
-    if (descriptorPool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-        descriptorPool = VK_NULL_HANDLE;
-    }
-    if (descriptorSetLayout != VK_NULL_HANDLE) {
-        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
-        descriptorSetLayout = VK_NULL_HANDLE;
-    }
-
-    // Buffers uniformes
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        if (uniformBuffers[i] != VK_NULL_HANDLE) {
-            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-            uniformBuffers[i] = VK_NULL_HANDLE;
-        }
-        if (uniformBuffersMemory[i] != VK_NULL_HANDLE) {
-            vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
-            uniformBuffersMemory[i] = VK_NULL_HANDLE;
-        }
-        if (objectUniformBuffers[i] != VK_NULL_HANDLE) {
-            vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
-            objectUniformBuffers[i] = VK_NULL_HANDLE;
-        }
-        if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
-            vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
-            objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        if (inFlightFences[i] != VK_NULL_HANDLE) {
+            vkDestroyFence(device, inFlightFences[i], nullptr);
+            inFlightFences[i] = VK_NULL_HANDLE;
         }
     }
 
-    // Buffers de vertex et d'index
+    // Command buffers (via commandPool)
+    if (!commandBuffers.empty()) {
+        vkFreeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+        commandBuffers.clear();
+    }
+
+    // Buffers Vertex et Index
     if (vertexBuffer != VK_NULL_HANDLE) {
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vertexBuffer = VK_NULL_HANDLE;
@@ -1758,25 +1795,130 @@ void NNE::VulkanManager::CleanUp()
         indexBufferMemory = VK_NULL_HANDLE;
     }
 
-    // Ressources de texture
-    if (textureSampler != VK_NULL_HANDLE) {
-        vkDestroySampler(device, textureSampler, nullptr);
-        textureSampler = VK_NULL_HANDLE;
-    }
-    if (textureImageView != VK_NULL_HANDLE) {
-        vkDestroyImageView(device, textureImageView, nullptr);
-        textureImageView = VK_NULL_HANDLE;
-    }
-    if (textureImage != VK_NULL_HANDLE) {
-        vkDestroyImage(device, textureImage, nullptr);
-        textureImage = VK_NULL_HANDLE;
-    }
-    if (textureImageMemory != VK_NULL_HANDLE) {
-        vkFreeMemory(device, textureImageMemory, nullptr);
-        textureImageMemory = VK_NULL_HANDLE;
+    // Uniform buffers
+    for (size_t i = 0; i < uniformBuffers.size(); i++) {
+        if (uniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+            uniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (uniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+            uniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+
+        if (objectUniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
+            objectUniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
+            objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
     }
 
-    // Ressources de profondeur
+    
+
+    if (stagingBuffer != VK_NULL_HANDLE) {
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        stagingBuffer = VK_NULL_HANDLE;
+    }
+    if (stagingBufferMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+        stagingBufferMemory = VK_NULL_HANDLE;
+    }
+
+    // Nettoyage complet du swapchain
+    cleanupSwapChain();
+
+    // Descriptor Pool et Layouts
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+        descriptorPool = VK_NULL_HANDLE;
+    }
+    if (descriptorSetLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+        descriptorSetLayout = VK_NULL_HANDLE;
+    }
+
+    // Pipeline
+    if (graphicsPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        graphicsPipeline = VK_NULL_HANDLE;
+    }
+    if (pipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        pipelineLayout = VK_NULL_HANDLE;
+    }
+
+    // RenderPass
+    if (renderPass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        renderPass = VK_NULL_HANDLE;
+    }
+
+    // Command Pool
+    if (commandPool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(device, commandPool, nullptr);
+        commandPool = VK_NULL_HANDLE;
+    }
+
+    // Device
+    if (device != VK_NULL_HANDLE) {
+        vkDestroyDevice(device, nullptr);
+        device = VK_NULL_HANDLE;
+    }
+
+    // Surface
+    if (surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(instance, surface, nullptr);
+        surface = VK_NULL_HANDLE;
+    }
+
+    // Instance Vulkan
+    if (instance != VK_NULL_HANDLE) {
+        vkDestroyInstance(instance, nullptr);
+        instance = VK_NULL_HANDLE;
+    }
+}
+
+void NNE::VulkanManager::cleanupSwapChain()
+{
+    vkDeviceWaitIdle(device);
+
+    for (auto& framebuffer : swapChainFramebuffers) {
+        if (framebuffer != VK_NULL_HANDLE) {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+            framebuffer = VK_NULL_HANDLE;
+        }
+    }
+
+    //// Détruire aussi toutes les textures entités si vous les recréez après:
+    //for (AEntity* entity : Application::GetInstance()->_entities) {
+    //    if (MeshComponent* mesh = entity->GetComponent<MeshComponent>()) {
+    //        if (mesh->textureSampler) {
+    //            vkDestroySampler(device, mesh->textureSampler, nullptr);
+    //            mesh->textureSampler = VK_NULL_HANDLE;
+    //        }
+    //        if (mesh->textureImageView) {
+    //            vkDestroyImageView(device, mesh->textureImageView, nullptr);
+    //            mesh->textureImageView = VK_NULL_HANDLE;
+    //        }
+    //        if (mesh->textureImage) {
+    //            vkDestroyImage(device, mesh->textureImage, nullptr);
+    //            mesh->textureImage = VK_NULL_HANDLE;
+    //        }
+    //        if (mesh->textureImageMemory) {
+    //            vkFreeMemory(device, mesh->textureImageMemory, nullptr);
+    //            mesh->textureImageMemory = VK_NULL_HANDLE;
+    //        }
+    //    }
+    //}
+
+    if (swapChain != VK_NULL_HANDLE) {
+        vkDestroySwapchainKHR(device, swapChain, nullptr);
+        swapChain = VK_NULL_HANDLE;
+    }
+
     if (depthImageView != VK_NULL_HANDLE) {
         vkDestroyImageView(device, depthImageView, nullptr);
         depthImageView = VK_NULL_HANDLE;
@@ -1790,7 +1932,43 @@ void NNE::VulkanManager::CleanUp()
         depthImageMemory = VK_NULL_HANDLE;
     }
 
-    // Framebuffers
+    if (colorImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(device, colorImageView, nullptr);
+        colorImageView = VK_NULL_HANDLE;
+    }
+    if (colorImage != VK_NULL_HANDLE) {
+        vkDestroyImage(device, colorImage, nullptr);
+        colorImage = VK_NULL_HANDLE;
+    }
+    if (colorImageMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, colorImageMemory, nullptr);
+        colorImageMemory = VK_NULL_HANDLE;
+    }
+
+    // Détruire uniformBuffers + uniformBuffersMemory
+    for (size_t i = 0; i < uniformBuffers.size(); i++) {
+        if (uniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+            uniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (uniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+            uniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+    }
+
+    // Idem pour objectUniformBuffers
+    for (size_t i = 0; i < objectUniformBuffers.size(); i++) {
+        if (objectUniformBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, objectUniformBuffers[i], nullptr);
+            objectUniformBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
+            objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+    }
+
     for (auto& framebuffer : swapChainFramebuffers) {
         if (framebuffer != VK_NULL_HANDLE) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -1798,7 +1976,6 @@ void NNE::VulkanManager::CleanUp()
         }
     }
 
-    // Image views de la swapchain
     for (auto& imageView : swapChainImageViews) {
         if (imageView != VK_NULL_HANDLE) {
             vkDestroyImageView(device, imageView, nullptr);
@@ -1806,56 +1983,18 @@ void NNE::VulkanManager::CleanUp()
         }
     }
 
-    // Swapchain
-    if (swapChain != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(device, swapChain, nullptr);
-        swapChain = VK_NULL_HANDLE;
+    
+
+    // TRÈS IMPORTANT : Libère DescriptorPool et DescriptorSets ici avant recréation !
+    if (descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+        descriptorPool = VK_NULL_HANDLE;
     }
 
-    // Surface
-    if (surface != VK_NULL_HANDLE) {
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-        surface = VK_NULL_HANDLE;
+    if (renderPass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device, renderPass, nullptr);
+        renderPass = VK_NULL_HANDLE;
     }
-
-    // Device
-    if (device != VK_NULL_HANDLE) {
-        vkDestroyDevice(device, nullptr);
-        device = VK_NULL_HANDLE;
-    }
-
-    // Instance Vulkan
-    if (instance != VK_NULL_HANDLE) {
-        vkDestroyInstance(instance, nullptr);
-        instance = VK_NULL_HANDLE;
-    }
-}
-
-void NNE::VulkanManager::cleanupSwapChain()
-{
-    // 🔥 Libérer toutes les images Vulkan restantes
-    vkDestroyImageView(device, depthImageView, nullptr);
-    vkDestroyImage(device, depthImage, nullptr);
-    vkFreeMemory(device, depthImageMemory, nullptr);
-
-    vkDestroyImageView(device, colorImageView, nullptr);
-    vkDestroyImage(device, colorImage, nullptr);
-    vkFreeMemory(device, colorImageMemory, nullptr);
-
-    // 🔥 Vérifier et libérer la mémoire des textures
-    vkDestroyImageView(device, textureImageView, nullptr);
-    vkDestroyImage(device, textureImage, nullptr);
-    vkFreeMemory(device, textureImageMemory, nullptr);
-
-    for (auto framebuffer : swapChainFramebuffers) {
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
-    }
-
-    for (auto imageView : swapChainImageViews) {
-        vkDestroyImageView(device, imageView, nullptr);
-    }
-
-    vkDestroySwapchainKHR(device, swapChain, nullptr);
 }
 
 bool NNE::VulkanManager::isDeviceSuitable(VkPhysicalDevice device)

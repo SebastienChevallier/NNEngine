@@ -2,6 +2,10 @@
 
 NNE::MeshComponent::MeshComponent()
 {
+    textureImage = VK_NULL_HANDLE;
+    textureImageMemory = VK_NULL_HANDLE;
+    textureImageView = VK_NULL_HANDLE;
+    textureSampler = VK_NULL_HANDLE;
 }
 
 void NNE::MeshComponent::SetModelPath(std::string path)

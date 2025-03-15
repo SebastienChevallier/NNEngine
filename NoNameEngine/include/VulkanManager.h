@@ -211,6 +211,7 @@ namespace NNE {
 		void drawFrame();
 		void createSyncObjects();
 		void recreateSwapChain();
+		void updateCameraAspectRatio();
 		
 		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void createTextureImageView(VkImage textureImage, VkImageView& textureImageView);
