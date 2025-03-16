@@ -87,6 +87,10 @@ Gère l'initialisation et le rendu avec Vulkan.
 - `void updateUniformBuffer(uint32_t currentImage)`
 - `void CleanUp()`
 
+#### `Diagramme de classe`
+![image](https://github.com/user-attachments/assets/f7313fe1-f969-477c-8f9f-a3bef365b3a8)
+
+
 ## Exécution
 
 Un exemple minimal d'utilisation du moteur :
