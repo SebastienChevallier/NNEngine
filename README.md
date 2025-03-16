@@ -88,7 +88,8 @@ Gère l'initialisation et le rendu avec Vulkan.
 - `void CleanUp()`
 
 #### `Diagramme de classe`
-![image](https://github.com/user-attachments/assets/f7313fe1-f969-477c-8f9f-a3bef365b3a8)
+![image](https://github.com/user-attachments/assets/39aa283d-5a06-489e-ba82-c189747c2691)
+
 
 
 ## Exécution
