@@ -63,4 +63,8 @@
       <UniqueIdentifier>{70906545-99CC-3A02-A420-F2B2713ADC50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\NoNameEngine\shaders\shader.frag" />
+    <None Include="..\..\NoNameEngine\shaders\shader.vert" />
+  </ItemGroup>
 </Project>

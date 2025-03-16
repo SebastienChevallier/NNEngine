@@ -9,5 +9,5 @@ NNE::TransformComponent::TransformComponent()
 
 void NNE::TransformComponent::Update(float deltaTime)
 {
-	rotation.y += 20.0f * deltaTime;	
+	//rotation.y += 20.0f * deltaTime;	
 }

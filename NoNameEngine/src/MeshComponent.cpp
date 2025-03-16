@@ -1,4 +1,5 @@
 #include "MeshComponent.h"
+#include <iostream>
 
 NNE::MeshComponent::MeshComponent()
 {
@@ -23,5 +24,6 @@ std::string NNE::MeshComponent::GetModelPath() const {
 }
 
 std::string NNE::MeshComponent::GetTexturePath() const {
+	//std::cout << "Texture path: " << texturePath << std::endl;
     return texturePath;
 }

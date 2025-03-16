@@ -28,6 +28,8 @@ set(HEADERS
     include/CameraComponent.h  
 )
 
+add_compile_definitions(SHADER_PATH="${CMAKE_SOURCE_DIR}/NoNameEngine/shaders")
+
 # Création d'une bibliothèque statique
 add_library(NoNameEngine STATIC ${SOURCES} ${HEADERS})
 

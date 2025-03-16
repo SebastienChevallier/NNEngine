@@ -15,16 +15,16 @@ NNE::Application::Application()
 
 NNE::Application::~Application()
 {
-    for (AEntity* entity : _entities) {
-        delete entity;
-    }   
-    _entities.clear();
-
     if (VKManager) {
         VKManager->CleanUp();
         delete VKManager;
         VKManager = nullptr;
     }
+
+    for (AEntity* entity : _entities) {
+        delete entity;
+    }   
+    _entities.clear();
 }
 
 
@@ -53,6 +53,19 @@ void NNE::Application::Update()
         glfwPollEvents();
         VKManager->drawFrame();
         
+        for (AEntity* entity : _entities) {
+            // Récupérer le CameraComponent et le TransformComponent
+            CameraComponent* cameraComp = entity->GetComponent<CameraComponent>();
+            TransformComponent* transform = entity->GetComponent<TransformComponent>();
+            // S’il s’agit d’une entité “caméra”
+            if (cameraComp && transform) {
+                // Exemple : On regarde vers l’axe -Z depuis la position
+                glm::vec3 pos = transform->position;
+                glm::vec3 target = pos + glm::vec3(0, 0, -1);
+                glm::vec3 up = glm::vec3(0, 1, 0);
+                cameraComp->UpdateViewMatrix(pos, target, up);
+            }
+        }
 
         //Update
         for(AEntity* entity : _entities)
@@ -94,10 +107,11 @@ NNE::AEntity* NNE::Application::CreateEntity()
 
 float NNE::Application::GetDeltaTime()
 {
-    std::clock_t currentFrameTime = std::clock();
-    float deltaTime = float(currentFrameTime - lastFrameTime) / CLOCKS_PER_SEC;
-    lastFrameTime = currentFrameTime;
-    return deltaTime;
+    static auto lastFrame = std::chrono::high_resolution_clock::now();
+    auto currentFrame = std::chrono::high_resolution_clock::now();
+    float dt = std::chrono::duration<float>(currentFrame - lastFrame).count();
+    lastFrame = currentFrame;
+    return dt;
 }
 
 //GLFWwindow* NNE::Application::CreateGLFWWindow(int width, int height)

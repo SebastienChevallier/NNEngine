@@ -5,6 +5,7 @@
 #include <map>
 #include <optional>
 #include <cstdint>
+#include <stdexcept>
 #include <set>
 #include <limits> // Necessary for std::numeric_limits
 #include <algorithm> // Necessary for std::clamp

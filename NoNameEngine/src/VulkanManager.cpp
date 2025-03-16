@@ -2,6 +2,7 @@
 #include "Application.h"
 #include <stb_image.h>
 #include <glm/gtx/hash.hpp>
+#include <filesystem>
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -112,7 +113,7 @@ NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice d
 
 
 
-    std::cout << "Begin Find queue " << std::endl;
+    //std::cout << "Begin Find queue " << std::endl;
 
     int i = 0;
     for (const auto& queueFamily : queueFamilies) {
@@ -125,7 +126,7 @@ NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice d
 
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
-            std::cout << "Indices : " + std::to_string(indices.graphicsFamily.value()) << std::endl;
+            //std::cout << "Indices : " + std::to_string(indices.graphicsFamily.value()) << std::endl;
         }
 
         if (indices.isComplete()) {
@@ -373,7 +374,7 @@ void NNE::VulkanManager::createLogicalDevice()
     if (minUboAlignment > 0) {
         dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
     }
-    std::cout << "Dynamic alignment for UBO: " << dynamicAlignment << " bytes" << std::endl;
+    //std::cout << "Dynamic alignment for UBO: " << dynamicAlignment << " bytes" << std::endl;
 
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);    
@@ -567,10 +568,10 @@ void NNE::VulkanManager::createRenderPass()
 
 void NNE::VulkanManager::createGraphicsPipeline()
 {
-    auto vertShaderCode = readFile("../shaders/vert.spv");
-    auto fragShaderCode = readFile("../shaders/frag.spv");
-    std::cout << "Taille shader vert: " << vertShaderCode.size() << " octets" << std::endl;
-    std::cout << "Taille shader frag: " << fragShaderCode.size() << " octets" << std::endl;
+    auto vertShaderCode = readFile("vert.spv");
+    auto fragShaderCode = readFile("frag.spv");
+    /*std::cout << "Taille shader vert: " << vertShaderCode.size() << " octets" << std::endl;
+    std::cout << "Taille shader frag: " << fragShaderCode.size() << " octets" << std::endl;*/
 
     VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -747,8 +748,8 @@ void NNE::VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDe
 void NNE::VulkanManager::createIndexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-    std::cout << "Nombre d'indices : " << indices.size() << std::endl;
-    std::cout << "Taille du buffer : " << bufferSize << " octets" << std::endl;
+    /*std::cout << "Nombre d'indices : " << indices.size() << std::endl;
+    std::cout << "Taille du buffer : " << bufferSize << " octets" << std::endl;*/
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -771,7 +772,7 @@ void NNE::VulkanManager::createVertexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-    std::cout << "Création du buffer des sommets, taille : " << bufferSize << " octets" << std::endl;
+    //std::cout << "Création du buffer des sommets, taille : " << bufferSize << " octets" << std::endl;
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -959,6 +960,7 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
 
         // 🔥 Correction : Dessin avec `vkCmdDrawIndexed()`
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
+        //std::cout << "Rendering " << mesh->getIndexCount() << " indices from offset " << mesh->getIndexOffset() << std::endl;
     }
 
     vkCmdEndRenderPass(commandBuffer);
@@ -990,8 +992,8 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    std::cout << "Chargement du modèle : " << modelPath << std::endl;
-    std::cout << "Nombre de sommets avant chargement : " << vertices.size() << std::endl;
+    /*std::cout << "Chargement du modèle : " << modelPath << std::endl;
+    std::cout << "Nombre de sommets avant chargement : " << vertices.size() << std::endl;*/
 
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str())) {
         throw std::runtime_error(warn + err);
@@ -1025,8 +1027,8 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
         }
     }   
 
-    std::cout << "Nombre de sommets après chargement : " << vertices.size() << std::endl;
-    std::cout << "Nombre d'indices : " << indices.size() << std::endl;
+    /*std::cout << "Nombre de sommets après chargement : " << vertices.size() << std::endl;
+    std::cout << "Nombre d'indices : " << indices.size() << std::endl;*/
 }
 
 void NNE::VulkanManager::createDescriptorSetLayout()
@@ -1303,7 +1305,7 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
 
         // Vérifier si une texture est définie, sinon utiliser une texture par défaut
         if (mesh->GetTexturePath().empty()) {
-            std::cerr << "⚠️ Aucune texture définie pour " << mesh->GetModelPath() << ", utilisation d'une texture blanche par défaut.\n";
+            //std::cerr << "⚠️ Aucune texture définie pour " << mesh->GetModelPath() << ", utilisation d'une texture blanche par défaut.\n";
             mesh->SetTexturePath("../textures/texture.jpg");
         }
 
@@ -1707,9 +1709,18 @@ VkShaderModule NNE::VulkanManager::createShaderModule(const std::vector<char>& c
     return shaderModule;
 }
 
+std::string getEnginePath() {
+	//std::string path = std::filesystem::path(__FILE__).parent_path().string();
+    std::string path = std::filesystem::path(__FILE__).parent_path().parent_path().string() + "/shaders/";
+    std::replace(path.begin(), path.end(), '\\', '/');
+	//std::cout << "Engine path: " << path << std::endl;
+    return path;
+}
+
 std::vector<char> NNE::VulkanManager::readFile(const std::string& filename)
 {
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    std::string fullPath = getEnginePath() + filename;
+    std::ifstream file(fullPath, std::ios::ate | std::ios::binary);
 
     if (!file.is_open()) {
         throw std::runtime_error("failed to open file!");

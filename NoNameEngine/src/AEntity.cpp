@@ -4,6 +4,7 @@
 NNE::AEntity::AEntity()
 {
 	_ID = NNE::Application::GetInstance()->GenerateID();
+	this->AddComponent<TransformComponent>();
 }
 
 NNE::AEntity::~AEntity()
