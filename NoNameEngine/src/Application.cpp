@@ -10,6 +10,7 @@ NNE::Application::Application()
 {
     Instance = this;
     VKManager = new VulkanManager();
+	physicsManager = new PhysicsManager();
     delta = 0;
 }
 
@@ -20,6 +21,7 @@ NNE::Application::~Application()
         delete VKManager;
         VKManager = nullptr;
     }
+
 
     for (AEntity* entity : _entities) {
         delete entity;
@@ -32,7 +34,7 @@ void NNE::Application::Init()
 {    
     Open();    
     VKManager->initVulkan();
-
+    physicsManager->Initialize();
     //VKManager->LoadEntitiesModels(_entities);
 
     uint32_t extensionCount = 0;
@@ -51,7 +53,9 @@ void NNE::Application::Update()
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
         glfwPollEvents();
-        VKManager->drawFrame();
+        
+
+        physicsManager->Update(delta);
         
         for (AEntity* entity : _entities) {
             // Récupérer le CameraComponent et le TransformComponent
@@ -78,6 +82,8 @@ void NNE::Application::Update()
         {
             entity->LateUpdate(delta);
         }
+
+        VKManager->drawFrame();
     }   
     vkDeviceWaitIdle(VKManager->device);
 }

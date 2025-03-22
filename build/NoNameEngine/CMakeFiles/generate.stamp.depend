@@ -9,6 +9,9 @@ C:/Program Files/CMake/share/cmake-4.0/Modules/FindThreads.cmake
 C:/Program Files/CMake/share/cmake-4.0/Modules/FindVulkan.cmake
 C:/Program Files/CMake/share/cmake-4.0/Modules/Internal/CheckSourceCompiles.cmake
 C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/CMakeLists.txt
+C:/Users/schev/vcpkg/installed/x64-windows/share/Jolt/JoltConfig-debug.cmake
+C:/Users/schev/vcpkg/installed/x64-windows/share/Jolt/JoltConfig-release.cmake
+C:/Users/schev/vcpkg/installed/x64-windows/share/Jolt/JoltConfig.cmake
 C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3Config.cmake
 C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3ConfigVersion.cmake
 C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3Targets-debug.cmake

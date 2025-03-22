@@ -15,6 +15,11 @@ set(SOURCES
     src/MeshComponent.cpp
     src/TransformComponent.cpp
     src/CameraComponent.cpp
+    src/PhysicsManager.cpp
+    src/ColliderComponent.cpp
+    src/BoxColliderComponent.cpp
+    src/PlaneCollider.cpp
+    src/RigidbodyComponent.cpp
 )
 
 set(HEADERS
@@ -25,7 +30,12 @@ set(HEADERS
     include/AScene.h  
     include/MeshComponent.h  
     include/TransformComponent.h  
-    include/CameraComponent.h  
+    include/CameraComponent.h
+    include/PhysicsManager.h
+    include/ColliderComponent.h
+    include/BoxColliderComponent.h
+    include/PlaneCollider.h
+    include/RigidbodyComponent.h
 )
 
 add_compile_definitions(SHADER_PATH="${CMAKE_SOURCE_DIR}/NoNameEngine/shaders")
@@ -41,5 +51,6 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
+find_package(Jolt CONFIG REQUIRED)
 
-target_link_libraries(NoNameEngine PUBLIC glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader)
+target_link_libraries(NoNameEngine PUBLIC glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader Jolt::Jolt)

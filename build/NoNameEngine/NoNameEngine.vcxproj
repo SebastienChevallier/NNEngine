@@ -24,6 +24,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ECC546DB-223C-3D00-B2BC-02601950C411}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <VcpkgEnabled>false</VcpkgEnabled>
     <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
     <ProjectName>NoNameEngine</ProjectName>
@@ -54,7 +55,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="do_not_import_user.props" Condition="exists('do_not_import_user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -87,21 +88,19 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
+      <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;_HAS_EXCEPTIONS=0;_DEBUG;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -126,23 +125,21 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
+      <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -167,23 +164,21 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
+      <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -209,21 +204,19 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild>
-      </MinimalRebuild>
+      <MinimalRebuild></MinimalRebuild>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode>
-      </SupportJustMyCode>
+      <SupportJustMyCode></SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH="C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SHADER_PATH=\"C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/shaders\";GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -251,7 +244,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\schev\Documents\GitHub\NNEngine\build\NoNameEngine\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/CMakeLists.txt</Message>
@@ -264,7 +257,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\schev\Documents\GitHub\NNEngine\build\NoNameEngine\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/CMakeLists.txt</Message>
@@ -277,7 +270,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\schev\Documents\GitHub\NNEngine\build\NoNameEngine\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
       <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/CMakeLists.txt</Message>
@@ -290,7 +283,7 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.0\Modules\CMakeFindDependencyMacro.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\FindVulkan.cmake;C:\Program Files\CMake\share\cmake-4.0\Modules\Internal\CheckSourceCompiles.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\Jolt\JoltConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3ConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glfw3\glfw3Targets.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfig.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\glm\glmConfigVersion.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config-version.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-config.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-debug.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets-release.cmake;C:\Users\schev\vcpkg\installed\x64-windows\share\tinyobjloader\tinyobjloader-targets.cmake;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\schev\Documents\GitHub\NNEngine\build\NoNameEngine\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
@@ -304,6 +297,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\MeshComponent.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\TransformComponent.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\CameraComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\PhysicsManager.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\ColliderComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\BoxColliderComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\PlaneCollider.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\RigidbodyComponent.cpp" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\Application.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\VulkanManager.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AEntity.h" />
@@ -312,11 +310,13 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\MeshComponent.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\TransformComponent.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\CameraComponent.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\PhysicsManager.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\ColliderComponent.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\BoxColliderComponent.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\PlaneCollider.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\RigidbodyComponent.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\NoNameEngine\shaders\shader.frag" />
-    <None Include="..\..\NoNameEngine\shaders\shader.vert" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="C:\Users\schev\Documents\GitHub\NNEngine\build\ZERO_CHECK.vcxproj">
       <Project>{58C19818-C4DE-33AD-83C9-A192D22F705E}</Project>

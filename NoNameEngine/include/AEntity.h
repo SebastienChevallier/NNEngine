@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <iostream>
 #include "AComponent.h"
 #include "Application.h"
@@ -24,19 +24,20 @@ namespace NNE {
 		void Update(float delta);
 		void LateUpdate(float delta);
 
-		template<typename T>
-		T* AddComponent();
+		template<typename T, typename... Args>
+		T* AddComponent(Args&&... args);
 
 		template<typename T>
 		T* GetComponent();
 
 	};
 
-	template<typename T>
-	T* NNE::AEntity::AddComponent()
+	template<typename T, typename... Args>
+	T* NNE::AEntity::AddComponent(Args&&... args)
 	{
-		T* component = new T();
-		components.push_back(component);		
+		T* component = new T(std::forward<Args>(args)...);
+		components.push_back(component);
+		component->SetEntity(this);
 		return component;
 	}
 

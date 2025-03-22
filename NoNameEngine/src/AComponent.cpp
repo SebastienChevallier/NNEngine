@@ -26,3 +26,13 @@ int NNE::AComponent::GetID()
 {
 	return _id;
 }
+
+NNE::AEntity* NNE::AComponent::GetEntity()
+{
+	return _entity;
+}
+
+void NNE::AComponent::SetEntity(AEntity* entity)
+{
+	_entity = entity;
+}

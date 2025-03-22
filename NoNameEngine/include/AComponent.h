@@ -1,10 +1,12 @@
 #pragma once
 
 namespace NNE {
+	class AEntity;
 	class AComponent
 	{
 	protected:
 		int _id;
+		AEntity* _entity;
 
 	public:
 		AComponent();
@@ -16,6 +18,8 @@ namespace NNE {
 		virtual void LateUpdate(float deltaTime);
 
 		int GetID();
+		AEntity* GetEntity();
+		void SetEntity(AEntity* entity);
 	};
 }
 

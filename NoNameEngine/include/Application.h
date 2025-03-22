@@ -8,8 +8,10 @@
 #include "TransformComponent.h"
 #include "CameraComponent.h"
 #include "VulkanManager.h"
-
-
+#include "PhysicsManager.h"
+#include "PlaneCollider.h"
+#include "BoxColliderComponent.h"
+#include "RigidbodyComponent.h"
 
 namespace NNE {
 	class VulkanManager;
@@ -38,6 +40,7 @@ namespace NNE {
 		Application();
 		~Application();
 		NNE::VulkanManager* VKManager;
+		NNE::PhysicsManager* physicsManager;
 		std::vector<AEntity*> _entities;
 
 		void Init();
