@@ -87,7 +87,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/schev/vcpkg/installed/x64-windows/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -109,10 +109,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -147,7 +147,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/schev/vcpkg/installed/x64-windows/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -170,10 +170,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -208,7 +208,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/schev/vcpkg/installed/x64-windows/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -231,10 +231,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -269,7 +269,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/schev/vcpkg/installed/x64-windows/include"</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -291,10 +291,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;GLFW_DLL;_HAS_EXCEPTIONS=0;JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;JPH_OBJECT_STREAM;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\..\NoNameEngine\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include;C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include;C:\Users\schev\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -386,6 +386,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\main.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\PlayerController.cpp" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include\PlayerController.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

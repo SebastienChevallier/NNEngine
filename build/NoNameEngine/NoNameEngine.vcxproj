@@ -302,6 +302,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\BoxColliderComponent.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\PlaneCollider.cpp" />
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\RigidbodyComponent.cpp" />
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\InputManager.cpp" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\Application.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\VulkanManager.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AEntity.h" />
@@ -315,6 +316,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\BoxColliderComponent.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\PlaneCollider.h" />
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\RigidbodyComponent.h" />
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\InputManager.h" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

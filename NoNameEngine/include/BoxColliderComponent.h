@@ -13,6 +13,7 @@ namespace NNE
 	public:
 		BoxColliderComponent(const glm::vec3& size);
 		void CreateShape() override;		
+		
 	};
 }
 

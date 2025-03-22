@@ -40,6 +40,9 @@
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\RigidbodyComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\Application.h">
@@ -79,6 +82,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\RigidbodyComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

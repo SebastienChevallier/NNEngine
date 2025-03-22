@@ -12,6 +12,7 @@
 #include "PlaneCollider.h"
 #include "BoxColliderComponent.h"
 #include "RigidbodyComponent.h"
+#include "InputManager.h"
 
 namespace NNE {
 	class VulkanManager;
@@ -34,8 +35,8 @@ namespace NNE {
 
 
 	public:
-		const uint32_t WIDTH = 1920;
-		const uint32_t HEIGHT = 1080;
+		const uint32_t WIDTH = 960;
+		const uint32_t HEIGHT = 540;
 		static Application* GetInstance();
 		Application();
 		~Application();

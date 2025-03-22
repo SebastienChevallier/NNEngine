@@ -4,11 +4,22 @@
     <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\PlayerController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include\PlayerController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{9C485DC6-758E-3AAC-BC86-3FB2EBCE7BD3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{70906545-99CC-3A02-A420-F2B2713ADC50}</UniqueIdentifier>
     </Filter>

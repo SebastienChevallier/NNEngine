@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "../include/PlayerController.h"
 
 int main() {
     NNE::Application app;
@@ -7,8 +8,9 @@ int main() {
 	//NNE::PlaneCollider* PC = floor->AddComponent<NNE::PlaneCollider>(glm::vec3(0, 1, 0), 10.0f);
 	NNE::TransformComponent* TCfloor = floor->GetComponent<NNE::TransformComponent>();
 	NNE::BoxColliderComponent* BCFloor = floor->AddComponent<NNE::BoxColliderComponent>(glm::vec3(100.0f, 0.50f, 100.0f));
-	NNE::RigidbodyComponent* RBCFloor = floor->AddComponent<NNE::RigidbodyComponent>(0.0f, false);
-	TCfloor->position = glm::vec3(0.0f, -1.0f, 0.0f);
+	NNE::RigidbodyComponent* RBCFloor = floor->AddComponent<NNE::RigidbodyComponent>(0.0f, true);
+	
+	TCfloor->position = glm::vec3(0.0f, -3.0f, 0.0f);
 
 	NNE::AEntity* entity = app.CreateEntity();
 	NNE::MeshComponent* MC = entity->AddComponent<NNE::MeshComponent>();
@@ -16,6 +18,7 @@ int main() {
 	TC->position = glm::vec3(0.0f, 5.0f, 0.0f);
 	NNE::BoxColliderComponent* BCC = entity->AddComponent<NNE::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
 	NNE::RigidbodyComponent* RBC = entity->AddComponent<NNE::RigidbodyComponent>( 1.0f, false);
+	PlayerController* PC = entity->AddComponent<PlayerController>();
 	MC->SetModelPath("C:/Users/schev/Downloads/viking_room.obj");
 	MC->SetTexturePath("C:/Users/schev/Downloads/viking_room.PNG");
 	

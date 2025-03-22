@@ -5,6 +5,7 @@
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Body/BodyID.h>
+#include <glm/glm.hpp>
 
 namespace NNE {
 
@@ -21,6 +22,9 @@ namespace NNE {
         void Awake() override;
         void Update(float deltaTime) override;
         JPH::BodyID GetBodyID() const;
+
+        void SetLinearVelocity(glm::vec3 velocity);
+		glm::vec3 GetLinearVelocity() const;
     };
 
 }

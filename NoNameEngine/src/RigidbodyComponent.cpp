@@ -32,7 +32,7 @@ namespace NNE {
             collider->GetShape(),
             JPH::RVec3(transform->position.x, transform->position.y, transform->position.z),
             JPH::Quat::sIdentity(),
-            (mass > 0.0f) ? JPH::EMotionType::Dynamic : (isKinematic ? JPH::EMotionType::Kinematic : JPH::EMotionType::Static),
+            (mass > 0.0f) ? JPH::EMotionType::Dynamic : (isKinematic ? JPH::EMotionType::Kinematic : JPH::EMotionType::Dynamic),
             0 
         );
 
@@ -63,8 +63,7 @@ namespace NNE {
             JPH::RVec3 pos = bodyInterface.GetPosition(bodyID);
             JPH::Quat rot = bodyInterface.GetRotation(bodyID);
 
-            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
-            std::cout << pos.GetY() << std::endl;
+            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());            
 
             // 🔥 Correction : Convertir le quaternion en Euler angles
             glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
@@ -76,6 +75,26 @@ namespace NNE {
 
     JPH::BodyID RigidbodyComponent::GetBodyID() const {
         return bodyID;
+    }
+
+    void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity)
+    {
+		auto physicsSystem = Application::GetInstance()->physicsManager->GetPhysicsSystem();
+		auto& bodyInterface = physicsSystem->GetBodyInterface();        
+		if (!bodyID.IsInvalid()) {
+			bodyInterface.SetLinearVelocity(bodyID, JPH::RVec3(velocity.x, velocity.y, velocity.z));            
+		}
+    }
+
+    glm::vec3 RigidbodyComponent::GetLinearVelocity() const
+    {
+		auto physicsSystem = Application::GetInstance()->physicsManager->GetPhysicsSystem();
+		auto& bodyInterface = physicsSystem->GetBodyInterface();
+		if (!bodyID.IsInvalid()) {
+			JPH::RVec3 velocity = bodyInterface.GetLinearVelocity(bodyID);
+			return glm::vec3(velocity.GetX(), velocity.GetY(), velocity.GetZ());
+		}
+        return glm::vec3();
     }
 
 }

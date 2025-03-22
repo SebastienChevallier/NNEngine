@@ -5,13 +5,15 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
     src/main.cpp
+    src/PlayerController.cpp
 )
 
-# Créer l'exécutable du jeu
-add_executable(NNE_GameTemplate ${SOURCES})
+set(HEADERS
+    include/PlayerController.h
+)
 
-# Indiquer que NNE_GameTemplate dépend de NoNameEngine
+add_executable(NNE_GameTemplate ${SOURCES} ${HEADERS})
+
 target_link_libraries(NNE_GameTemplate PRIVATE NoNameEngine)
 
-# Ajouter le dossier include du moteur pour que le jeu trouve les headers
-target_include_directories(NNE_GameTemplate PRIVATE ../NoNameEngine/include)
+target_include_directories(NNE_GameTemplate PRIVATE ${CMAKE_SOURCE_DIR}/NNE_GameTemplate/include)

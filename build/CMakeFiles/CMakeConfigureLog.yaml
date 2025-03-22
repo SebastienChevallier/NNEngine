@@ -24,7 +24,7 @@ events:
       The output was:
       0
       Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-      La g├®n├®ration a d├®marr├® 18/03/2025 21:26:02.
+      La g├®n├®ration a d├®marr├® 22/03/2025 22:05:53.
       
       Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\4.0.0-rc3\\CompilerIdC\\CompilerIdC.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
       PrepareForBuild:
@@ -62,7 +62,7 @@ events:
           0 Avertissement(s)
           0 Erreur(s)
       
-      Temps ├®coul├® 00:00:00.56
+      Temps ├®coul├® 00:00:00.58
       
       
       Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
@@ -88,7 +88,7 @@ events:
       The output was:
       0
       Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-      La g├®n├®ration a d├®marr├® 18/03/2025 21:26:03.
+      La g├®n├®ration a d├®marr├® 22/03/2025 22:05:54.
       
       Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\4.0.0-rc3\\CompilerIdCXX\\CompilerIdCXX.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
       PrepareForBuild:
@@ -145,8 +145,8 @@ events:
     checks:
       - "Detecting C compiler ABI info"
     directories:
-      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-idd8wr"
-      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-idd8wr"
+      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-n47087"
+      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-n47087"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -159,40 +159,40 @@ events:
       variable: "CMAKE_C_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-idd8wr'
+        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-n47087'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_780d2.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_0af27.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-        La g├®n├®ration a d├®marr├® 18/03/2025 21:26:04.
+        La g├®n├®ration a d├®marr├® 22/03/2025 22:05:55.
         
-        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-idd8wr\\cmTC_780d2.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-n47087\\cmTC_0af27.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
         PrepareForBuild:
-          Cr├®ation du r├®pertoire "cmTC_780d2.dir\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_0af27.dir\\Debug\\".
           La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
-          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-idd8wr\\Debug\\".
-          Cr├®ation du r├®pertoire "cmTC_780d2.dir\\Debug\\cmTC_780d2.tlog\\".
+          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-n47087\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_0af27.dir\\Debug\\cmTC_0af27.tlog\\".
         InitializeBuildStatus:
-          Cr├®ation de "cmTC_780d2.dir\\Debug\\cmTC_780d2.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
-          Mise ├á jour de l'horodatage "cmTC_780d2.dir\\Debug\\cmTC_780d2.tlog\\unsuccessfulbuild".
+          Cr├®ation de "cmTC_0af27.dir\\Debug\\cmTC_0af27.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+          Mise ├á jour de l'horodatage "cmTC_0af27.dir\\Debug\\cmTC_0af27.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_780d2.dir\\Debug\\\\" /Fd"cmTC_780d2.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_0af27.dir\\Debug\\\\" /Fd"cmTC_0af27.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
           Compilateur d'optimisation Microsoft (R) C/C++ version┬á19.43.34808 pour x64
           Copyright (C) Microsoft Corporation. Tous droits r├®serv├®s.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_780d2.dir\\Debug\\\\" /Fd"cmTC_780d2.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_0af27.dir\\Debug\\\\" /Fd"cmTC_0af27.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCCompilerABI.c"
           CMakeCCompilerABI.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-idd8wr\\Debug\\cmTC_780d2.exe" /INCREMENTAL /ILK:"cmTC_780d2.dir\\Debug\\cmTC_780d2.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-idd8wr/Debug/cmTC_780d2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-idd8wr/Debug/cmTC_780d2.lib" /MACHINE:X64  /machine:x64 cmTC_780d2.dir\\Debug\\CMakeCCompilerABI.obj
-          cmTC_780d2.vcxproj -> C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-idd8wr\\Debug\\cmTC_780d2.exe
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-n47087\\Debug\\cmTC_0af27.exe" /INCREMENTAL /ILK:"cmTC_0af27.dir\\Debug\\cmTC_0af27.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-n47087/Debug/cmTC_0af27.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-n47087/Debug/cmTC_0af27.lib" /MACHINE:X64  /machine:x64 cmTC_0af27.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_0af27.vcxproj -> C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-n47087\\Debug\\cmTC_0af27.exe
         FinalizeBuildStatus:
-          Suppression du fichier "cmTC_780d2.dir\\Debug\\cmTC_780d2.tlog\\unsuccessfulbuild".
-          Mise ├á jour de l'horodatage "cmTC_780d2.dir\\Debug\\cmTC_780d2.tlog\\cmTC_780d2.lastbuildstate".
-        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-idd8wr\\cmTC_780d2.vcxproj" termin├®e (cibles par d├®faut).
+          Suppression du fichier "cmTC_0af27.dir\\Debug\\cmTC_0af27.tlog\\unsuccessfulbuild".
+          Mise ├á jour de l'horodatage "cmTC_0af27.dir\\Debug\\cmTC_0af27.tlog\\cmTC_0af27.lastbuildstate".
+        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-n47087\\cmTC_0af27.vcxproj" termin├®e (cibles par d├®faut).
         
         La g├®n├®ration a r├®ussi.
             0 Avertissement(s)
             0 Erreur(s)
         
-        Temps ├®coul├® 00:00:00.31
+        Temps ├®coul├® 00:00:00.33
         
       exitCode: 0
   -
@@ -232,8 +232,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-ge97f5"
-      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-ge97f5"
+      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-h77c8g"
+      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-h77c8g"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -247,34 +247,34 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-ge97f5'
+        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-h77c8g'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_6c7b6.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_09b6e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-        La g├®n├®ration a d├®marr├® 18/03/2025 21:26:05.
+        La g├®n├®ration a d├®marr├® 22/03/2025 22:05:55.
         
-        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ge97f5\\cmTC_6c7b6.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-h77c8g\\cmTC_09b6e.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
         PrepareForBuild:
-          Cr├®ation du r├®pertoire "cmTC_6c7b6.dir\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_09b6e.dir\\Debug\\".
           La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
-          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ge97f5\\Debug\\".
-          Cr├®ation du r├®pertoire "cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.tlog\\".
+          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-h77c8g\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_09b6e.dir\\Debug\\cmTC_09b6e.tlog\\".
         InitializeBuildStatus:
-          Cr├®ation de "cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
-          Mise ├á jour de l'horodatage "cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.tlog\\unsuccessfulbuild".
+          Cr├®ation de "cmTC_09b6e.dir\\Debug\\cmTC_09b6e.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+          Mise ├á jour de l'horodatage "cmTC_09b6e.dir\\Debug\\cmTC_09b6e.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6c7b6.dir\\Debug\\\\" /Fd"cmTC_6c7b6.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_09b6e.dir\\Debug\\\\" /Fd"cmTC_09b6e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
           Compilateur d'optimisation Microsoft (R) C/C++ version┬á19.43.34808 pour x64
           Copyright (C) Microsoft Corporation. Tous droits r├®serv├®s.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_6c7b6.dir\\Debug\\\\" /Fd"cmTC_6c7b6.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_09b6e.dir\\Debug\\\\" /Fd"cmTC_09b6e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.0\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ge97f5\\Debug\\cmTC_6c7b6.exe" /INCREMENTAL /ILK:"cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-ge97f5/Debug/cmTC_6c7b6.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-ge97f5/Debug/cmTC_6c7b6.lib" /MACHINE:X64  /machine:x64 cmTC_6c7b6.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_6c7b6.vcxproj -> C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ge97f5\\Debug\\cmTC_6c7b6.exe
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-h77c8g\\Debug\\cmTC_09b6e.exe" /INCREMENTAL /ILK:"cmTC_09b6e.dir\\Debug\\cmTC_09b6e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-h77c8g/Debug/cmTC_09b6e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-h77c8g/Debug/cmTC_09b6e.lib" /MACHINE:X64  /machine:x64 cmTC_09b6e.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_09b6e.vcxproj -> C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-h77c8g\\Debug\\cmTC_09b6e.exe
         FinalizeBuildStatus:
-          Suppression du fichier "cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.tlog\\unsuccessfulbuild".
-          Mise ├á jour de l'horodatage "cmTC_6c7b6.dir\\Debug\\cmTC_6c7b6.tlog\\cmTC_6c7b6.lastbuildstate".
-        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-ge97f5\\cmTC_6c7b6.vcxproj" termin├®e (cibles par d├®faut).
+          Suppression du fichier "cmTC_09b6e.dir\\Debug\\cmTC_09b6e.tlog\\unsuccessfulbuild".
+          Mise ├á jour de l'horodatage "cmTC_09b6e.dir\\Debug\\cmTC_09b6e.tlog\\cmTC_09b6e.lastbuildstate".
+        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-h77c8g\\cmTC_09b6e.vcxproj" termin├®e (cibles par d├®faut).
         
         La g├®n├®ration a r├®ussi.
             0 Avertissement(s)
@@ -322,12 +322,12 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeFindDependencyMacro.cmake:78 (find_package)"
       - "C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3Config.cmake:2 (find_dependency)"
       - "C:/Users/schev/vcpkg/scripts/buildsystems/vcpkg.cmake:859 (_find_package)"
-      - "NoNameEngine/CMakeLists.txt:42 (find_package)"
+      - "NoNameEngine/CMakeLists.txt:52 (find_package)"
     checks:
       - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
     directories:
-      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-u4cru1"
-      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-u4cru1"
+      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-xwszgo"
+      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-xwszgo"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -340,35 +340,35 @@ events:
       variable: "CMAKE_HAVE_LIBC_PTHREAD"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-u4cru1'
+        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-xwszgo'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7a3b1.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_72515.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-        La g├®n├®ration a d├®marr├® 18/03/2025 21:26:05.
+        La g├®n├®ration a d├®marr├® 22/03/2025 22:05:56.
         
-        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\cmTC_7a3b1.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\cmTC_72515.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
         PrepareForBuild:
-          Cr├®ation du r├®pertoire "cmTC_7a3b1.dir\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_72515.dir\\Debug\\".
           La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
-          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\Debug\\".
-          Cr├®ation du r├®pertoire "cmTC_7a3b1.dir\\Debug\\cmTC_7a3b1.tlog\\".
+          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_72515.dir\\Debug\\cmTC_72515.tlog\\".
         InitializeBuildStatus:
-          Cr├®ation de "cmTC_7a3b1.dir\\Debug\\cmTC_7a3b1.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
-          Mise ├á jour de l'horodatage "cmTC_7a3b1.dir\\Debug\\cmTC_7a3b1.tlog\\unsuccessfulbuild".
+          Cr├®ation de "cmTC_72515.dir\\Debug\\cmTC_72515.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+          Mise ├á jour de l'horodatage "cmTC_72515.dir\\Debug\\cmTC_72515.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7a3b1.dir\\Debug\\\\" /Fd"cmTC_7a3b1.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\src.c"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_72515.dir\\Debug\\\\" /Fd"cmTC_72515.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\src.c"
           Compilateur d'optimisation Microsoft (R) C/C++ version┬á19.43.34808 pour x64
           Copyright (C) Microsoft Corporation. Tous droits r├®serv├®s.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7a3b1.dir\\Debug\\\\" /Fd"cmTC_7a3b1.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\src.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_72515.dir\\Debug\\\\" /Fd"cmTC_72515.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\src.c"
           src.c
-        C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\src.c(1,10): error C1083: Impossible d'ouvrir le fichier include┬á: 'pthread.h'┬á: No such file or directory [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\cmTC_7a3b1.vcxproj]
-        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\cmTC_7a3b1.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
+        C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\src.c(1,10): error C1083: Impossible d'ouvrir le fichier include┬á: 'pthread.h'┬á: No such file or directory [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\cmTC_72515.vcxproj]
+        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\cmTC_72515.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
         
         ├ëCHEC de la build.
         
-        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\cmTC_7a3b1.vcxproj" (cible par d├®faut) (1) ->
+        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\cmTC_72515.vcxproj" (cible par d├®faut) (1) ->
         (ClCompile cible) -> 
-          C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\src.c(1,10): error C1083: Impossible d'ouvrir le fichier include┬á: 'pthread.h'┬á: No such file or directory [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-u4cru1\\cmTC_7a3b1.vcxproj]
+          C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\src.c(1,10): error C1083: Impossible d'ouvrir le fichier include┬á: 'pthread.h'┬á: No such file or directory [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xwszgo\\cmTC_72515.vcxproj]
         
             0 Avertissement(s)
             1 Erreur(s)
@@ -386,12 +386,12 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeFindDependencyMacro.cmake:78 (find_package)"
       - "C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3Config.cmake:2 (find_dependency)"
       - "C:/Users/schev/vcpkg/scripts/buildsystems/vcpkg.cmake:859 (_find_package)"
-      - "NoNameEngine/CMakeLists.txt:42 (find_package)"
+      - "NoNameEngine/CMakeLists.txt:52 (find_package)"
     checks:
       - "Looking for pthread_create in pthreads"
     directories:
-      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-eacbpi"
-      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-eacbpi"
+      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-f8t130"
+      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-f8t130"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -404,37 +404,37 @@ events:
       variable: "CMAKE_HAVE_PTHREADS_CREATE"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-eacbpi'
+        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-f8t130'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_762d5.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_0c7d9.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-        La g├®n├®ration a d├®marr├® 18/03/2025 21:26:06.
+        La g├®n├®ration a d├®marr├® 22/03/2025 22:05:56.
         
-        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\cmTC_762d5.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\cmTC_0c7d9.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
         PrepareForBuild:
-          Cr├®ation du r├®pertoire "cmTC_762d5.dir\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_0c7d9.dir\\Debug\\".
           La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
-          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\Debug\\".
-          Cr├®ation du r├®pertoire "cmTC_762d5.dir\\Debug\\cmTC_762d5.tlog\\".
+          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_0c7d9.dir\\Debug\\cmTC_0c7d9.tlog\\".
         InitializeBuildStatus:
-          Cr├®ation de "cmTC_762d5.dir\\Debug\\cmTC_762d5.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
-          Mise ├á jour de l'horodatage "cmTC_762d5.dir\\Debug\\cmTC_762d5.tlog\\unsuccessfulbuild".
+          Cr├®ation de "cmTC_0c7d9.dir\\Debug\\cmTC_0c7d9.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+          Mise ├á jour de l'horodatage "cmTC_0c7d9.dir\\Debug\\cmTC_0c7d9.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_762d5.dir\\Debug\\\\" /Fd"cmTC_762d5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\CheckFunctionExists.c"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_0c7d9.dir\\Debug\\\\" /Fd"cmTC_0c7d9.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\CheckFunctionExists.c"
           Compilateur d'optimisation Microsoft (R) C/C++ version┬á19.43.34808 pour x64
           Copyright (C) Microsoft Corporation. Tous droits r├®serv├®s.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_762d5.dir\\Debug\\\\" /Fd"cmTC_762d5.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\CheckFunctionExists.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_0c7d9.dir\\Debug\\\\" /Fd"cmTC_0c7d9.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\CheckFunctionExists.c"
           CheckFunctionExists.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\Debug\\cmTC_762d5.exe" /INCREMENTAL /ILK:"cmTC_762d5.dir\\Debug\\cmTC_762d5.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-eacbpi/Debug/cmTC_762d5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-eacbpi/Debug/cmTC_762d5.lib" /MACHINE:X64  /machine:x64 cmTC_762d5.dir\\Debug\\CheckFunctionExists.obj
-        LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthreads.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\cmTC_762d5.vcxproj]
-        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\cmTC_762d5.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\Debug\\cmTC_0c7d9.exe" /INCREMENTAL /ILK:"cmTC_0c7d9.dir\\Debug\\cmTC_0c7d9.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-f8t130/Debug/cmTC_0c7d9.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-f8t130/Debug/cmTC_0c7d9.lib" /MACHINE:X64  /machine:x64 cmTC_0c7d9.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthreads.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\cmTC_0c7d9.vcxproj]
+        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\cmTC_0c7d9.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
         
         ├ëCHEC de la build.
         
-        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\cmTC_762d5.vcxproj" (cible par d├®faut) (1) ->
+        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\cmTC_0c7d9.vcxproj" (cible par d├®faut) (1) ->
         (Link cible) -> 
-          LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthreads.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eacbpi\\cmTC_762d5.vcxproj]
+          LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthreads.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f8t130\\cmTC_0c7d9.vcxproj]
         
             0 Avertissement(s)
             1 Erreur(s)
@@ -452,12 +452,12 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.0/Modules/CMakeFindDependencyMacro.cmake:78 (find_package)"
       - "C:/Users/schev/vcpkg/installed/x64-windows/share/glfw3/glfw3Config.cmake:2 (find_dependency)"
       - "C:/Users/schev/vcpkg/scripts/buildsystems/vcpkg.cmake:859 (_find_package)"
-      - "NoNameEngine/CMakeLists.txt:42 (find_package)"
+      - "NoNameEngine/CMakeLists.txt:52 (find_package)"
     checks:
       - "Looking for pthread_create in pthread"
     directories:
-      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-lipcvf"
-      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-lipcvf"
+      source: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-dodhtb"
+      binary: "C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-dodhtb"
     cmakeVariables:
       CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
       CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -470,37 +470,37 @@ events:
       variable: "CMAKE_HAVE_PTHREAD_CREATE"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-lipcvf'
+        Change Dir: 'C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-dodhtb'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_74dab.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c5119.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Version MSBuild 17.13.15+18b3035f6 pour .NET Framework
-        La g├®n├®ration a d├®marr├® 18/03/2025 21:26:06.
+        La g├®n├®ration a d├®marr├® 22/03/2025 22:05:57.
         
-        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\cmTC_74dab.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
+        Projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\cmTC_c5119.vcxproj" sur le n┼ôud 1 (cibles par d├®faut).
         PrepareForBuild:
-          Cr├®ation du r├®pertoire "cmTC_74dab.dir\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_c5119.dir\\Debug\\".
           La sortie structur├®e est activ├®e. La mise en forme du compilateur diagnostics refl├¿te la hi├®rarchie des erreurs. Pour plus dÔÇÖinformations, consultez https://aka.ms/cpp/structured-output.
-          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\Debug\\".
-          Cr├®ation du r├®pertoire "cmTC_74dab.dir\\Debug\\cmTC_74dab.tlog\\".
+          Cr├®ation du r├®pertoire "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\Debug\\".
+          Cr├®ation du r├®pertoire "cmTC_c5119.dir\\Debug\\cmTC_c5119.tlog\\".
         InitializeBuildStatus:
-          Cr├®ation de "cmTC_74dab.dir\\Debug\\cmTC_74dab.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
-          Mise ├á jour de l'horodatage "cmTC_74dab.dir\\Debug\\cmTC_74dab.tlog\\unsuccessfulbuild".
+          Cr├®ation de "cmTC_c5119.dir\\Debug\\cmTC_c5119.tlog\\unsuccessfulbuild", car "AlwaysCreate" a ├®t├® sp├®cifi├®.
+          Mise ├á jour de l'horodatage "cmTC_c5119.dir\\Debug\\cmTC_c5119.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_74dab.dir\\Debug\\\\" /Fd"cmTC_74dab.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\CheckFunctionExists.c"
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c5119.dir\\Debug\\\\" /Fd"cmTC_c5119.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\CheckFunctionExists.c"
           Compilateur d'optimisation Microsoft (R) C/C++ version┬á19.43.34808 pour x64
           Copyright (C) Microsoft Corporation. Tous droits r├®serv├®s.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_74dab.dir\\Debug\\\\" /Fd"cmTC_74dab.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\CheckFunctionExists.c"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c5119.dir\\Debug\\\\" /Fd"cmTC_c5119.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\CheckFunctionExists.c"
           CheckFunctionExists.c
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\Debug\\cmTC_74dab.exe" /INCREMENTAL /ILK:"cmTC_74dab.dir\\Debug\\cmTC_74dab.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-lipcvf/Debug/cmTC_74dab.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-lipcvf/Debug/cmTC_74dab.lib" /MACHINE:X64  /machine:x64 cmTC_74dab.dir\\Debug\\CheckFunctionExists.obj
-        LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthread.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\cmTC_74dab.vcxproj]
-        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\cmTC_74dab.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\Debug\\cmTC_c5119.exe" /INCREMENTAL /ILK:"cmTC_c5119.dir\\Debug\\cmTC_c5119.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-dodhtb/Debug/cmTC_c5119.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/CMakeScratch/TryCompile-dodhtb/Debug/cmTC_c5119.lib" /MACHINE:X64  /machine:x64 cmTC_c5119.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthread.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\cmTC_c5119.vcxproj]
+        G├®n├®ration du projet "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\cmTC_c5119.vcxproj" termin├®e (cibles par d├®faut) -- ├ëCHEC.
         
         ├ëCHEC de la build.
         
-        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\cmTC_74dab.vcxproj" (cible par d├®faut) (1) ->
+        "C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\cmTC_c5119.vcxproj" (cible par d├®faut) (1) ->
         (Link cible) -> 
-          LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthread.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-lipcvf\\cmTC_74dab.vcxproj]
+          LINK : fatal error LNK1104: impossible d'ouvrir le fichier 'pthread.lib' [C:\\Users\\schev\\Documents\\GitHub\\NNEngine\\build\\CMakeFiles\\CMakeScratch\\TryCompile-dodhtb\\cmTC_c5119.vcxproj]
         
             0 Avertissement(s)
             1 Erreur(s)

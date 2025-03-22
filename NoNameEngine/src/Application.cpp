@@ -52,9 +52,8 @@ void NNE::Application::Update()
     
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
-        glfwPollEvents();
-        
-
+        glfwPollEvents();        
+        InputManager::Update();
         physicsManager->Update(delta);
         
         for (AEntity* entity : _entities) {
@@ -91,6 +90,7 @@ void NNE::Application::Update()
 void NNE::Application::Open()
 {
     VKManager->CreateGLFWWindow(WIDTH, HEIGHT);
+    InputManager::Init(VKManager->window);
 }
 
 void NNE::Application::Quit()
