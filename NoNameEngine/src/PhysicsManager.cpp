@@ -1,4 +1,5 @@
 #include "PhysicsManager.h"
+#include "Application.h"
 
 
 class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
@@ -41,10 +42,13 @@ void NNE::PhysicsManager::Initialize() {
         broadPhaseFilter,
         objectLayerFilter
     );
+
+    physicsSystem.SetContactListener(&contactListener);
 }
 
 void NNE::PhysicsManager::Update(float deltaTime) {
-    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
+    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);  
+    
 }
 
 NNE::PhysicsManager::~PhysicsManager() {
@@ -54,4 +58,16 @@ NNE::PhysicsManager::~PhysicsManager() {
 
 JPH::PhysicsSystem* NNE::PhysicsManager::GetPhysicsSystem() {
     return &physicsSystem;
+}
+
+void NNE::PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
+{
+    ColliderComponent* colliderA = Application::GetInstance()->GetCollider(body1.GetID());
+    ColliderComponent* colliderB = Application::GetInstance()->GetCollider(body2.GetID());
+
+    if (colliderA && colliderB)
+    {
+        colliderA->OnHit(colliderB);
+        colliderB->OnHit(colliderA);
+    }
 }

@@ -5,6 +5,7 @@
 
 namespace NNE
 {
+	//class ColliderComponent;
 	class PlaneCollider : public ColliderComponent
 	{
 	private:

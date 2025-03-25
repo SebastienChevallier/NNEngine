@@ -1,5 +1,6 @@
 #include "Application.h"
 
+
 std::clock_t lastFrameTime;
 NNE::Application* NNE::Application::Instance = nullptr;
 int NNE::Application::_genericID = 0;

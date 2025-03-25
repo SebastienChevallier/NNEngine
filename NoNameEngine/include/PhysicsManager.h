@@ -20,6 +20,14 @@ namespace NNE {
         void Initialize();
         void Update(float deltaTime);
         JPH::PhysicsSystem* GetPhysicsSystem();
+
+        class ContactListenerImpl : public JPH::ContactListener
+        {
+        public:
+            void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&) override;
+        };
+
+        ContactListenerImpl contactListener;
     };
 
 }

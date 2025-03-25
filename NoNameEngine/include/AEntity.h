@@ -30,6 +30,9 @@ namespace NNE {
 		template<typename T>
 		T* GetComponent();
 
+		template<typename T>
+		std::vector<T*> GetComponents();
+
 	};
 
 	template<typename T, typename... Args>
@@ -51,6 +54,19 @@ namespace NNE {
 			}
 		}
 		return nullptr;
+	}
+
+	template<typename T>
+	std::vector<T*> NNE::AEntity::GetComponents()
+	{
+		std::vector<T*> ref = new std::vector<T*>;
+		for (AComponent* component : components) {
+			T* casted = dynamic_cast<T*>(component);
+			if (casted) {
+				ref.push_back(component)
+			}
+		}
+		return ref;
 	}
 }
 

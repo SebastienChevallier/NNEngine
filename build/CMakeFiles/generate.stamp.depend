@@ -28,9 +28,9 @@ C:/Program Files/CMake/share/cmake-4.0/Modules/Platform/Windows-MSVC-CXX.cmake
 C:/Program Files/CMake/share/cmake-4.0/Modules/Platform/Windows-MSVC.cmake
 C:/Program Files/CMake/share/cmake-4.0/Modules/Platform/Windows.cmake
 C:/Program Files/CMake/share/cmake-4.0/Modules/Platform/WindowsPaths.cmake
-C:/Users/schev/Documents/GitHub/NNEngine/CMakeLists.txt
-C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/4.0.0-rc3/CMakeCCompiler.cmake
-C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/4.0.0-rc3/CMakeCXXCompiler.cmake
-C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/4.0.0-rc3/CMakeRCCompiler.cmake
-C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/4.0.0-rc3/CMakeSystem.cmake
-C:/Users/schev/vcpkg/scripts/buildsystems/vcpkg.cmake
+C:/Users/schev/source/repos/Git-NNE/CMakeLists.txt
+C:/Users/schev/source/repos/Git-NNE/build/CMakeFiles/4.0.0-rc4/CMakeCCompiler.cmake
+C:/Users/schev/source/repos/Git-NNE/build/CMakeFiles/4.0.0-rc4/CMakeCXXCompiler.cmake
+C:/Users/schev/source/repos/Git-NNE/build/CMakeFiles/4.0.0-rc4/CMakeRCCompiler.cmake
+C:/Users/schev/source/repos/Git-NNE/build/CMakeFiles/4.0.0-rc4/CMakeSystem.cmake
+C:/vcpkg/scripts/buildsystems/vcpkg.cmake

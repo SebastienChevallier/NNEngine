@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\main.cpp">
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NNE_GameTemplate\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\src\PlayerController.cpp">
+    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NNE_GameTemplate\src\PlayerController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\include\PlayerController.h">
+    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NNE_GameTemplate\include\PlayerController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\schev\source\repos\Git-NNE\NNE_GameTemplate\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{9C485DC6-758E-3AAC-BC86-3FB2EBCE7BD3}</UniqueIdentifier>
+      <UniqueIdentifier>{B0E1CF58-7028-327B-ADB8-8F03B77CFD29}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{70906545-99CC-3A02-A420-F2B2713ADC50}</UniqueIdentifier>
+      <UniqueIdentifier>{74E4C92C-E097-3BCD-A9C9-45654E583B9A}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

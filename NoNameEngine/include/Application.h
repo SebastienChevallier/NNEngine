@@ -16,6 +16,7 @@
 
 namespace NNE {
 	class VulkanManager;
+	class ColliderComponent;
 	class Application
 	{
 	protected:
@@ -28,7 +29,7 @@ namespace NNE {
 
 		static int _genericID;
 
-
+		
 
 	private:
 		/*VkInstance instance;*/
@@ -52,6 +53,21 @@ namespace NNE {
 		int GenerateID();
 
 		AEntity* CreateEntity();
+
+		std::unordered_map<JPH::BodyID, ColliderComponent*> colliderMap;
+
+		void RegisterCollider(JPH::BodyID id, ColliderComponent* collider) {
+			colliderMap[id] = collider;
+		}
+
+		ColliderComponent* GetCollider(JPH::BodyID id) {
+			auto it = colliderMap.find(id);
+			return it != colliderMap.end() ? it->second : nullptr;
+		}
+
+		void UnregisterCollider(JPH::BodyID id) {
+			colliderMap.erase(id);
+		}
 	};
 }
 

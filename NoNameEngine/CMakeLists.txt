@@ -4,7 +4,8 @@ project(NoNameEngine)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_PREFIX_PATH "C:/Users/schev/vcpkg/installed/x64-windows")
+#set(CMAKE_PREFIX_PATH "C:/Users/schev/vcpkg/installed/x64-windows")
+set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
 
 set(SOURCES
     src/Application.cpp
@@ -21,6 +22,7 @@ set(SOURCES
     src/PlaneCollider.cpp
     src/RigidbodyComponent.cpp
     src/InputManager.cpp
+    src/MonoComponent.cpp
 )
 
 set(HEADERS
@@ -38,6 +40,7 @@ set(HEADERS
     include/PlaneCollider.h
     include/RigidbodyComponent.h
     include/InputManager.h
+    include/MonoComponent.h
 )
 
 add_compile_definitions(SHADER_PATH="${CMAKE_SOURCE_DIR}/NoNameEngine/shaders")
