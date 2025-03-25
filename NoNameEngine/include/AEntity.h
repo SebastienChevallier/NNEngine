@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "AComponent.h"
+#include <TransformComponent.h>
 
 namespace NNE {	
 	class AComponent;	
@@ -15,6 +16,7 @@ namespace NNE {
 	public:
 		AEntity();
 		~AEntity();
+		NNE::TransformComponent* transform;
 		std::vector<AComponent*> components;
 
 		int GetID();

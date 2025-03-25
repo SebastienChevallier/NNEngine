@@ -55,21 +55,7 @@ void NNE::Application::Update()
         delta = GetDeltaTime();
         glfwPollEvents();        
         InputManager::Update();
-        physicsManager->Update(delta);
-        
-        for (AEntity* entity : _entities) {
-            // Récupérer le CameraComponent et le TransformComponent
-            CameraComponent* cameraComp = entity->GetComponent<CameraComponent>();
-            TransformComponent* transform = entity->GetComponent<TransformComponent>();
-            // S’il s’agit d’une entité “caméra”
-            if (cameraComp && transform) {
-                // Exemple : On regarde vers l’axe -Z depuis la position
-                glm::vec3 pos = transform->position;
-                glm::vec3 target = pos + glm::vec3(0, 0, -1);
-                glm::vec3 up = glm::vec3(0, 1, 0);
-                cameraComp->UpdateViewMatrix(pos, target, up);
-            }
-        }
+        physicsManager->Update(delta);       
 
         //Update
         for(AEntity* entity : _entities)

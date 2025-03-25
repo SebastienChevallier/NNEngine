@@ -5,6 +5,19 @@ NNE::CameraComponent::CameraComponent(float fov, float aspectRatio, float nearPl
 	SetPerspective(fov, aspectRatio, nearPlane, farPlane);
 }
 
+void NNE::CameraComponent::Update(float deltaTime)
+{
+    CameraComponent* cameraComp = _entity->GetComponent<CameraComponent>();
+    TransformComponent* transform = _entity->GetComponent<TransformComponent>();
+    // S’il s’agit d’une entité “caméra”
+    if (cameraComp && transform) {
+        glm::vec3 pos = transform->GetWorldPosition();
+        glm::vec3 target = pos + transform->GetForward();
+        glm::vec3 up = transform->GetUp();
+        cameraComp->UpdateViewMatrix(pos, target, up);
+    }
+}
+
 void NNE::CameraComponent::SetPerspective(float fov, float aspectRatio, float nearPlane, float farPlane)
 {
     this->fov = fov;

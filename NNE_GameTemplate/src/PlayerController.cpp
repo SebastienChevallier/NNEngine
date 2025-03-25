@@ -20,15 +20,15 @@ void PlayerController::Update(float deltaTime)
 	direction = glm::vec3(0.0f);	
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_W)) {
-		direction.z += 1;				
+		direction.z = 1;				
 	}
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_S)) {
-		direction.z -= 1;
+		direction.z = -1;
 	}	
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_A)) {
-		direction.x += 1;
+		direction.x = 1;
 	}
 	
 
@@ -44,7 +44,7 @@ void PlayerController::Update(float deltaTime)
 	direction.y += (gravity / speed);
 	
 	_entity->GetComponent<NNE::RigidbodyComponent>()->SetLinearVelocity(direction * speed);	
-	
+	std::cout << _entity->transform->position.x << std::endl;
 }
 
 void PlayerController::OnHit(NNE::ColliderComponent* other)

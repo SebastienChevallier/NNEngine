@@ -3,8 +3,9 @@
 #include "TransformComponent.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "AEntity.h"
 
-namespace NNE {
+namespace NNE {    
     class CameraComponent : public AComponent {
     private:
         glm::mat4 viewMatrix;
@@ -16,7 +17,7 @@ namespace NNE {
 
     public:
         CameraComponent(float fov = 45.0f, float aspectRatio = 16.0f / 9.0f, float nearPlane = 0.1f, float farPlane = 100.0f);
-
+        virtual void Update(float deltaTime) override;
         void SetPerspective(float fov, float aspectRatio, float nearPlane, float farPlane);
         void UpdateViewMatrix(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up);
 
