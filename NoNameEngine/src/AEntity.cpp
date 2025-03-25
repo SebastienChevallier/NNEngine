@@ -1,4 +1,5 @@
 #include "AEntity.h"
+#include <Application.h>
 
 
 NNE::AEntity::AEntity()

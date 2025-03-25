@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #set(CMAKE_PREFIX_PATH "C:/Users/schev/vcpkg/installed/x64-windows")
-set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
+#set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
 
 set(SOURCES
     src/Application.cpp

@@ -2,7 +2,7 @@
 #include "AComponent.h"
 //#include "ColliderComponent.h"
 
-namespace NNE {
+namespace NNE {	
 	class ColliderComponent;
 	class MonoComponent : public AComponent
 	{

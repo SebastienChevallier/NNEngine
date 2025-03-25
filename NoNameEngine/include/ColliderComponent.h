@@ -1,35 +1,30 @@
 #pragma once
 #include "AComponent.h"
 #include "AEntity.h"
-#include "MonoComponent.h"
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 
-
 namespace NNE
 {
-	class AComponent;
-	class ColliderComponent : public AComponent
-	{
-	protected:
-		JPH::ShapeRefC shape;		
+    class ColliderComponent : public AComponent
+    {
+    protected:
+        JPH::ShapeRefC shape;
 
-	public:
-		JPH::BodyID bodyID;
+    public:
+        JPH::BodyID bodyID;
 
-		ColliderComponent() = default;
-		virtual ~ColliderComponent() = default;
+        ColliderComponent() = default;
+        virtual ~ColliderComponent() = default;
 
-		virtual void CreateShape() = 0;
+        virtual void CreateShape() = 0;
 
-		JPH::ShapeRefC GetShape() const { return shape; }
+        JPH::ShapeRefC GetShape() const { return shape; }
 
-		virtual void OnHit(ColliderComponent* other);	
-		
-		virtual void OnTriggerHit(ColliderComponent* other);
+        virtual void OnHit(ColliderComponent* other);
 
-		JPH::BodyID GetBodyID() const { return bodyID; }
-	};
+        virtual void OnTriggerHit(ColliderComponent* other);
+
+        JPH::BodyID GetBodyID() const { return bodyID; }
+    };
 }
-
-

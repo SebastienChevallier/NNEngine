@@ -1,4 +1,5 @@
 #include "PlayerController.h"
+#include <RigidbodyComponent.h>
 
 PlayerController::PlayerController()
 {
@@ -11,6 +12,7 @@ PlayerController::~PlayerController()
 
 void PlayerController::Awake()
 {
+	
 }
 
 void PlayerController::Update(float deltaTime)
@@ -18,15 +20,15 @@ void PlayerController::Update(float deltaTime)
 	direction = glm::vec3(0.0f);	
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_W)) {
-		direction.z = 1;				
+		direction.z += 1;				
 	}
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_S)) {
-		direction.z = -1;
+		direction.z -= 1;
 	}	
 
 	if (NNE::InputManager::IsKeyPressed(GLFW_KEY_A)) {
-		direction.x = 1;
+		direction.x += 1;
 	}
 	
 

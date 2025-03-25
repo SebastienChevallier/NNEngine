@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include <iostream>
+#include <vector>
+#include <string>
 #include "AComponent.h"
-#include "Application.h"
 
 namespace NNE {	
 	class AComponent;	
@@ -59,11 +60,11 @@ namespace NNE {
 	template<typename T>
 	std::vector<T*> NNE::AEntity::GetComponents()
 	{
-		std::vector<T*> ref = new std::vector<T*>;
+		std::vector<T*> ref;
 		for (AComponent* component : components) {
 			T* casted = dynamic_cast<T*>(component);
 			if (casted) {
-				ref.push_back(component)
+				ref.push_back(casted);
 			}
 		}
 		return ref;
