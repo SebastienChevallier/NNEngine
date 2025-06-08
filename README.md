@@ -26,6 +26,7 @@ make
 ## Architecture
 
 Le moteur est basé sur un ECS avec les composants suivants :
+Un schéma plus complet est disponible dans [docs/architecture.md](docs/architecture.md).
 
 ### Classes principales
 
@@ -86,6 +87,60 @@ Gère l'initialisation et le rendu avec Vulkan.
 - `void createCommandBuffers()`
 - `void updateUniformBuffer(uint32_t currentImage)`
 - `void CleanUp()`
+
+#### `NNE::InputManager`
+Gère les entrées clavier et souris.
+
+- `static void Init(GLFWwindow* win)`
+- `static void Update()`
+- `static bool IsKeyPressed(int key)`
+- `static bool IsKeyJustPressed(int key)`
+- `static bool IsKeyJustReleased(int key)`
+- `static glm::vec2 GetMousePosition()`
+- `static bool IsMouseButtonPressed(int button)`
+
+#### `NNE::PhysicsManager`
+Interface avec Jolt Physics.
+
+- `void Initialize()`
+- `void Update(float deltaTime)`
+- `JPH::PhysicsSystem* GetPhysicsSystem()`
+
+#### `NNE::ColliderComponent`
+Classe mère pour les colliders.
+
+- `virtual void CreateShape()`
+- `virtual void OnHit(ColliderComponent* other)`
+- `virtual void OnTriggerHit(ColliderComponent* other)`
+
+#### `NNE::BoxColliderComponent`
+Collider en boîte.
+
+- `void Awake()`
+- `void CreateShape()`
+
+#### `NNE::PlaneCollider`
+Collider plan.
+
+- `void CreateShape()`
+
+#### `NNE::RigidbodyComponent`
+Gère un corps physique dynamique.
+
+- `void Awake()`
+- `void Update(float deltaTime)`
+- `void SetLinearVelocity(glm::vec3 velocity)`
+- `glm::vec3 GetLinearVelocity()`
+
+#### `NNE::MonoComponent`
+Composant scriptable générique.
+
+- `void Awake()`
+- `void Start()`
+- `void Update(float deltaTime)`
+- `void LateUpdate(float deltaTime)`
+- `void OnHit(NNE::ColliderComponent* other)`
+- `void OnTriggerHit(NNE::ColliderComponent* other)`
 
 #### `Diagramme de classe`
 ![image](https://github.com/user-attachments/assets/39aa283d-5a06-489e-ba82-c189747c2691)
