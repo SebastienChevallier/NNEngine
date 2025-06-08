@@ -43,6 +43,7 @@ L'utilisation de Vulkan permet de limiter les surcoûts de calcul en accédant d
 - Adapter la fréquence d'affichage en fonction des besoins du jeu.
 - Nettoyer les entités et composants inutilisés pour éviter une consommation mémoire et CPU superflue.
 
+
 ## Diagramme de classes complet
 
 ```mermaid
@@ -96,4 +97,5 @@ classDiagram
 - `ColliderComponent` : base des composants de collision.
 - `BoxColliderComponent` : collider en forme de boîte.
 - `PlaneCollider` : collider plan infini.
+
 
