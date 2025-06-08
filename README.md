@@ -26,6 +26,7 @@ make
 ## Architecture
 
 Le moteur est basé sur un ECS avec les composants suivants :
+Un schéma plus complet est disponible dans [docs/architecture.md](docs/architecture.md).
 
 ### Classes principales
 
