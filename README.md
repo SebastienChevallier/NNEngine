@@ -17,10 +17,11 @@ NoNameEngine est un moteur de jeu basé sur un système Entity Component System 
 ### Compilation
 
 ```sh
-mkdir build
-cd build
-cmake ..
-make
+# On Linux/macOS
+./scripts/build.sh
+
+# On Windows
+scripts\build.bat
 ```
 
 ## Architecture
