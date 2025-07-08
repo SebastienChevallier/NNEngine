@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/schev/source/repos/Git-NNE/NNE_GameTemplate
+# Install script for directory: C:/Users/schev/Documents/GitHub/NNEngine/NNE_GameTemplate
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/NNEngine")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files/NNEngine")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -35,6 +35,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "C:/Users/schev/source/repos/Git-NNE/build/NNE_GameTemplate/install_local_manifest.txt"
+  file(WRITE "C:/Users/schev/Documents/GitHub/NNEngine/build/NNE_GameTemplate/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

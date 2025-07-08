@@ -1,108 +1,108 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\Application.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\VulkanManager.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\VulkanManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AEntity.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\AEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\AComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\AScene.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\AScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\MeshComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\MeshComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\TransformComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\TransformComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\CameraComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\CameraComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\PhysicsManager.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\PhysicsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\ColliderComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\ColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\BoxColliderComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\BoxColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\PlaneCollider.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\PlaneCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\RigidbodyComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\RigidbodyComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\InputManager.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\InputManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\src\MonoComponent.cpp">
+    <ClCompile Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\src\MonoComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\Application.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\VulkanManager.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\VulkanManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AEntity.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\AScene.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\AScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\MeshComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\MeshComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\TransformComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\CameraComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\PhysicsManager.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\PhysicsManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\ColliderComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\ColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\BoxColliderComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\BoxColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\PlaneCollider.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\PlaneCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\RigidbodyComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\RigidbodyComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\InputManager.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\include\MonoComponent.h">
+    <ClInclude Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\include\MonoComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\schev\source\repos\Git-NNE\NoNameEngine\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\schev\Documents\GitHub\NNEngine\NoNameEngine\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{B0E1CF58-7028-327B-ADB8-8F03B77CFD29}</UniqueIdentifier>
+      <UniqueIdentifier>{9C485DC6-758E-3AAC-BC86-3FB2EBCE7BD3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{74E4C92C-E097-3BCD-A9C9-45654E583B9A}</UniqueIdentifier>
+      <UniqueIdentifier>{70906545-99CC-3A02-A420-F2B2713ADC50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

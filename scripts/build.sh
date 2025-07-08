@@ -12,5 +12,5 @@ mkdir -p "$BUILD_DIR"
 VCPKG_PATH="${VCPKG_ROOT:-$ROOT_DIR/vcpkg}"
 TOOLCHAIN_FILE="$VCPKG_PATH/scripts/buildsystems/vcpkg.cmake"
 
-cmake -B "$BUILD_DIR" -S "$ROOT_DIR" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$@"
+cmake -B "$BUILD_DIR" -S "$ROOT_DIR" -G "Visual Studio 17 2022" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$@"
 cmake --build "$BUILD_DIR"
