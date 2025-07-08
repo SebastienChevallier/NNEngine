@@ -3,7 +3,7 @@
 #include "InputManager.h"
 #include "MonoComponent.h"
 #include "AEntity.h"
-#include "../../../../../vcpkg/installed/x64-windows/include/glm/ext/vector_float3.hpp"
+#include <glm/ext/vector_float3.hpp>
 
 class PlayerController : public NNE::MonoComponent
 {
