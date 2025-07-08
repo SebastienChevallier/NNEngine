@@ -19,8 +19,8 @@ int main() {
 	NNE::BoxColliderComponent* BCC = entity->AddComponent<NNE::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
 	NNE::RigidbodyComponent* RBC = entity->AddComponent<NNE::RigidbodyComponent>( 1.0f, false);
 	
-        MC->SetModelPath("../assets/viking_room.obj");
-        MC->SetTexturePath("../assets/viking_room.png");
+        MC->SetModelPath("../assets/models/viking_room.obj");
+        MC->SetTexturePath("../assets/textures/viking_room.png");
 
 	NNE::AEntity* player = app.CreateEntity();
 	NNE::TransformComponent* TCplayer = player->GetComponent<NNE::TransformComponent>();

@@ -14,9 +14,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\schev\Documents\GitHub\NNEngine\NNE_GameTemplate\CMakeLists.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Header Files">
       <UniqueIdentifier>{9C485DC6-758E-3AAC-BC86-3FB2EBCE7BD3}</UniqueIdentifier>
     </Filter>

@@ -1,18 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CMakeTargets", "CMakeTargets", "{283ADE6C-F31F-31EC-9819-05FC03D7C38E}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{16AF8B29-196B-357F-8BD2-E8E7356AC900}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ECC546DB-223C-3D00-B2BC-02601950C411} = {ECC546DB-223C-3D00-B2BC-02601950C411}
-		{58C19818-C4DE-33AD-83C9-A192D22F705E} = {58C19818-C4DE-33AD-83C9-A192D22F705E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NoNameEngine", "NoNameEngine.vcxproj", "{ECC546DB-223C-3D00-B2BC-02601950C411}"
-	ProjectSection(ProjectDependencies) = postProject
-		{58C19818-C4DE-33AD-83C9-A192D22F705E} = {58C19818-C4DE-33AD-83C9-A192D22F705E}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "..\\ZERO_CHECK.vcxproj", "{58C19818-C4DE-33AD-83C9-A192D22F705E}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -36,14 +32,9 @@ Global
 		{ECC546DB-223C-3D00-B2BC-02601950C411}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
 		{ECC546DB-223C-3D00-B2BC-02601950C411}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{ECC546DB-223C-3D00-B2BC-02601950C411}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.Debug|x64.ActiveCfg = Debug|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.Debug|x64.Build.0 = Debug|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.Release|x64.ActiveCfg = Release|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.Release|x64.Build.0 = Release|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{58C19818-C4DE-33AD-83C9-A192D22F705E}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{16AF8B29-196B-357F-8BD2-E8E7356AC900} = {283ADE6C-F31F-31EC-9819-05FC03D7C38E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC35FEA8-FE78-3D92-935C-46CB35BEE700}
