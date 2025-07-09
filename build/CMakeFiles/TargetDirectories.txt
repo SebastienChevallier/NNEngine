@@ -1,5 +1,0 @@
-C:/Users/schev/Documents/GitHub/NNEngine/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/schev/Documents/GitHub/NNEngine/build/NoNameEngine/CMakeFiles/NoNameEngine.dir
-C:/Users/schev/Documents/GitHub/NNEngine/build/NoNameEngine/CMakeFiles/ALL_BUILD.dir
-C:/Users/schev/Documents/GitHub/NNEngine/build/NNE_GameTemplate/CMakeFiles/NNE_GameTemplate.dir
-C:/Users/schev/Documents/GitHub/NNEngine/build/NNE_GameTemplate/CMakeFiles/ALL_BUILD.dir

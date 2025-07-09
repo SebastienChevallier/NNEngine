@@ -1,2 +1,0 @@
-C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/build/CMakeFiles/NoNameEngine.dir
-C:/Users/schev/Documents/GitHub/NNEngine/NoNameEngine/build/CMakeFiles/ALL_BUILD.dir
