@@ -17,8 +17,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Clean CMake Cache
-      run: rm build/CMakeCache.txt
+    
 
     - name: Setup VCPKG
       run: |
