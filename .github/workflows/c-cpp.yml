@@ -36,4 +36,4 @@ jobs:
 
     - name: Run unit tests
       run: ctest --test-dir build -C Release --output-on-failure
-    
+
