@@ -1,8 +1,5 @@
-add_executable(NoNameEngine_tests test_main.cpp)
+add_executable(UnitTests test_main.cpp)
+target_link_libraries(UnitTests PRIVATE NoNameEngine)
 
-# Link the engine library
-# The engine target is NoNameEngine defined in parent directory
-
-target_link_libraries(NoNameEngine_tests PRIVATE NoNameEngine)
-
-add_test(NAME NoNameEngineTests COMMAND NoNameEngine_tests)
+enable_testing()
+add_test(NAME UnitTests COMMAND UnitTests)
