@@ -1306,7 +1306,7 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
         // Vérifier si une texture est définie, sinon utiliser une texture par défaut
         if (mesh->GetTexturePath().empty()) {
             //std::cerr << "⚠️ Aucune texture définie pour " << mesh->GetModelPath() << ", utilisation d'une texture blanche par défaut.\n";
-            mesh->SetTexturePath("../textures/texture.jpg");
+            mesh->SetTexturePath("../assets/textures/texture.jpg");
         }
 
         // Charger une texture propre à chaque entité
