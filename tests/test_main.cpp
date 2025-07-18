@@ -5,6 +5,7 @@
 #include "CameraComponent.h"
 #include "AEntity.h"
 #include "AComponent.h"
+#include "Application.h"
 
 static void test_default_transform()
 {
@@ -71,15 +72,47 @@ static void test_entity_component_management()
     assert(e.GetComponent<NNE::MeshComponent>() == mc);
 }
 
+static void test_get_components_multiple()
+{
+    NNE::AEntity e;
+    e.AddComponent<NNE::MeshComponent>();
+    e.AddComponent<NNE::MeshComponent>();
+    auto meshes = e.GetComponents<NNE::MeshComponent>();
+    assert(meshes.size() == 2);
+    for (auto* m : meshes) {
+        assert(m->GetEntity() == &e);
+    }
+}
+
+static void test_application_id_increment()
+{
+    int id1 = NNE::Application::GetInstance()->GenerateID();
+    int id2 = NNE::Application::GetInstance()->GenerateID();
+    assert(id2 == id1 + 1);
+}
+
+static void test_model_matrix_translation()
+{
+    NNE::TransformComponent t;
+    t.position = glm::vec3(1.0f, 2.0f, 3.0f);
+    glm::mat4 mat = t.getModelMatrix();
+    glm::vec3 trans(mat[3]);
+    assert(glm::all(glm::epsilonEqual(trans, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
+}
+
 int main()
 {
+    NNE::Application app;
+    test_application_id_increment();
     test_default_transform();
     test_parent_relationship();
     test_transform_directions();
     test_world_position();
+    test_model_matrix_translation();
     test_mesh_component_paths();
     test_camera_perspective();
     test_entity_component_management();
+    test_get_components_multiple();
     std::cout << "All tests passed" << std::endl;
     return 0;
 }
