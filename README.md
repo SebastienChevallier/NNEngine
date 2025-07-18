@@ -27,7 +27,6 @@ scripts\build.bat
 ## Architecture
 
 Le moteur est basé sur un ECS avec les composants suivants :
-Un schéma plus complet est disponible dans [docs/architecture.md](docs/architecture.md).
 
 ### Classes principales
 
@@ -162,7 +161,7 @@ int main() {
     // The engine expects the assets folder to be copied next to the executable
     // when building. Relative paths can then be used during runtime.
     MC->SetModelPath("../assets/viking_room.obj");
-    MC->SetTexturePath("../assets/viking_room.png");
+    MC->SetTexturePath("../assets/textures/viking_room.png");
     
     NNE::AEntity* camera = app.CreateEntity();
     NNE::CameraComponent* CC = camera->AddComponent<NNE::CameraComponent>();
@@ -176,4 +175,4 @@ int main() {
     return 0;
 }
 ```
-> Les fichiers `viking_room.obj` et `viking_room.png` ne sont pas fournis. Placez-les dans un dossier `assets/` à la racine du projet avant de compiler.
+> Les fichiers `viking_room.obj` et `viking_room.png` ne sont pas fournis. Placez le modèle dans `assets/` et la texture dans `src/textures/` avant de compiler.
