@@ -14,6 +14,20 @@ NoNameEngine est un moteur de jeu basé sur un système Entity Component System 
 - GLM
 - tinyobjloader
 
+### Installer les dépendances
+Ce projet utilise [vcpkg](https://github.com/microsoft/vcpkg) pour gérer les bibliothèques tierces.
+Des scripts sont fournis pour installer automatiquement `vcpkg` ainsi que les packages requis.
+
+```sh
+# Linux/macOS
+./scripts/install_dependencies.sh
+
+# Windows
+scripts\install_dependencies.bat
+```
+
+Une fois les dépendances en place, vous pouvez générer la solution comme décrit ci-dessous.
+
 ### Compilation
 
 ```sh
