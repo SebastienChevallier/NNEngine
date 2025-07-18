@@ -439,6 +439,5 @@ FodyWeavers.xsd
 
 # Project build directories and solution files
 build/
-NoNameEngine/build/
 *.sln
 *.vcxproj*
