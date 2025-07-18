@@ -1,6 +1,11 @@
 #include <iostream>
 #include <cassert>
 #include "TransformComponent.h"
+#include "MeshComponent.h"
+#include "CameraComponent.h"
+#include "AEntity.h"
+#include "AComponent.h"
+#include "Application.h"
 
 static void test_default_transform()
 {
@@ -20,10 +25,94 @@ static void test_parent_relationship()
     assert(parent.children[0] == &child);
 }
 
+static void test_transform_directions()
+{
+    NNE::TransformComponent t;
+    glm::vec3 forward = t.GetForward();
+    glm::vec3 up = t.GetUp();
+    assert(glm::all(glm::epsilonEqual(forward, glm::vec3(0, 0, -1), 0.0001f)));
+    assert(glm::all(glm::epsilonEqual(up, glm::vec3(0, 1, 0), 0.0001f)));
+}
+
+static void test_world_position()
+{
+    NNE::TransformComponent parent;
+    parent.position = glm::vec3(1.0f, 2.0f, 3.0f);
+    NNE::TransformComponent child;
+    child.position = glm::vec3(1.0f, 0.0f, 0.0f);
+    child.SetParent(&parent);
+    glm::vec3 worldPos = child.GetWorldPosition();
+    assert(glm::all(glm::epsilonEqual(worldPos, glm::vec3(2.0f, 2.0f, 3.0f), 0.0001f)));
+}
+
+static void test_mesh_component_paths()
+{
+    NNE::MeshComponent m;
+    m.SetModelPath("model.obj");
+    m.SetTexturePath("texture.png");
+    assert(m.GetModelPath() == "model.obj");
+    assert(m.GetTexturePath() == "texture.png");
+}
+
+static void test_camera_perspective()
+{
+    NNE::CameraComponent c;
+    c.SetPerspective(60.0f, 4.0f/3.0f, 0.1f, 200.0f);
+    assert(c.GetFOV() == 60.0f);
+    assert(c.GetAspectRatio() == 4.0f/3.0f);
+    assert(c.GetNearPlane() == 0.1f);
+    assert(c.GetFarPlane() == 200.0f);
+}
+
+static void test_entity_component_management()
+{
+    NNE::AEntity e;
+    NNE::MeshComponent* mc = e.AddComponent<NNE::MeshComponent>();
+    assert(mc->GetEntity() == &e);
+    assert(e.GetComponent<NNE::MeshComponent>() == mc);
+}
+
+static void test_get_components_multiple()
+{
+    NNE::AEntity e;
+    e.AddComponent<NNE::MeshComponent>();
+    e.AddComponent<NNE::MeshComponent>();
+    auto meshes = e.GetComponents<NNE::MeshComponent>();
+    assert(meshes.size() == 2);
+    for (auto* m : meshes) {
+        assert(m->GetEntity() == &e);
+    }
+}
+
+static void test_application_id_increment()
+{
+    int id1 = NNE::Application::GetInstance()->GenerateID();
+    int id2 = NNE::Application::GetInstance()->GenerateID();
+    assert(id2 == id1 + 1);
+}
+
+static void test_model_matrix_translation()
+{
+    NNE::TransformComponent t;
+    t.position = glm::vec3(1.0f, 2.0f, 3.0f);
+    glm::mat4 mat = t.getModelMatrix();
+    glm::vec3 trans(mat[3]);
+    assert(glm::all(glm::epsilonEqual(trans, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
+}
+
 int main()
 {
+    NNE::Application app;
+    test_application_id_increment();
     test_default_transform();
     test_parent_relationship();
+    test_transform_directions();
+    test_world_position();
+    test_model_matrix_translation();
+    test_mesh_component_paths();
+    test_camera_perspective();
+    test_entity_component_management();
+    test_get_components_multiple();
     std::cout << "All tests passed" << std::endl;
     return 0;
 }
