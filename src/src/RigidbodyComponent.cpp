@@ -1,4 +1,4 @@
-﻿#include "RigidBodyComponent.h"
+﻿#include "RigidbodyComponent.h"
 #include "Application.h"
 #include "TransformComponent.h"
 #include <Jolt/Physics/Body/BodyCreationSettings.h> 
