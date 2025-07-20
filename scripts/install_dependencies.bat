@@ -28,4 +28,4 @@ echo You can now build the project with:
 echo     cmake -B build -S "%ROOT_DIR%" -DCMAKE_TOOLCHAIN_FILE="%VCPKG_PATH%\scripts\buildsystems\vcpkg.cmake"
 echo     cmake --build build
 
-endlocal
+pause
