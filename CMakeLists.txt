@@ -18,8 +18,9 @@ find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
 find_package(Jolt CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-target_link_libraries(NNEngine PUBLIC glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader Jolt::Jolt)
+target_link_libraries(NNEngine PUBLIC glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader Jolt::Jolt nlohmann_json::nlohmann_json)
 
 # ---------------- Example ----------------
 file(GLOB EXAMPLE_SOURCES examples/src/*.cpp)
