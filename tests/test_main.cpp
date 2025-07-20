@@ -5,7 +5,9 @@
 #include "CameraComponent.h"
 #include "AEntity.h"
 #include "AComponent.h"
+#include "AScene.h"
 #include "Application.h"
+#include <cstdio>
 
 static void test_default_transform()
 {
@@ -100,6 +102,43 @@ static void test_model_matrix_translation()
     assert(glm::all(glm::epsilonEqual(trans, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
 }
 
+static void test_scene_serialization()
+{
+    NNE::AScene scene;
+
+    NNE::AEntity* e1 = new NNE::AEntity();
+    e1->transform->position = glm::vec3(1.0f, 2.0f, 3.0f);
+    NNE::MeshComponent* m1 = e1->AddComponent<NNE::MeshComponent>();
+    m1->SetModelPath("model1.obj");
+    m1->SetTexturePath("texture1.png");
+    scene.entities.push_back(e1);
+
+    NNE::AEntity* e2 = new NNE::AEntity();
+    e2->transform->position = glm::vec3(4.0f, 5.0f, 6.0f);
+    scene.entities.push_back(e2);
+
+    bool saved = scene.Save("test_scene.json");
+    assert(saved);
+
+    NNE::AScene loaded;
+    bool loadedOk = loaded.Load("test_scene.json");
+    assert(loadedOk);
+    assert(loaded.entities.size() == 2);
+
+    auto* lt1 = loaded.entities[0]->GetComponent<NNE::TransformComponent>();
+    auto* lm1 = loaded.entities[0]->GetComponent<NNE::MeshComponent>();
+    assert(lt1 && lm1);
+    assert(glm::all(glm::epsilonEqual(lt1->position, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
+    assert(lm1->GetModelPath() == "model1.obj");
+    assert(lm1->GetTexturePath() == "texture1.png");
+
+    auto* lt2 = loaded.entities[1]->GetComponent<NNE::TransformComponent>();
+    assert(lt2);
+    assert(glm::all(glm::epsilonEqual(lt2->position, glm::vec3(4.0f, 5.0f, 6.0f), 0.0001f)));
+
+    std::remove("test_scene.json");
+}
+
 int main()
 {
     NNE::Application app;
@@ -109,6 +148,7 @@ int main()
     test_transform_directions();
     test_world_position();
     test_model_matrix_translation();
+    test_scene_serialization();
     test_mesh_component_paths();
     test_camera_perspective();
     test_entity_component_management();
