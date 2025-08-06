@@ -41,5 +41,5 @@ cmake --build "$BUILD_DIR"
 
 # Run tests if they were generated
 if command -v ctest >/dev/null 2>&1; then
-    ctest --test-dir "$BUILD_DIR" --output-on-failure || true
+    ctest --test-dir "$BUILD_DIR" --output-on-failure
 fi
