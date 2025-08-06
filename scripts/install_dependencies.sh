@@ -16,7 +16,7 @@ if [ ! -d "$VCPKG_DIR" ]; then
     "$VCPKG_DIR/bootstrap-vcpkg.sh"
 fi
 
-PACKAGES="glfw3 glm stb vulkan tinyobjloader joltphysics"
+PACKAGES="glfw3 glm stb vulkan tinyobjloader joltphysics nlohmann-json"
 "$VCPKG_DIR/vcpkg" install $PACKAGES
 
 cat <<EOS

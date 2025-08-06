@@ -11,6 +11,13 @@ mkdir -p "$BUILD_DIR"
 # Use VCPKG_ROOT if set, otherwise assume ../vcpkg relative to repository root
 VCPKG_PATH="${VCPKG_ROOT:-$ROOT_DIR/vcpkg}"
 TOOLCHAIN_FILE="$VCPKG_PATH/scripts/buildsystems/vcpkg.cmake"
+CMAKE_TOOLCHAIN_ARG=""
+if [ -f "$TOOLCHAIN_FILE" ]; then
+    CMAKE_TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE"
+else
+    echo "Warning: vcpkg toolchain file not found at $TOOLCHAIN_FILE, proceeding without it."
+    CMAKE_TOOLCHAIN_ARG="-DCMAKE_TOOLCHAIN_FILE="
+fi
 
 # Choose an appropriate CMake generator depending on the platform. On Windows
 # we keep using Visual Studio while on other systems we rely on CMake's default
@@ -26,9 +33,9 @@ esac
 
 # Configure and build the project
 if [ -n "$GENERATOR" ]; then
-    cmake -B "$BUILD_DIR" -S "$ROOT_DIR" -G "$GENERATOR" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$@"
+    cmake -B "$BUILD_DIR" -S "$ROOT_DIR" -G "$GENERATOR" $CMAKE_TOOLCHAIN_ARG "$@"
 else
-    cmake -B "$BUILD_DIR" -S "$ROOT_DIR" -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN_FILE" "$@"
+    cmake -B "$BUILD_DIR" -S "$ROOT_DIR" $CMAKE_TOOLCHAIN_ARG "$@"
 fi
 cmake --build "$BUILD_DIR"
 
