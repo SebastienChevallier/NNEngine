@@ -18,7 +18,19 @@ find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(tinyobjloader CONFIG REQUIRED)
 find_package(Jolt CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
+# Try to locate nlohmann_json via package manager (e.g., vcpkg).
+# If not available, fetch the header-only library from upstream.
+find_package(nlohmann_json CONFIG QUIET)
+if(NOT nlohmann_json_FOUND)
+    message(STATUS "nlohmann_json not found; fetching from source")
+    include(FetchContent)
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.2
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+endif()
 
 target_link_libraries(NNEngine PUBLIC glfw glm::glm Vulkan::Vulkan tinyobjloader::tinyobjloader Jolt::Jolt nlohmann_json::nlohmann_json)
 
