@@ -1,6 +1,6 @@
 #include "PhysicsManager.h"
 #include "Application.h"
-
+#include "ColliderComponent.h"
 
 class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
 public:
@@ -18,20 +18,20 @@ public:
     bool ShouldCollide(JPH::ObjectLayer, JPH::ObjectLayer) const override { return true; }
 };
 
-NNE::PhysicsManager::PhysicsManager()
-    : tempAllocator(nullptr), jobSystem(nullptr) // Initialisation temporaire et neutre
+namespace NNE::Systems {
+
+PhysicsManager::PhysicsManager()
+    : tempAllocator(nullptr), jobSystem(nullptr)
 {
-    // Initialisation indispensable AVANT toute utilisation des objets internes Jolt :
     JPH::RegisterDefaultAllocator();
     JPH::Factory::sInstance = new JPH::Factory();
     JPH::RegisterTypes();
 
-    // Initialisation correcte APRÈS :
     tempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
     jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 }
 
-void NNE::PhysicsManager::Initialize() {
+void PhysicsManager::Initialize() {
     static SimpleBroadPhaseLayerInterface broadPhaseLayerInterface;
     static SimpleObjectVsBroadPhaseLayerFilter broadPhaseFilter;
     static SimpleObjectLayerPairFilter objectLayerFilter;
@@ -46,24 +46,23 @@ void NNE::PhysicsManager::Initialize() {
     physicsSystem.SetContactListener(&contactListener);
 }
 
-void NNE::PhysicsManager::Update(float deltaTime) {
-    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);  
-    
+void PhysicsManager::Update(float deltaTime) {
+    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
 }
 
-NNE::PhysicsManager::~PhysicsManager() {
+PhysicsManager::~PhysicsManager() {
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;
 }
 
-JPH::PhysicsSystem* NNE::PhysicsManager::GetPhysicsSystem() {
+JPH::PhysicsSystem* PhysicsManager::GetPhysicsSystem() {
     return &physicsSystem;
 }
 
-void NNE::PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
+void PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
 {
-    ColliderComponent* colliderA = Application::GetInstance()->GetCollider(body1.GetID());
-    ColliderComponent* colliderB = Application::GetInstance()->GetCollider(body2.GetID());
+    auto* colliderA = NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());
+    auto* colliderB = NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
 
     if (colliderA && colliderB)
     {
@@ -71,3 +70,5 @@ void NNE::PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& b
         colliderB->OnHit(colliderA);
     }
 }
+
+} // namespace NNE::Systems

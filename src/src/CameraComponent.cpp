@@ -1,15 +1,14 @@
 #include "CameraComponent.h"
 
-NNE::CameraComponent::CameraComponent(float fov, float aspectRatio, float nearPlane, float farPlane) : fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane)
+NNE::Component::Render::CameraComponent::CameraComponent(float fov, float aspectRatio, float nearPlane, float farPlane) : fov(fov), aspectRatio(aspectRatio), nearPlane(nearPlane), farPlane(farPlane)
 {
-	SetPerspective(fov, aspectRatio, nearPlane, farPlane);
+        SetPerspective(fov, aspectRatio, nearPlane, farPlane);
 }
 
-void NNE::CameraComponent::Update(float deltaTime)
+void NNE::Component::Render::CameraComponent::Update(float deltaTime)
 {
-    CameraComponent* cameraComp = _entity->GetComponent<CameraComponent>();
-    TransformComponent* transform = _entity->GetComponent<TransformComponent>();
-    // S’il s’agit d’une entité “caméra”
+    auto* cameraComp = _entity->GetComponent<NNE::Component::Render::CameraComponent>();
+    auto* transform = _entity->GetComponent<NNE::Component::TransformComponent>();
     if (cameraComp && transform) {
         glm::vec3 pos = transform->GetWorldPosition();
         glm::vec3 target = pos + transform->GetForward();
@@ -18,7 +17,7 @@ void NNE::CameraComponent::Update(float deltaTime)
     }
 }
 
-void NNE::CameraComponent::SetPerspective(float fov, float aspectRatio, float nearPlane, float farPlane)
+void NNE::Component::Render::CameraComponent::SetPerspective(float fov, float aspectRatio, float nearPlane, float farPlane)
 {
     this->fov = fov;
     this->aspectRatio = aspectRatio;
@@ -26,10 +25,10 @@ void NNE::CameraComponent::SetPerspective(float fov, float aspectRatio, float ne
     this->farPlane = farPlane;
 
     projectionMatrix = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
-    projectionMatrix[1][1] *= -1; // Correction pour Vulkan
+    projectionMatrix[1][1] *= -1;
 }
 
-void NNE::CameraComponent::UpdateViewMatrix(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
+void NNE::Component::Render::CameraComponent::UpdateViewMatrix(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
 {
     viewMatrix = glm::lookAt(position, target, up);
 }

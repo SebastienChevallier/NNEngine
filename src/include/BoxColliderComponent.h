@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
-namespace NNE
+namespace NNE::Component::Physics
 {
     class BoxColliderComponent : public ColliderComponent
     {

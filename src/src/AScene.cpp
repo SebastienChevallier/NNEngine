@@ -38,16 +38,16 @@ bool AScene::Save(const std::string& path) const
         file << "    {\n      \"components\": [\n";
 
         bool first = true;
-        for (AComponent* comp : entity->components) {
+        for (NNE::Component::AComponent* comp : entity->components) {
             if (!first) file << ",\n";
             first = false;
 
-            if (auto* t = dynamic_cast<TransformComponent*>(comp)) {
+            if (auto* t = dynamic_cast<NNE::Component::TransformComponent*>(comp)) {
                 file << "        {\"type\":\"TransformComponent\",";
                 file << "\"position\":"; WriteVec3(file, t->position); file << ",";
                 file << "\"rotation\":"; WriteVec3(file, t->rotation); file << ",";
                 file << "\"scale\":"; WriteVec3(file, t->scale); file << "}";
-            } else if (auto* m = dynamic_cast<MeshComponent*>(comp)) {
+            } else if (auto* m = dynamic_cast<NNE::Component::Render::MeshComponent*>(comp)) {
                 file << "        {\"type\":\"MeshComponent\",";
                 file << "\"model\":\"" << m->GetModelPath() << "\",";
                 file << "\"texture\":\"" << m->GetTexturePath() << "\"}";
@@ -69,7 +69,6 @@ bool AScene::Load(const std::string& path)
     if (!file.is_open())
         return false;
 
-    // Clear previous entities
     for (AEntity* e : entities)
         delete e;
     entities.clear();
@@ -111,7 +110,7 @@ bool AScene::Load(const std::string& path)
                 size_t sEnd = content.find(']', sBegin);
                 glm::vec3 s = ParseVec3(content.substr(sBegin, sEnd - sBegin + 1));
 
-                TransformComponent* t = entity->AddComponent<TransformComponent>();
+                NNE::Component::TransformComponent* t = entity->AddComponent<NNE::Component::TransformComponent>();
                 t->position = p;
                 t->rotation = r;
                 t->scale = s;
@@ -125,7 +124,7 @@ bool AScene::Load(const std::string& path)
                 size_t tEnd = content.find('"', tBegin + 1);
                 std::string texture = content.substr(tBegin + 1, tEnd - tBegin - 1);
 
-                MeshComponent* m = entity->AddComponent<MeshComponent>();
+                NNE::Component::Render::MeshComponent* m = entity->AddComponent<NNE::Component::Render::MeshComponent>();
                 m->SetModelPath(model);
                 m->SetTexturePath(texture);
                 pos = tEnd + 1;

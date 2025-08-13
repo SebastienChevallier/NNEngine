@@ -1,21 +1,18 @@
 #include "Application.h"
 
-
 std::clock_t lastFrameTime;
-NNE::Application* NNE::Application::Instance = nullptr;
-int NNE::Application::_genericID = 0;
+NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
+int NNE::Systems::Application::_genericID = 0;
 
-
-
-NNE::Application::Application()
+NNE::Systems::Application::Application()
 {
     Instance = this;
     VKManager = new VulkanManager();
-	physicsManager = new PhysicsManager();
+    physicsManager = new PhysicsManager();
     delta = 0;
 }
 
-NNE::Application::~Application()
+NNE::Systems::Application::~Application()
 {
     if (VKManager) {
         VKManager->CleanUp();
@@ -23,82 +20,76 @@ NNE::Application::~Application()
         VKManager = nullptr;
     }
 
-
-    for (AEntity* entity : _entities) {
+    for (NNE::AEntity* entity : _entities) {
         delete entity;
-    }   
+    }
     _entities.clear();
 }
 
-
-void NNE::Application::Init()
-{    
-    Open();    
+void NNE::Systems::Application::Init()
+{
+    Open();
     VKManager->initVulkan();
     physicsManager->Initialize();
-    //VKManager->LoadEntitiesModels(_entities);
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
-    for (AEntity* entity : _entities)
+    for (NNE::AEntity* entity : _entities)
     {
         entity->Awake();
         entity->Start();
     }
 }
 
-void NNE::Application::Update()
+void NNE::Systems::Application::Update()
 {
-    
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
-        glfwPollEvents();        
-        InputManager::Update();
-        physicsManager->Update(delta);       
+        glfwPollEvents();
+        NNE::Systems::InputManager::Update();
+        physicsManager->Update(delta);
 
-        //Update
-        for(AEntity* entity : _entities)
+        for (NNE::AEntity* entity : _entities)
         {
             entity->Update(delta);
         }
 
-        //LateUpdate
-        for (AEntity* entity : _entities)
+        for (NNE::AEntity* entity : _entities)
         {
             entity->LateUpdate(delta);
         }
 
         VKManager->drawFrame();
-    }   
+    }
     vkDeviceWaitIdle(VKManager->device);
 }
 
-void NNE::Application::Open()
+void NNE::Systems::Application::Open()
 {
     VKManager->CreateGLFWWindow(WIDTH, HEIGHT);
-    InputManager::Init(VKManager->window);
+    NNE::Systems::InputManager::Init(VKManager->window);
 }
 
-void NNE::Application::Quit()
-{    
+void NNE::Systems::Application::Quit()
+{
     glfwTerminate();
 }
 
-int NNE::Application::GenerateID()
+int NNE::Systems::Application::GenerateID()
 {
     _genericID++;
     return _genericID;
 }
 
-NNE::AEntity* NNE::Application::CreateEntity()
+NNE::AEntity* NNE::Systems::Application::CreateEntity()
 {
-    AEntity* entity = new AEntity();
+    NNE::AEntity* entity = new NNE::AEntity();
     _entities.push_back(entity);
     return entity;
 }
 
-float NNE::Application::GetDeltaTime()
+float NNE::Systems::Application::GetDeltaTime()
 {
     static auto lastFrame = std::chrono::high_resolution_clock::now();
     auto currentFrame = std::chrono::high_resolution_clock::now();
@@ -107,15 +98,7 @@ float NNE::Application::GetDeltaTime()
     return dt;
 }
 
-//GLFWwindow* NNE::Application::CreateGLFWWindow(int width, int height)
-//{
-//    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-//    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-//    window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
-//    return window;
-//}
-
-NNE::Application* NNE::Application::GetInstance()
+NNE::Systems::Application* NNE::Systems::Application::GetInstance()
 {
     return Instance;
 }

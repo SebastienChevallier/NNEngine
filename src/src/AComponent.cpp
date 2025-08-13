@@ -1,38 +1,38 @@
 #include "AComponent.h"
-#include <Application.h>
+#include "Application.h"
 
-NNE::AComponent::AComponent()
+NNE::Component::AComponent::AComponent()
 {
-	_id = NNE::Application::GetInstance()->GenerateID();
+        _id = NNE::Systems::Application::GetInstance()->GenerateID();
 }
 
-void NNE::AComponent::Awake()
-{
-}
-
-void NNE::AComponent::Start()
+void NNE::Component::AComponent::Awake()
 {
 }
 
-void NNE::AComponent::Update(float deltaTime)
+void NNE::Component::AComponent::Start()
 {
 }
 
-void NNE::AComponent::LateUpdate(float deltaTime)
+void NNE::Component::AComponent::Update(float deltaTime)
 {
 }
 
-int NNE::AComponent::GetID()
+void NNE::Component::AComponent::LateUpdate(float deltaTime)
 {
-	return _id;
 }
 
-NNE::AEntity* NNE::AComponent::GetEntity()
+int NNE::Component::AComponent::GetID()
 {
-	return _entity;
+        return _id;
 }
 
-void NNE::AComponent::SetEntity(AEntity* entity)
+NNE::AEntity* NNE::Component::AComponent::GetEntity()
 {
-	_entity = entity;
+        return _entity;
+}
+
+void NNE::Component::AComponent::SetEntity(NNE::AEntity* entity)
+{
+        _entity = entity;
 }

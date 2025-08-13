@@ -5,12 +5,12 @@
 #include <glm/glm.hpp>
 #include <unordered_map>
 
-namespace NNE {
+namespace NNE::Systems {
 
     class InputManager {
     public:
         static void Init(GLFWwindow* win);
-        static void Update();  // Met à jour les états des touches
+        static void Update();
         static bool IsKeyPressed(int key);
         static bool IsKeyJustPressed(int key);
         static bool IsKeyJustReleased(int key);

@@ -1,7 +1,7 @@
 #include "MeshComponent.h"
 #include <iostream>
 
-NNE::MeshComponent::MeshComponent()
+NNE::Component::Render::MeshComponent::MeshComponent()
 {
     textureImage = VK_NULL_HANDLE;
     textureImageMemory = VK_NULL_HANDLE;
@@ -9,21 +9,20 @@ NNE::MeshComponent::MeshComponent()
     textureSampler = VK_NULL_HANDLE;
 }
 
-void NNE::MeshComponent::SetModelPath(std::string path)
+void NNE::Component::Render::MeshComponent::SetModelPath(std::string path)
 {
-	modelPath = path;
+        modelPath = std::move(path);
 }
 
-void NNE::MeshComponent::SetTexturePath(std::string path)
+void NNE::Component::Render::MeshComponent::SetTexturePath(std::string path)
 {
-	texturePath = path;
+        texturePath = std::move(path);
 }
 
-std::string NNE::MeshComponent::GetModelPath() const {
+std::string NNE::Component::Render::MeshComponent::GetModelPath() const {
     return modelPath;
 }
 
-std::string NNE::MeshComponent::GetTexturePath() const {
-	//std::cout << "Texture path: " << texturePath << std::endl;
+std::string NNE::Component::Render::MeshComponent::GetTexturePath() const {
     return texturePath;
 }

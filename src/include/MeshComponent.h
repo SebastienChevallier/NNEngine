@@ -1,12 +1,11 @@
 #pragma once
-#include "AComponent.h" 
+#include "AComponent.h"
 #include <string>
 #include <vulkan/vulkan.h>
 
-namespace NNE {
-    class AComponent;
-	class MeshComponent : public AComponent
-	{
+namespace NNE::Component::Render {
+        class MeshComponent : public NNE::Component::AComponent
+        {
     private:
         std::string modelPath;
         std::string texturePath;
@@ -14,18 +13,12 @@ namespace NNE {
         uint32_t indexCount = 0;
 
     public:
-        MeshComponent();   
+        MeshComponent();
 
-        // Ajout des ressources Vulkan propres à chaque entité
         VkImage textureImage = VK_NULL_HANDLE;
         VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
         VkImageView textureImageView = VK_NULL_HANDLE;
         VkSampler textureSampler = VK_NULL_HANDLE;
-
-        /*virtual void Awake() override;
-        virtual void Start() override;
-        virtual void Update(float deltaTime) override;
-        virtual void LateUpdate(float deltaTime) override;*/
 
         std::string GetModelPath() const;
         std::string GetTexturePath() const;
@@ -36,7 +29,5 @@ namespace NNE {
         void setIndexCount(uint32_t count) { indexCount = count; }
         uint32_t getIndexOffset() const { return indexOffset; }
         uint32_t getIndexCount() const { return indexCount; }
-	};
+        };
 }
-	
-

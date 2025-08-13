@@ -5,7 +5,7 @@
 #include "AEntity.h"
 #include <glm/ext/vector_float3.hpp>
 
-class PlayerController : public NNE::MonoComponent
+class PlayerController : public NNE::Component::MonoComponent
 {
 private:
 	float speed = 10.0f;
@@ -18,6 +18,6 @@ public:
 	void Awake() override;
 	void Update(float deltaTime) override;
 
-	void OnHit(NNE::ColliderComponent* other) override;
+        void OnHit(NNE::Component::Physics::ColliderComponent* other) override;
 };
 

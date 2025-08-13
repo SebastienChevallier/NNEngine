@@ -4,9 +4,9 @@
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 
-namespace NNE
+namespace NNE::Component::Physics
 {
-    class ColliderComponent : public AComponent
+    class ColliderComponent : public NNE::Component::AComponent
     {
     protected:
         JPH::ShapeRefC shape;

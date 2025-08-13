@@ -1,26 +1,26 @@
 #include "MonoComponent.h"
 
-void NNE::MonoComponent::Awake()
+void NNE::Component::MonoComponent::Awake()
 {
 
 }
 
-void NNE::MonoComponent::Start()
+void NNE::Component::MonoComponent::Start()
 {
 }
 
-void NNE::MonoComponent::Update(float deltaTime)
+void NNE::Component::MonoComponent::Update(float deltaTime)
 {
 }
 
-void NNE::MonoComponent::LateUpdate(float deltaTime)
+void NNE::Component::MonoComponent::LateUpdate(float deltaTime)
 {
 }
 
-void NNE::MonoComponent::OnHit(NNE::ColliderComponent* other)
+void NNE::Component::MonoComponent::OnHit(NNE::Component::Physics::ColliderComponent* other)
 {
 }
 
-void NNE::MonoComponent::OnTriggerHit(NNE::ColliderComponent* other)
+void NNE::Component::MonoComponent::OnTriggerHit(NNE::Component::Physics::ColliderComponent* other)
 {
 }
