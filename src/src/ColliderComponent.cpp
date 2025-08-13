@@ -1,28 +1,28 @@
 #include "ColliderComponent.h"
-#include <MonoComponent.h>
+#include "MonoComponent.h"
 
 
-void NNE::ColliderComponent::OnHit(ColliderComponent* other)
+void NNE::Component::Physics::ColliderComponent::OnHit(ColliderComponent* other)
 {
-	std::vector<MonoComponent*> list = _entity->GetComponents<MonoComponent>();
+        std::vector<NNE::Component::MonoComponent*> list = _entity->GetComponents<NNE::Component::MonoComponent>();
 
 	if (!list.empty()) {
-		for each (MonoComponent * comp in list)
-		{
-			comp->OnHit(other);
-		}
+                for each (NNE::Component::MonoComponent * comp in list)
+                {
+                        comp->OnHit(other);
+                }
 	}
 	
 }
 
-void NNE::ColliderComponent::OnTriggerHit(ColliderComponent* other)
+void NNE::Component::Physics::ColliderComponent::OnTriggerHit(ColliderComponent* other)
 {
-	std::vector<MonoComponent*> list = _entity->GetComponents<MonoComponent>();
+        std::vector<NNE::Component::MonoComponent*> list = _entity->GetComponents<NNE::Component::MonoComponent>();
 
 	if (!list.empty()) {
-		for each (MonoComponent * comp in list)
-		{
-			comp->OnTriggerHit(other);
-		}
+                for each (NNE::Component::MonoComponent * comp in list)
+                {
+                        comp->OnTriggerHit(other);
+                }
 	}
 }

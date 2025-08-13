@@ -3,21 +3,20 @@
 #include <vector>
 #include <string>
 #include "AComponent.h"
-#include <TransformComponent.h>
+#include "TransformComponent.h"
 
-namespace NNE {	
-	class AComponent;	
-	class AEntity
-	{
-	protected: 
-		int _ID;
-		std::string _Name;	
+namespace NNE {
+        class AEntity
+        {
+        protected:
+                int _ID;
+                std::string _Name;
 
-	public:
-		AEntity();
-		~AEntity();
-		NNE::TransformComponent* transform;
-		std::vector<AComponent*> components;
+        public:
+                AEntity();
+                ~AEntity();
+                NNE::Component::TransformComponent* transform;
+                std::vector<NNE::Component::AComponent*> components;
 
 		int GetID();
 		std::string GetName();
@@ -38,39 +37,39 @@ namespace NNE {
 
 	};
 
-	template<typename T, typename... Args>
-	T* NNE::AEntity::AddComponent(Args&&... args)
-	{
-		T* component = new T(std::forward<Args>(args)...);
-		components.push_back(component);
-		component->SetEntity(this);
-		return component;
-	}
+        template<typename T, typename... Args>
+        T* NNE::AEntity::AddComponent(Args&&... args)
+        {
+                T* component = new T(std::forward<Args>(args)...);
+                components.push_back(component);
+                component->SetEntity(this);
+                return component;
+        }
 
-	template<typename T>
-	T* NNE::AEntity::GetComponent()
-	{
-		for (AComponent* component : components) {
-			T* casted = dynamic_cast<T*>(component);
-			if (casted) {
-				return casted;
-			}
-		}
-		return nullptr;
-	}
+        template<typename T>
+        T* NNE::AEntity::GetComponent()
+        {
+                for (NNE::Component::AComponent* component : components) {
+                        T* casted = dynamic_cast<T*>(component);
+                        if (casted) {
+                                return casted;
+                        }
+                }
+                return nullptr;
+        }
 
-	template<typename T>
-	std::vector<T*> NNE::AEntity::GetComponents()
-	{
-		std::vector<T*> ref;
-		for (AComponent* component : components) {
-			T* casted = dynamic_cast<T*>(component);
-			if (casted) {
-				ref.push_back(casted);
-			}
-		}
-		return ref;
-	}
+        template<typename T>
+        std::vector<T*> NNE::AEntity::GetComponents()
+        {
+                std::vector<T*> ref;
+                for (NNE::Component::AComponent* component : components) {
+                        T* casted = dynamic_cast<T*>(component);
+                        if (casted) {
+                                ref.push_back(casted);
+                        }
+                }
+                return ref;
+        }
 }
 
 

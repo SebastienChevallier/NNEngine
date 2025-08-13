@@ -7,9 +7,9 @@
 #include <Jolt/Physics/Body/BodyID.h>
 #include <glm/glm.hpp>
 
-namespace NNE {
+namespace NNE::Component::Physics {
 
-    class RigidbodyComponent : public AComponent {
+    class RigidbodyComponent : public NNE::Component::AComponent {
     private:
         JPH::BodyID bodyID;
         float mass;
@@ -24,7 +24,7 @@ namespace NNE {
         JPH::BodyID GetBodyID() const;
 
         void SetLinearVelocity(glm::vec3 velocity);
-		glm::vec3 GetLinearVelocity() const;
+        glm::vec3 GetLinearVelocity() const;
     };
 
 }

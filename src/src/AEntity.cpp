@@ -1,19 +1,19 @@
 #include "AEntity.h"
-#include <Application.h>
+#include "Application.h"
 
 
 NNE::AEntity::AEntity()
 {
-	_ID = NNE::Application::GetInstance()->GenerateID();
-	transform = this->AddComponent<TransformComponent>();
+        _ID = NNE::Systems::Application::GetInstance()->GenerateID();
+        transform = this->AddComponent<NNE::Component::TransformComponent>();
 }
 
 NNE::AEntity::~AEntity()
 {
-	for (AComponent* comp : NNE::AEntity::components) {
-		delete comp;
-	}
-	components.clear();
+        for (NNE::Component::AComponent* comp : NNE::AEntity::components) {
+                delete comp;
+        }
+        components.clear();
 }
 
 int NNE::AEntity::GetID()
@@ -24,36 +24,36 @@ int NNE::AEntity::GetID()
 
 void NNE::AEntity::Awake()
 {
-	if (!components.empty()) {
-		for (AComponent* component : components) {
-			component->Awake();
-		}
-	}
+        if (!components.empty()) {
+                for (NNE::Component::AComponent* component : components) {
+                        component->Awake();
+                }
+        }
 }
 
 void NNE::AEntity::Start()
 {
-	if (!components.empty()) {
-		for (AComponent* component : components) {
-			component->Start();
-		}
-	}
+        if (!components.empty()) {
+                for (NNE::Component::AComponent* component : components) {
+                        component->Start();
+                }
+        }
 }
 
 void NNE::AEntity::Update(float delta)
 {
-	if (!components.empty()) {
-		for (AComponent* component : components) {
-			component->Update(delta);
-		}
-	}
+        if (!components.empty()) {
+                for (NNE::Component::AComponent* component : components) {
+                        component->Update(delta);
+                }
+        }
 }
 
 void NNE::AEntity::LateUpdate(float delta)
 {
-	if (!components.empty()) {
-		for (AComponent* component : components) {
-			component->LateUpdate(delta);
-		}
-	}
+        if (!components.empty()) {
+                for (NNE::Component::AComponent* component : components) {
+                        component->LateUpdate(delta);
+                }
+        }
 }

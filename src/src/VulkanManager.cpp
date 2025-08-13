@@ -23,7 +23,7 @@ const std::vector<const char*> deviceExtensions = {
 const bool enableValidationLayers = true;
 
 
-NNE::VulkanManager::VulkanManager()
+NNE::Systems::VulkanManager::VulkanManager()
 {
     device = VK_NULL_HANDLE;
     instance = VK_NULL_HANDLE;
@@ -60,12 +60,12 @@ NNE::VulkanManager::VulkanManager()
     }
 }
 
-NNE::VulkanManager::~VulkanManager()
+NNE::Systems::VulkanManager::~VulkanManager()
 {
     CleanUp();
 }
 
-void NNE::VulkanManager::initVulkan()
+void NNE::Systems::VulkanManager::initVulkan()
 {
     CreateVulkanInstance();        // 1️⃣ Créer une instance Vulkan
     createSurface();               // 2️⃣ Créer la surface de rendu
@@ -85,7 +85,7 @@ void NNE::VulkanManager::initVulkan()
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
 
-    LoadEntitiesModels(Application::GetInstance()->_entities); // 📦 Charger les modèles 3D
+    LoadEntitiesModels(NNE::Systems::Application::GetInstance()->_entities); // 📦 Charger les modèles 3D
     createVertexBuffer();           // 📦 Stocker les sommets des modèles
     createIndexBuffer();            // 📌 Stocker les indices des modèles
     createUniformBuffers();         // 🎭 Créer les buffers uniformes pour les shaders
@@ -101,7 +101,7 @@ void NNE::VulkanManager::initVulkan()
 }
 
 
-NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice device)
+NNE::Systems::QueueFamilyIndices NNE::Systems::VulkanManager::findQueueFamilies(VkPhysicalDevice device)
 {
     QueueFamilyIndices indices;
 
@@ -139,7 +139,7 @@ NNE::QueueFamilyIndices NNE::VulkanManager::findQueueFamilies(VkPhysicalDevice d
     return indices;
 }
 
-bool NNE::VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
+bool NNE::Systems::VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -156,7 +156,7 @@ bool NNE::VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-NNE::SwapChainSupportDetails NNE::VulkanManager::querySwapChainSupport(VkPhysicalDevice device)
+NNE::Systems::SwapChainSupportDetails NNE::Systems::VulkanManager::querySwapChainSupport(VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
 
@@ -180,7 +180,7 @@ NNE::SwapChainSupportDetails NNE::VulkanManager::querySwapChainSupport(VkPhysica
     return details;
 }
 
-VkSurfaceFormatKHR NNE::VulkanManager::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+VkSurfaceFormatKHR NNE::Systems::VulkanManager::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
     for (const auto& availableFormat : availableFormats) {
         if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -190,7 +190,7 @@ VkSurfaceFormatKHR NNE::VulkanManager::chooseSwapSurfaceFormat(const std::vector
     return availableFormats[0];
 }
 
-VkPresentModeKHR NNE::VulkanManager::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+VkPresentModeKHR NNE::Systems::VulkanManager::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
     for (const auto& availablePresentMode : availablePresentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -201,7 +201,7 @@ VkPresentModeKHR NNE::VulkanManager::chooseSwapPresentMode(const std::vector<VkP
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D NNE::VulkanManager::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+VkExtent2D NNE::Systems::VulkanManager::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 {
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         return capabilities.currentExtent;
@@ -222,7 +222,7 @@ VkExtent2D NNE::VulkanManager::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& 
     }
 }
 
-uint32_t NNE::VulkanManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t NNE::Systems::VulkanManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -236,7 +236,7 @@ uint32_t NNE::VulkanManager::findMemoryType(uint32_t typeFilter, VkMemoryPropert
     throw std::runtime_error("failed to find suitable memory type!");    
 }
 
-void NNE::VulkanManager::CreateVulkanInstance()
+void NNE::Systems::VulkanManager::CreateVulkanInstance()
 {
     if (enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("validation layers requested, but not available!");
@@ -281,7 +281,7 @@ void NNE::VulkanManager::CreateVulkanInstance()
     }
 }
 
-bool NNE::VulkanManager::checkValidationLayerSupport()
+bool NNE::Systems::VulkanManager::checkValidationLayerSupport()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -307,7 +307,7 @@ bool NNE::VulkanManager::checkValidationLayerSupport()
     return true;
 }
 
-void NNE::VulkanManager::pickPhysicalDevice()
+void NNE::Systems::VulkanManager::pickPhysicalDevice()
 {
     uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -332,7 +332,7 @@ void NNE::VulkanManager::pickPhysicalDevice()
         }
 } 
 
-void NNE::VulkanManager::createLogicalDevice()
+void NNE::Systems::VulkanManager::createLogicalDevice()
 {
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
@@ -380,7 +380,7 @@ void NNE::VulkanManager::createLogicalDevice()
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);    
 }
 
-GLFWwindow* NNE::VulkanManager::CreateGLFWWindow(int width, int height)
+GLFWwindow* NNE::Systems::VulkanManager::CreateGLFWWindow(int width, int height)
 {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -391,20 +391,20 @@ GLFWwindow* NNE::VulkanManager::CreateGLFWWindow(int width, int height)
     return window;
 }
 
-void NNE::VulkanManager::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+void NNE::Systems::VulkanManager::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     auto app = reinterpret_cast<VulkanManager*>(glfwGetWindowUserPointer(window));
     app->framebufferResized = true;
 }
 
-void NNE::VulkanManager::createSurface()
+void NNE::Systems::VulkanManager::createSurface()
 {
     if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
         throw std::runtime_error("failed to create window surface!");
     }
 }
 
-void NNE::VulkanManager::createSwapChain()
+void NNE::Systems::VulkanManager::createSwapChain()
 {
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -459,7 +459,7 @@ void NNE::VulkanManager::createSwapChain()
     swapChainExtent = extent;
 }
 
-void NNE::VulkanManager::createImageViews()
+void NNE::Systems::VulkanManager::createImageViews()
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -468,7 +468,7 @@ void NNE::VulkanManager::createImageViews()
     }
 }
 
-VkImageView NNE::VulkanManager::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
+VkImageView NNE::Systems::VulkanManager::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -489,7 +489,7 @@ VkImageView NNE::VulkanManager::createImageView(VkImage image, VkFormat format, 
     return imageView;
 }
 
-void NNE::VulkanManager::createRenderPass()
+void NNE::Systems::VulkanManager::createRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapChainImageFormat;
@@ -566,7 +566,7 @@ void NNE::VulkanManager::createRenderPass()
     }
 }
 
-void NNE::VulkanManager::createGraphicsPipeline()
+void NNE::Systems::VulkanManager::createGraphicsPipeline()
 {
     auto vertShaderCode = readFile("vert.spv");
     auto fragShaderCode = readFile("frag.spv");
@@ -705,7 +705,7 @@ void NNE::VulkanManager::createGraphicsPipeline()
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-void NNE::VulkanManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
+void NNE::Systems::VulkanManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
     VkBufferCreateInfo bufferInfo{};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -734,7 +734,7 @@ void NNE::VulkanManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usag
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
 
-void NNE::VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+void NNE::Systems::VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -745,7 +745,7 @@ void NNE::VulkanManager::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDe
     endSingleTimeCommands(commandBuffer);
 }
 
-void NNE::VulkanManager::createIndexBuffer()
+void NNE::Systems::VulkanManager::createIndexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
     /*std::cout << "Nombre d'indices : " << indices.size() << std::endl;
@@ -768,7 +768,7 @@ void NNE::VulkanManager::createIndexBuffer()
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void NNE::VulkanManager::createVertexBuffer()
+void NNE::Systems::VulkanManager::createVertexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
@@ -791,7 +791,7 @@ void NNE::VulkanManager::createVertexBuffer()
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void NNE::VulkanManager::createFramebuffers()
+void NNE::Systems::VulkanManager::createFramebuffers()
 {
     swapChainFramebuffers.resize(swapChainImageViews.size());
 
@@ -817,7 +817,7 @@ void NNE::VulkanManager::createFramebuffers()
     }
 }
 
-void NNE::VulkanManager::createCommandPool()
+void NNE::Systems::VulkanManager::createCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
@@ -831,7 +831,7 @@ void NNE::VulkanManager::createCommandPool()
     }
 }
 
-void NNE::VulkanManager::createCommandBuffers()
+void NNE::Systems::VulkanManager::createCommandBuffers()
 {
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -847,7 +847,7 @@ void NNE::VulkanManager::createCommandBuffers()
     }
 }
 
-void NNE::VulkanManager::createUniformBuffers()
+void NNE::Systems::VulkanManager::createUniformBuffers()
 {
     // UBO global (vue/projection)
     VkDeviceSize globalBufferSize = sizeof(GlobalUniformBufferObject);
@@ -876,7 +876,7 @@ void NNE::VulkanManager::createUniformBuffers()
     }
 }
 
-void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {   
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -925,10 +925,10 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     // 🔥 Boucle pour dessiner les entités
-    const std::vector<AEntity*>& entities = Application::GetInstance()->_entities;
+    const std::vector<NNE::AEntity*>& entities = NNE::Systems::Application::GetInstance()->_entities;
     for (size_t i = 0; i < entities.size(); i++) {
-        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
-        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entities[i]->GetComponent<MeshComponent>());
+        NNE::Component::TransformComponent* transform = entities[i]->GetComponent<NNE::Component::TransformComponent>();
+        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entities[i]->GetComponent<NNE::Component::Render::MeshComponent>());
 
         if (!mesh || mesh->getIndexCount() == 0) continue;
 
@@ -969,7 +969,7 @@ void NNE::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint
     }
 }
 
-void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
+void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -985,7 +985,7 @@ void NNE::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         
 }
 
-void NNE::VulkanManager::loadModel(const std::string& modelPath)
+void NNE::Systems::VulkanManager::loadModel(const std::string& modelPath)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -1031,7 +1031,7 @@ void NNE::VulkanManager::loadModel(const std::string& modelPath)
     std::cout << "Nombre d'indices : " << indices.size() << std::endl;*/
 }
 
-void NNE::VulkanManager::createDescriptorSetLayout()
+void NNE::Systems::VulkanManager::createDescriptorSetLayout()
 {
     // Binding 0 : UBO global pour la vue/projection
     VkDescriptorSetLayoutBinding globalUboLayoutBinding{};
@@ -1064,7 +1064,7 @@ void NNE::VulkanManager::createDescriptorSetLayout()
     }
 }
 
-void NNE::VulkanManager::createDescriptorPool()
+void NNE::Systems::VulkanManager::createDescriptorPool()
 {
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1085,7 +1085,7 @@ void NNE::VulkanManager::createDescriptorPool()
     }
 }
 
-void NNE::VulkanManager::createDescriptorSets()
+void NNE::Systems::VulkanManager::createDescriptorSets()
 {
     descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -1118,7 +1118,7 @@ void NNE::VulkanManager::createDescriptorSets()
     }
 }
 
-void NNE::VulkanManager::drawFrame()
+void NNE::Systems::VulkanManager::drawFrame()
 {
     try {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -1189,7 +1189,7 @@ void NNE::VulkanManager::drawFrame()
     }
 }
 
-void NNE::VulkanManager::createSyncObjects()
+void NNE::Systems::VulkanManager::createSyncObjects()
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1212,7 +1212,7 @@ void NNE::VulkanManager::createSyncObjects()
     }
 }
 
-void NNE::VulkanManager::recreateSwapChain()
+void NNE::Systems::VulkanManager::recreateSwapChain()
 {
     int width = 0, height = 0;
     glfwGetFramebufferSize(window, &width, &height);
@@ -1243,7 +1243,7 @@ void NNE::VulkanManager::recreateSwapChain()
 	updateCameraAspectRatio();
 }
 
-void NNE::VulkanManager::updateCameraAspectRatio()
+void NNE::Systems::VulkanManager::updateCameraAspectRatio()
 {
     if (activeCamera) {
         int width, height;
@@ -1255,7 +1255,7 @@ void NNE::VulkanManager::updateCameraAspectRatio()
     }
 }
 
-void NNE::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
+void NNE::Systems::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
 {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -1292,10 +1292,10 @@ void NNE::VulkanManager::createTextureImage(const std::string& texturePath, VkIm
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 }
 
-void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entities)
+void NNE::Systems::VulkanManager::LoadEntitiesModels(const std::vector<NNE::AEntity*>& entities)
 {
-    for (AEntity* entity : entities) {
-        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
+    for (NNE::AEntity* entity : entities) {
+        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entity->GetComponent<NNE::Component::Render::MeshComponent>());
         if (!mesh || mesh->getIndexCount() != 0) continue;
 
         uint32_t startOffset = static_cast<uint32_t>(indices.size());
@@ -1320,14 +1320,14 @@ void NNE::VulkanManager::LoadEntitiesModels(const std::vector<AEntity*>& entitie
     }
 }
 
-void NNE::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities)
+void NNE::Systems::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<NNE::AEntity*>& entities)
 {
     // On suppose ici que pour chaque entité, on souhaite copier sa matrice modèle dans le buffer.
     // Le buffer est supposé être de taille MAX_OBJECTS * sizeof(glm::mat4).
     size_t offset = 0;
     // Parcourir les entités (attention : si le nombre d'entités dépasse MAX_OBJECTS, il faudra gérer ce cas)
     for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
-        TransformComponent* transform = entities[i]->GetComponent<TransformComponent>();
+        NNE::Component::TransformComponent* transform = entities[i]->GetComponent<NNE::Component::TransformComponent>();
         if (transform) {
             glm::mat4 modelMatrix = transform->getModelMatrix();
             memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
@@ -1336,7 +1336,7 @@ void NNE::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const 
     }
 }
 
-void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+void NNE::Systems::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1372,12 +1372,12 @@ void NNE::VulkanManager::createImage(uint32_t width, uint32_t height, uint32_t m
     vkBindImageMemory(device, image, imageMemory, 0);
 }
 
-void NNE::VulkanManager::createTextureImageView(VkImage textureImage, VkImageView& textureImageView)
+void NNE::Systems::VulkanManager::createTextureImageView(VkImage textureImage, VkImageView& textureImageView)
 {
     textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 }
 
-void NNE::VulkanManager::createTextureSampler(VkSampler& textureSampler)
+void NNE::Systems::VulkanManager::createTextureSampler(VkSampler& textureSampler)
 {
     VkPhysicalDeviceProperties properties{};
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
@@ -1405,7 +1405,7 @@ void NNE::VulkanManager::createTextureSampler(VkSampler& textureSampler)
     }
 }
 
-void NNE::VulkanManager::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+void NNE::Systems::VulkanManager::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 {
     // Check if image format supports linear blitting
     VkFormatProperties formatProperties;
@@ -1493,7 +1493,7 @@ void NNE::VulkanManager::generateMipmaps(VkImage image, VkFormat imageFormat, in
     endSingleTimeCommands(commandBuffer);
 }
 
-void NNE::VulkanManager::createDepthResources()
+void NNE::Systems::VulkanManager::createDepthResources()
 {
     VkFormat depthFormat = findDepthFormat();
     createImage(swapChainExtent.width, swapChainExtent.height, 1, msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
@@ -1502,7 +1502,7 @@ void NNE::VulkanManager::createDepthResources()
 
 }
 
-VkFormat NNE::VulkanManager::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+VkFormat NNE::Systems::VulkanManager::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates) {
         VkFormatProperties props;
@@ -1519,7 +1519,7 @@ VkFormat NNE::VulkanManager::findSupportedFormat(const std::vector<VkFormat>& ca
     throw std::runtime_error("failed to find supported format!");
 }
 
-VkFormat NNE::VulkanManager::findDepthFormat()
+VkFormat NNE::Systems::VulkanManager::findDepthFormat()
 {
     return findSupportedFormat(
         { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
@@ -1528,12 +1528,12 @@ VkFormat NNE::VulkanManager::findDepthFormat()
     );
 }
 
-bool NNE::VulkanManager::hasStencilComponent(VkFormat format)
+bool NNE::Systems::VulkanManager::hasStencilComponent(VkFormat format)
 {
     return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
-VkSampleCountFlagBits NNE::VulkanManager::getMaxUsableSampleCount()
+VkSampleCountFlagBits NNE::Systems::VulkanManager::getMaxUsableSampleCount()
 {
     VkPhysicalDeviceProperties physicalDeviceProperties;
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
@@ -1549,7 +1549,7 @@ VkSampleCountFlagBits NNE::VulkanManager::getMaxUsableSampleCount()
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-VkCommandBuffer NNE::VulkanManager::beginSingleTimeCommands()
+VkCommandBuffer NNE::Systems::VulkanManager::beginSingleTimeCommands()
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1569,7 +1569,7 @@ VkCommandBuffer NNE::VulkanManager::beginSingleTimeCommands()
     return commandBuffer;
 }
 
-void NNE::VulkanManager::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+void NNE::Systems::VulkanManager::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 {
     vkEndCommandBuffer(commandBuffer);
 
@@ -1584,7 +1584,7 @@ void NNE::VulkanManager::endSingleTimeCommands(VkCommandBuffer commandBuffer)
     vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
 
-void NNE::VulkanManager::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
+void NNE::Systems::VulkanManager::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -1653,7 +1653,7 @@ void NNE::VulkanManager::transitionImageLayout(VkImage image, VkFormat format, V
     endSingleTimeCommands(commandBuffer);
 }
 
-void NNE::VulkanManager::createColorResources()
+void NNE::Systems::VulkanManager::createColorResources()
 {
     VkFormat colorFormat = swapChainImageFormat;
 
@@ -1661,7 +1661,7 @@ void NNE::VulkanManager::createColorResources()
     colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
-void NNE::VulkanManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+void NNE::Systems::VulkanManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
@@ -1694,7 +1694,7 @@ void NNE::VulkanManager::copyBufferToImage(VkBuffer buffer, VkImage image, uint3
     endSingleTimeCommands(commandBuffer);   
 }
 
-VkShaderModule NNE::VulkanManager::createShaderModule(const std::vector<char>& code)
+VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1717,7 +1717,7 @@ std::string getEnginePath() {
     return path;
 }
 
-std::vector<char> NNE::VulkanManager::readFile(const std::string& filename)
+std::vector<char> NNE::Systems::VulkanManager::readFile(const std::string& filename)
 {
     std::string fullPath = getEnginePath() + filename;
     std::ifstream file(fullPath, std::ios::ate | std::ios::binary);
@@ -1737,15 +1737,15 @@ std::vector<char> NNE::VulkanManager::readFile(const std::string& filename)
     return buffer;
 }
 
-void NNE::VulkanManager::CleanUp()
+void NNE::Systems::VulkanManager::CleanUp()
 {    
     if (device == VK_NULL_HANDLE) return;
 
     vkDeviceWaitIdle(device);
 
-    // Ressources MeshComponent (très important !)
-    for (AEntity* entity : Application::GetInstance()->_entities) {
-        MeshComponent* mesh = dynamic_cast<MeshComponent*>(entity->GetComponent<MeshComponent>());
+    // Ressources NNE::Component::Render::MeshComponent (très important !)
+    for (NNE::AEntity* entity : NNE::Systems::Application::GetInstance()->_entities) {
+        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entity->GetComponent<NNE::Component::Render::MeshComponent>());
         if (mesh) {
             if (mesh->textureSampler != VK_NULL_HANDLE) {
                 vkDestroySampler(device, mesh->textureSampler, nullptr);
@@ -1892,7 +1892,7 @@ void NNE::VulkanManager::CleanUp()
     }
 }
 
-void NNE::VulkanManager::cleanupSwapChain()
+void NNE::Systems::VulkanManager::cleanupSwapChain()
 {
     vkDeviceWaitIdle(device);
 
@@ -1904,8 +1904,8 @@ void NNE::VulkanManager::cleanupSwapChain()
     }
 
     //// Détruire aussi toutes les textures entités si vous les recréez après:
-    //for (AEntity* entity : Application::GetInstance()->_entities) {
-    //    if (MeshComponent* mesh = entity->GetComponent<MeshComponent>()) {
+    //for (NNE::AEntity* entity : NNE::Systems::Application::GetInstance()->_entities) {
+    //    if (NNE::Component::Render::MeshComponent* mesh = entity->GetComponent<NNE::Component::Render::MeshComponent>()) {
     //        if (mesh->textureSampler) {
     //            vkDestroySampler(device, mesh->textureSampler, nullptr);
     //            mesh->textureSampler = VK_NULL_HANDLE;
@@ -2008,7 +2008,7 @@ void NNE::VulkanManager::cleanupSwapChain()
     }
 }
 
-bool NNE::VulkanManager::isDeviceSuitable(VkPhysicalDevice device)
+bool NNE::Systems::VulkanManager::isDeviceSuitable(VkPhysicalDevice device)
 {
     QueueFamilyIndices indices = findQueueFamilies(device);   
     bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -2025,7 +2025,7 @@ bool NNE::VulkanManager::isDeviceSuitable(VkPhysicalDevice device)
     return indices.isComplete() && extensionsSupported && swapChainAdequate;
 }
 
-int NNE::VulkanManager::rateDeviceSuitability(VkPhysicalDevice device)
+int NNE::Systems::VulkanManager::rateDeviceSuitability(VkPhysicalDevice device)
 {
     int score = 0;
     //Get Device properties

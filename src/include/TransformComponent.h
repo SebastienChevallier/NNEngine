@@ -5,8 +5,8 @@
 #include <iostream>
 #include <vector>
 
-namespace NNE {
-	class alignas(16) TransformComponent : public AComponent
+namespace NNE::Component {
+        class alignas(16) TransformComponent : public AComponent
 	{
 	public:
 		alignas(16) glm::vec3 position;

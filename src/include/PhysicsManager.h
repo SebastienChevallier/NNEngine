@@ -5,7 +5,7 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
 
-namespace NNE {
+namespace NNE::Systems {
 
     class PhysicsManager {
     private:

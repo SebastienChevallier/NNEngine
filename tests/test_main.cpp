@@ -11,7 +11,7 @@
 
 static void test_default_transform()
 {
-    NNE::TransformComponent t;
+    NNE::Component::TransformComponent t;
     assert(t.position == glm::vec3(0.0f));
     assert(t.rotation == glm::vec3(0.0f));
     assert(t.scale == glm::vec3(1.0f, 1.0f, 1.0f));
@@ -19,8 +19,8 @@ static void test_default_transform()
 
 static void test_parent_relationship()
 {
-    NNE::TransformComponent parent;
-    NNE::TransformComponent child;
+    NNE::Component::TransformComponent parent;
+    NNE::Component::TransformComponent child;
     child.SetParent(&parent);
     assert(child.parent == &parent);
     assert(parent.children.size() == 1);
@@ -29,7 +29,7 @@ static void test_parent_relationship()
 
 static void test_transform_directions()
 {
-    NNE::TransformComponent t;
+    NNE::Component::TransformComponent t;
     glm::vec3 forward = t.GetForward();
     glm::vec3 up = t.GetUp();
     assert(glm::all(glm::epsilonEqual(forward, glm::vec3(0, 0, -1), 0.0001f)));
@@ -38,9 +38,9 @@ static void test_transform_directions()
 
 static void test_world_position()
 {
-    NNE::TransformComponent parent;
+    NNE::Component::TransformComponent parent;
     parent.position = glm::vec3(1.0f, 2.0f, 3.0f);
-    NNE::TransformComponent child;
+    NNE::Component::TransformComponent child;
     child.position = glm::vec3(1.0f, 0.0f, 0.0f);
     child.SetParent(&parent);
     glm::vec3 worldPos = child.GetWorldPosition();
@@ -49,7 +49,7 @@ static void test_world_position()
 
 static void test_mesh_component_paths()
 {
-    NNE::MeshComponent m;
+    NNE::Component::Render::MeshComponent m;
     m.SetModelPath("model.obj");
     m.SetTexturePath("texture.png");
     assert(m.GetModelPath() == "model.obj");
@@ -58,7 +58,7 @@ static void test_mesh_component_paths()
 
 static void test_camera_perspective()
 {
-    NNE::CameraComponent c;
+    NNE::Component::Render::CameraComponent c;
     c.SetPerspective(60.0f, 4.0f/3.0f, 0.1f, 200.0f);
     assert(c.GetFOV() == 60.0f);
     assert(c.GetAspectRatio() == 4.0f/3.0f);
@@ -69,17 +69,17 @@ static void test_camera_perspective()
 static void test_entity_component_management()
 {
     NNE::AEntity e;
-    NNE::MeshComponent* mc = e.AddComponent<NNE::MeshComponent>();
+    NNE::Component::Render::MeshComponent* mc = e.AddComponent<NNE::Component::Render::MeshComponent>();
     assert(mc->GetEntity() == &e);
-    assert(e.GetComponent<NNE::MeshComponent>() == mc);
+    assert(e.GetComponent<NNE::Component::Render::MeshComponent>() == mc);
 }
 
 static void test_get_components_multiple()
 {
     NNE::AEntity e;
-    e.AddComponent<NNE::MeshComponent>();
-    e.AddComponent<NNE::MeshComponent>();
-    auto meshes = e.GetComponents<NNE::MeshComponent>();
+    e.AddComponent<NNE::Component::Render::MeshComponent>();
+    e.AddComponent<NNE::Component::Render::MeshComponent>();
+    auto meshes = e.GetComponents<NNE::Component::Render::MeshComponent>();
     assert(meshes.size() == 2);
     for (auto* m : meshes) {
         assert(m->GetEntity() == &e);
@@ -88,14 +88,14 @@ static void test_get_components_multiple()
 
 static void test_application_id_increment()
 {
-    int id1 = NNE::Application::GetInstance()->GenerateID();
-    int id2 = NNE::Application::GetInstance()->GenerateID();
+    int id1 = NNE::Systems::Application::GetInstance()->GenerateID();
+    int id2 = NNE::Systems::Application::GetInstance()->GenerateID();
     assert(id2 == id1 + 1);
 }
 
 static void test_model_matrix_translation()
 {
-    NNE::TransformComponent t;
+    NNE::Component::TransformComponent t;
     t.position = glm::vec3(1.0f, 2.0f, 3.0f);
     glm::mat4 mat = t.getModelMatrix();
     glm::vec3 trans(mat[3]);
@@ -108,7 +108,7 @@ static void test_scene_serialization()
 
     NNE::AEntity* e1 = new NNE::AEntity();
     e1->transform->position = glm::vec3(1.0f, 2.0f, 3.0f);
-    NNE::MeshComponent* m1 = e1->AddComponent<NNE::MeshComponent>();
+    NNE::Component::Render::MeshComponent* m1 = e1->AddComponent<NNE::Component::Render::MeshComponent>();
     m1->SetModelPath("model1.obj");
     m1->SetTexturePath("texture1.png");
     scene.entities.push_back(e1);
@@ -125,14 +125,14 @@ static void test_scene_serialization()
     assert(loadedOk);
     assert(loaded.entities.size() == 2);
 
-    auto* lt1 = loaded.entities[0]->GetComponent<NNE::TransformComponent>();
-    auto* lm1 = loaded.entities[0]->GetComponent<NNE::MeshComponent>();
+    auto* lt1 = loaded.entities[0]->GetComponent<NNE::Component::TransformComponent>();
+    auto* lm1 = loaded.entities[0]->GetComponent<NNE::Component::Render::MeshComponent>();
     assert(lt1 && lm1);
     assert(glm::all(glm::epsilonEqual(lt1->position, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
     assert(lm1->GetModelPath() == "model1.obj");
     assert(lm1->GetTexturePath() == "texture1.png");
 
-    auto* lt2 = loaded.entities[1]->GetComponent<NNE::TransformComponent>();
+    auto* lt2 = loaded.entities[1]->GetComponent<NNE::Component::TransformComponent>();
     assert(lt2);
     assert(glm::all(glm::epsilonEqual(lt2->position, glm::vec3(4.0f, 5.0f, 6.0f), 0.0001f)));
 
@@ -141,7 +141,7 @@ static void test_scene_serialization()
 
 int main()
 {
-    NNE::Application app;
+    NNE::Systems::Application app;
     test_application_id_increment();
     test_default_transform();
     test_parent_relationship();

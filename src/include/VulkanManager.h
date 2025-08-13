@@ -38,10 +38,10 @@
 
 
 
-namespace NNE {
-	class AEntity;	
+namespace NNE { class AEntity; }
 
-	struct QueueFamilyIndices {
+namespace NNE::Systems {
+        struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
 		std::optional<uint32_t> presentFamily;
 
@@ -100,12 +100,12 @@ namespace NNE {
 		alignas(16) glm::mat4 model;		
 	};	
 
-	struct GlobalUniformBufferObject {
-		alignas(16)glm::mat4 view;
-		alignas(16)glm::mat4 proj;
-	};
+        struct GlobalUniformBufferObject {
+                alignas(16)glm::mat4 view;
+                alignas(16)glm::mat4 proj;
+        };
 
-	class VulkanManager
+        class VulkanManager
 	{
 	protected:
 		size_t dynamicAlignment;
@@ -176,7 +176,7 @@ namespace NNE {
 		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	public :
-		CameraComponent* activeCamera = nullptr;
+            NNE::Component::Render::CameraComponent* activeCamera = nullptr;
 		VkInstance instance = VK_NULL_HANDLE;
 		GLFWwindow* window;
 		VulkanManager();
@@ -260,13 +260,13 @@ namespace NNE {
 }
 
 namespace std {
-	template<> struct hash<NNE::Vertex> {
-		size_t operator()(NNE::Vertex const& vertex) const {
-			return ((hash<glm::vec3>()(vertex.pos) ^
-				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-				(hash<glm::vec2>()(vertex.texCoord) << 1);
-		}
-	};
+        template<> struct hash<NNE::Systems::Vertex> {
+                size_t operator()(NNE::Systems::Vertex const& vertex) const {
+                        return ((hash<glm::vec3>()(vertex.pos) ^
+                                (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+                                (hash<glm::vec2>()(vertex.texCoord) << 1);
+                }
+        };
 }
 
 
