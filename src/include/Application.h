@@ -13,6 +13,8 @@
 #include "BoxColliderComponent.h"
 #include "RigidbodyComponent.h"
 #include "InputManager.h"
+#include "ISystem.h"
+#include "SystemManager.h"
 
 namespace NNE::Systems {
         class Application
@@ -42,6 +44,7 @@ namespace NNE::Systems {
                 NNE::Systems::VulkanManager* VKManager;
                 NNE::Systems::PhysicsManager* physicsManager;
                 std::vector<NNE::AEntity*> _entities;
+                std::vector<NNE::Systems::ISystem*>& _systems;
 
 		void Init();
 		void Update();

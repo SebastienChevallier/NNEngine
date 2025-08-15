@@ -4,10 +4,11 @@
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
+#include "ISystem.h"
 
 namespace NNE::Systems {
 
-    class PhysicsManager {
+    class PhysicsManager : public ISystem {
     private:
         JPH::PhysicsSystem physicsSystem;
         JPH::TempAllocatorImpl* tempAllocator;
@@ -18,7 +19,11 @@ namespace NNE::Systems {
         ~PhysicsManager();
 
         void Initialize();
-        void Update(float deltaTime);
+        void Update(float deltaTime) override;
+        void LateUpdate(float deltaTime) override;
+        void Awake() override;
+        void Start() override;
+        void RegisterComponent(NNE::Component::AComponent* component) override;
         JPH::PhysicsSystem* GetPhysicsSystem();
 
         class ContactListenerImpl : public JPH::ContactListener

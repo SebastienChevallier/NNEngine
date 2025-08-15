@@ -4,6 +4,7 @@
 #include <string>
 #include "AComponent.h"
 #include "TransformComponent.h"
+#include "SystemManager.h"
 
 namespace NNE {
         class AEntity
@@ -43,6 +44,7 @@ namespace NNE {
                 T* component = new T(std::forward<Args>(args)...);
                 components.push_back(component);
                 component->SetEntity(this);
+                NNE::Systems::SystemManager::GetInstance()->RegisterComponent(component);
                 return component;
         }
 
