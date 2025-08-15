@@ -1,5 +1,6 @@
 #include "AEntity.h"
 #include "Application.h"
+#include "MonoComponent.h"
 
 
 NNE::AEntity::AEntity()
@@ -44,7 +45,8 @@ void NNE::AEntity::Update(float delta)
 {
         if (!components.empty()) {
                 for (NNE::Component::AComponent* component : components) {
-                        component->Update(delta);
+                        if (!dynamic_cast<NNE::Component::MonoComponent*>(component))
+                                component->Update(delta);
                 }
         }
 }
@@ -53,7 +55,8 @@ void NNE::AEntity::LateUpdate(float delta)
 {
         if (!components.empty()) {
                 for (NNE::Component::AComponent* component : components) {
-                        component->LateUpdate(delta);
+                        if (!dynamic_cast<NNE::Component::MonoComponent*>(component))
+                                component->LateUpdate(delta);
                 }
         }
 }

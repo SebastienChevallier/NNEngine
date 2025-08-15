@@ -11,6 +11,7 @@
 #include "PhysicsSystem.h"
 #include "RenderSystem.h"
 #include "InputSystem.h"
+#include "ScriptSystem.h"
 #include "PlaneCollider.h"
 #include "BoxColliderComponent.h"
 #include "RigidbodyComponent.h"
@@ -47,6 +48,7 @@ namespace NNE::Systems {
                 NNE::Systems::PhysicsSystem* physicsSystem;
                 NNE::Systems::RenderSystem* renderSystem;
                 NNE::Systems::InputSystem* inputSystem;
+                NNE::Systems::ScriptSystem* scriptSystem;
                 std::vector<NNE::AEntity*> _entities;
                 std::vector<NNE::Systems::ISystem*>& _systems;
 
