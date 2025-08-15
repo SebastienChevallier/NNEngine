@@ -5,18 +5,24 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/RegisterTypes.h>
 #include "ISystem.h"
+#include <vector>
+
+namespace NNE { namespace Component { class AComponent; } }
+namespace NNE { namespace Component { namespace Physics { class RigidbodyComponent; class ColliderComponent; } } }
 
 namespace NNE::Systems {
 
-    class PhysicsManager : public ISystem {
+    class PhysicsSystem : public ISystem {
     private:
         JPH::PhysicsSystem physicsSystem;
         JPH::TempAllocatorImpl* tempAllocator;
         JPH::JobSystemThreadPool* jobSystem;
+        std::vector<NNE::Component::Physics::RigidbodyComponent*> rigidbodies;
+        std::vector<NNE::Component::Physics::ColliderComponent*> colliders;
 
     public:
-        PhysicsManager();
-        ~PhysicsManager();
+        PhysicsSystem();
+        ~PhysicsSystem();
 
         void Initialize();
         void Update(float deltaTime) override;

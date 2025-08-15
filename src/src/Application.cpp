@@ -10,9 +10,9 @@ NNE::Systems::Application::Application()
 {
     Instance = this;
     VKManager = new VulkanManager();
-    physicsManager = new PhysicsManager();
+    physicsSystem = new PhysicsSystem();
     renderSystem = new RenderSystem(VKManager);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsManager);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
     delta = 0;
 }
@@ -35,6 +35,12 @@ NNE::Systems::Application::~Application()
         delete entity;
     }
     _entities.clear();
+
+    if (physicsSystem)
+    {
+        delete physicsSystem;
+        physicsSystem = nullptr;
+    }
 }
 
 void NNE::Systems::Application::Init()

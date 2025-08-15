@@ -10,14 +10,14 @@ RigidbodyComponent::RigidbodyComponent(float mass, bool kinematic)
 }
 
 RigidbodyComponent::~RigidbodyComponent() {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsManager->GetPhysicsSystem();
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     if (!bodyID.IsInvalid()) {
         physicsSystem->GetBodyInterface().RemoveBody(bodyID);
     }
 }
 
 void RigidbodyComponent::Awake() {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsManager->GetPhysicsSystem();
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
     auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
@@ -41,17 +41,7 @@ void RigidbodyComponent::Awake() {
 }
 
 void RigidbodyComponent::Update(float deltaTime) {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsManager->GetPhysicsSystem();
-    auto& bodyInterface = physicsSystem->GetBodyInterface();
-    if (!bodyID.IsInvalid()) {
-        auto* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-        JPH::RVec3 pos = bodyInterface.GetPosition(bodyID);
-        JPH::Quat rot = bodyInterface.GetRotation(bodyID);
-        transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
-        glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
-        glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(glmQuat));
-        transform->rotation = eulerAngles;
-    }
+    (void)deltaTime;
 }
 
 JPH::BodyID RigidbodyComponent::GetBodyID() const {
@@ -59,7 +49,7 @@ JPH::BodyID RigidbodyComponent::GetBodyID() const {
 }
 
 void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsManager->GetPhysicsSystem();
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
         bodyInterface.SetLinearVelocity(bodyID, JPH::RVec3(velocity.x, velocity.y, velocity.z));
@@ -67,7 +57,7 @@ void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
 }
 
 glm::vec3 RigidbodyComponent::GetLinearVelocity() const {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsManager->GetPhysicsSystem();
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
         JPH::RVec3 velocity = bodyInterface.GetLinearVelocity(bodyID);
