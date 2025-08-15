@@ -14,7 +14,10 @@
 #include <fstream>
 #include <array>
 #include <unordered_map>
+#include <utility>
 #include "CameraComponent.h"
+#include "MeshComponent.h"
+#include "TransformComponent.h"
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -38,7 +41,6 @@
 
 
 
-namespace NNE { class AEntity; }
 
 namespace NNE::Systems {
         struct QueueFamilyIndices {
@@ -146,9 +148,11 @@ namespace NNE::Systems {
 		std::vector<VkDeviceMemory> uniformBuffersMemory;
 		std::vector<void*> uniformBuffersMapped;
 
-		std::vector<VkBuffer> objectUniformBuffers;
-		std::vector<VkDeviceMemory> objectUniformBuffersMemory;
-		std::vector<void*> objectUniformBuffersMapped;
+                std::vector<VkBuffer> objectUniformBuffers;
+                std::vector<VkDeviceMemory> objectUniformBuffersMemory;
+                std::vector<void*> objectUniformBuffersMapped;
+
+                std::vector<NNE::Component::Render::MeshComponent*> loadedMeshes;
 
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
@@ -202,14 +206,14 @@ namespace NNE::Systems {
 		void createVertexBuffer();
 		void createFramebuffers();
 		void createCommandPool();
-		void createCommandBuffers();
-		void createUniformBuffers();
-		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+                void createCommandBuffers();
+                void createUniformBuffers();
+                void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects);
 		void updateUniformBuffer(uint32_t currentImage);
 		void createDescriptorSetLayout();
 		void createDescriptorPool();
-		void createDescriptorSets();
-		void drawFrame();
+                void createDescriptorSets();
+                void drawFrame(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects);
 		void createSyncObjects();
 		void recreateSwapChain();
 		void updateCameraAspectRatio();
@@ -223,10 +227,8 @@ namespace NNE::Systems {
 		void createColorResources();
 
 		void loadModel(const std::string& modelPath);
-		void createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory);
-		void LoadEntitiesModels(const std::vector<AEntity*>& entities);
-
-		void UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<AEntity*>& entities);
+                void createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory);
+                void LoadMeshes(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects);
 
 		VkSampleCountFlagBits getMaxUsableSampleCount();
 

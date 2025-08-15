@@ -1,5 +1,4 @@
 #include "VulkanManager.h"
-#include "Application.h"
 #include <stb_image.h>
 #include <glm/gtx/hash.hpp>
 #include <filesystem>
@@ -84,20 +83,6 @@ void NNE::Systems::VulkanManager::initVulkan()
     createDepthResources();         // 📏 Créer une image de profondeur
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
-
-    LoadEntitiesModels(NNE::Systems::Application::GetInstance()->_entities); // 📦 Charger les modèles 3D
-    createVertexBuffer();           // 📦 Stocker les sommets des modèles
-    createIndexBuffer();            // 📌 Stocker les indices des modèles
-    createUniformBuffers();         // 🎭 Créer les buffers uniformes pour les shaders
-
-    //createTextureImageView();       // 🖼 Convertir la texture en une vue utilisable
-    //createTextureSampler();         // 🔎 Créer un échantillonneur de texture
-
-    createDescriptorPool();         // 🎛 Allouer la mémoire pour les descripteurs shaders
-    createDescriptorSets();         // 🎛 Remplir les descripteurs avec les textures et buffers    
-
-    createCommandBuffers();         // 🎬 Générer les commandes de rendu
-    createSyncObjects();            // 🕐 Gérer la synchronisation CPU/GPU
 }
 
 
@@ -876,7 +861,7 @@ void NNE::Systems::VulkanManager::createUniformBuffers()
     }
 }
 
-void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
 {   
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -924,12 +909,9 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    // 🔥 Boucle pour dessiner les entités
-    const std::vector<NNE::AEntity*>& entities = NNE::Systems::Application::GetInstance()->_entities;
-    for (size_t i = 0; i < entities.size(); i++) {
-        NNE::Component::TransformComponent* transform = entities[i]->GetComponent<NNE::Component::TransformComponent>();
-        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entities[i]->GetComponent<NNE::Component::Render::MeshComponent>());
-
+    for (auto& pair : objects) {
+        NNE::Component::Render::MeshComponent* mesh = pair.first;
+        NNE::Component::TransformComponent* transform = pair.second;
         if (!mesh || mesh->getIndexCount() == 0) continue;
 
         // Envoyer la matrice modèle via Push Constants
@@ -1118,7 +1100,7 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
     }
 }
 
-void NNE::Systems::VulkanManager::drawFrame()
+void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
 {
     try {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
@@ -1139,7 +1121,7 @@ void NNE::Systems::VulkanManager::drawFrame()
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
         vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-        recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+        recordCommandBuffer(commandBuffers[currentFrame], imageIndex, objects);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1292,24 +1274,20 @@ void NNE::Systems::VulkanManager::createTextureImage(const std::string& textureP
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 }
 
-void NNE::Systems::VulkanManager::LoadEntitiesModels(const std::vector<NNE::AEntity*>& entities)
+void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
 {
-    for (NNE::AEntity* entity : entities) {
-        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entity->GetComponent<NNE::Component::Render::MeshComponent>());
+    for (auto& pair : objects) {
+        NNE::Component::Render::MeshComponent* mesh = pair.first;
         if (!mesh || mesh->getIndexCount() != 0) continue;
 
         uint32_t startOffset = static_cast<uint32_t>(indices.size());
 
-        // Charger le modèle
         loadModel(mesh->GetModelPath());
 
-        // Vérifier si une texture est définie, sinon utiliser une texture par défaut
         if (mesh->GetTexturePath().empty()) {
-            //std::cerr << "⚠️ Aucune texture définie pour " << mesh->GetModelPath() << ", utilisation d'une texture blanche par défaut.\n";
             mesh->SetTexturePath("../assets/textures/texture.jpg");
         }
 
-        // Charger une texture propre à chaque entité
         createTextureImage(mesh->GetTexturePath(), mesh->textureImage, mesh->textureImageMemory);
         createTextureImageView(mesh->textureImage, mesh->textureImageView);
         createTextureSampler(mesh->textureSampler);
@@ -1317,22 +1295,8 @@ void NNE::Systems::VulkanManager::LoadEntitiesModels(const std::vector<NNE::AEnt
         uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
         mesh->setIndexOffset(startOffset);
         mesh->setIndexCount(count);
-    }
-}
 
-void NNE::Systems::VulkanManager::UpdateObjectUniformBuffer(uint32_t currentImage, const std::vector<NNE::AEntity*>& entities)
-{
-    // On suppose ici que pour chaque entité, on souhaite copier sa matrice modèle dans le buffer.
-    // Le buffer est supposé être de taille MAX_OBJECTS * sizeof(glm::mat4).
-    size_t offset = 0;
-    // Parcourir les entités (attention : si le nombre d'entités dépasse MAX_OBJECTS, il faudra gérer ce cas)
-    for (size_t i = 0; i < entities.size() && i < MAX_OBJECTS; i++) {
-        NNE::Component::TransformComponent* transform = entities[i]->GetComponent<NNE::Component::TransformComponent>();
-        if (transform) {
-            glm::mat4 modelMatrix = transform->getModelMatrix();
-            memcpy((char*)objectUniformBuffersMapped[currentImage] + offset, &modelMatrix, sizeof(glm::mat4));
-            offset += sizeof(glm::mat4);
-        }
+        loadedMeshes.push_back(mesh);
     }
 }
 
@@ -1743,9 +1707,7 @@ void NNE::Systems::VulkanManager::CleanUp()
 
     vkDeviceWaitIdle(device);
 
-    // Ressources NNE::Component::Render::MeshComponent (très important !)
-    for (NNE::AEntity* entity : NNE::Systems::Application::GetInstance()->_entities) {
-        NNE::Component::Render::MeshComponent* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(entity->GetComponent<NNE::Component::Render::MeshComponent>());
+    for (NNE::Component::Render::MeshComponent* mesh : loadedMeshes) {
         if (mesh) {
             if (mesh->textureSampler != VK_NULL_HANDLE) {
                 vkDestroySampler(device, mesh->textureSampler, nullptr);
@@ -1904,7 +1866,6 @@ void NNE::Systems::VulkanManager::cleanupSwapChain()
     }
 
     //// Détruire aussi toutes les textures entités si vous les recréez après:
-    //for (NNE::AEntity* entity : NNE::Systems::Application::GetInstance()->_entities) {
     //    if (NNE::Component::Render::MeshComponent* mesh = entity->GetComponent<NNE::Component::Render::MeshComponent>()) {
     //        if (mesh->textureSampler) {
     //            vkDestroySampler(device, mesh->textureSampler, nullptr);

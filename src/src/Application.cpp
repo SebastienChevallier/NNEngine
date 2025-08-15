@@ -11,7 +11,9 @@ NNE::Systems::Application::Application()
     Instance = this;
     VKManager = new VulkanManager();
     physicsManager = new PhysicsManager();
+    renderSystem = new RenderSystem(VKManager);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsManager);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
     delta = 0;
 }
 
@@ -21,6 +23,12 @@ NNE::Systems::Application::~Application()
         VKManager->CleanUp();
         delete VKManager;
         VKManager = nullptr;
+    }
+
+    if (renderSystem)
+    {
+        delete renderSystem;
+        renderSystem = nullptr;
     }
 
     for (NNE::AEntity* entity : _entities) {
@@ -74,8 +82,6 @@ void NNE::Systems::Application::Update()
         {
             entity->LateUpdate(delta);
         }
-
-        VKManager->drawFrame();
     }
     vkDeviceWaitIdle(VKManager->device);
 }
