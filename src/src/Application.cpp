@@ -13,9 +13,11 @@ NNE::Systems::Application::Application()
     physicsSystem = new PhysicsSystem();
     renderSystem = new RenderSystem(VKManager);
     inputSystem = new InputSystem();
+    scriptSystem = new ScriptSystem();
     NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(inputSystem);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(scriptSystem);
     delta = 0;
 }
 
@@ -37,6 +39,12 @@ NNE::Systems::Application::~Application()
     {
         delete inputSystem;
         inputSystem = nullptr;
+    }
+
+    if (scriptSystem)
+    {
+        delete scriptSystem;
+        scriptSystem = nullptr;
     }
 
     for (NNE::AEntity* entity : _entities) {
