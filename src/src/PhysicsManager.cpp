@@ -1,6 +1,7 @@
 #include "PhysicsManager.h"
 #include "Application.h"
 #include "ColliderComponent.h"
+#include "RigidbodyComponent.h"
 
 class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
 public:
@@ -46,10 +47,6 @@ void PhysicsManager::Initialize() {
     physicsSystem.SetContactListener(&contactListener);
 }
 
-void PhysicsManager::Update(float deltaTime) {
-    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
-}
-
 PhysicsManager::~PhysicsManager() {
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;
@@ -57,6 +54,37 @@ PhysicsManager::~PhysicsManager() {
 
 JPH::PhysicsSystem* PhysicsManager::GetPhysicsSystem() {
     return &physicsSystem;
+}
+
+void PhysicsManager::Awake()
+{
+    Initialize();
+}
+
+void PhysicsManager::Start()
+{
+}
+
+void PhysicsManager::Update(float deltaTime)
+{
+    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
+}
+
+void PhysicsManager::LateUpdate(float deltaTime)
+{
+    (void)deltaTime;
+}
+
+void PhysicsManager::RegisterComponent(NNE::Component::AComponent* component)
+{
+    if (auto* collider = dynamic_cast<NNE::Component::Physics::ColliderComponent*>(component))
+    {
+        (void)collider; // registration handled in component
+    }
+    if (auto* rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent*>(component))
+    {
+        (void)rb; // registration handled in component
+    }
 }
 
 void PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
