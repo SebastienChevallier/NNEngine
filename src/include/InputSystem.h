@@ -14,8 +14,18 @@ private:
 public:
     void Awake() override {}
     void Start() override {}
+    /**
+     * <summary>
+     * Met à jour l'état des composants d'entrée.
+     * </summary>
+     */
     void Update(float deltaTime) override;
     void LateUpdate(float deltaTime) override {}
+    /**
+     * <summary>
+     * Ajoute un composant d'entrée à la liste gérée.
+     * </summary>
+     */
     void RegisterComponent(NNE::Component::AComponent* component) override;
 };
 

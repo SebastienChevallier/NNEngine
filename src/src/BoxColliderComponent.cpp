@@ -3,15 +3,30 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include "Application.h"
 
+/**
+ * <summary>
+ * Initialise un collider boîte avec la taille spécifiée.
+ * </summary>
+ */
 NNE::Component::Physics::BoxColliderComponent::BoxColliderComponent(const glm::vec3& size) : size(size)
 {
 }
 
+/**
+ * <summary>
+ * Crée la forme lors de l'activation du composant.
+ * </summary>
+ */
 void NNE::Component::Physics::BoxColliderComponent::Awake()
 {
         CreateShape();
 }
 
+/**
+ * <summary>
+ * Construit et enregistre la forme physique de la boîte.
+ * </summary>
+ */
 void NNE::Component::Physics::BoxColliderComponent::CreateShape()
 {
         shape = new JPH::BoxShape(JPH::Vec3(size.x, size.y, size.z));

@@ -13,11 +13,31 @@ private:
     static SystemManager* Instance;
 
 public:
+    /**
+     * <summary>
+     * Accède à l'instance unique du gestionnaire de systèmes.
+     * </summary>
+     */
     static SystemManager* GetInstance();
 
+    /**
+     * <summary>
+     * Ajoute un système à la liste gérée.
+     * </summary>
+     */
     void AddSystem(ISystem* system);
+    /**
+     * <summary>
+     * Fournit la liste des systèmes enregistrés.
+     * </summary>
+     */
     std::vector<ISystem*>& GetSystems();
 
+    /**
+     * <summary>
+     * Enregistre un composant auprès des systèmes concernés.
+     * </summary>
+     */
     void RegisterComponent(NNE::Component::AComponent* component);
 };
 }

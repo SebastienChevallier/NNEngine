@@ -5,10 +5,20 @@
 
 namespace NNE::Component::Physics {
 
+/**
+ * <summary>
+ * Instancie un corps rigide avec masse et type kinematic.
+ * </summary>
+ */
 RigidbodyComponent::RigidbodyComponent(float mass, bool kinematic)
     : bodyID(), mass(mass), isKinematic(kinematic) {
 }
 
+/**
+ * <summary>
+ * Supprime le corps physique lors de la destruction.
+ * </summary>
+ */
 RigidbodyComponent::~RigidbodyComponent() {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     if (!bodyID.IsInvalid()) {
@@ -16,6 +26,11 @@ RigidbodyComponent::~RigidbodyComponent() {
     }
 }
 
+/**
+ * <summary>
+ * Crée le corps physique et l'ajoute au monde.
+ * </summary>
+ */
 void RigidbodyComponent::Awake() {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
@@ -40,14 +55,29 @@ void RigidbodyComponent::Awake() {
     bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 }
 
+/**
+ * <summary>
+ * Met à jour l'état physique si nécessaire.
+ * </summary>
+ */
 void RigidbodyComponent::Update(float deltaTime) {
     (void)deltaTime;
 }
 
+/**
+ * <summary>
+ * Obtient l'identifiant du corps rigide.
+ * </summary>
+ */
 JPH::BodyID RigidbodyComponent::GetBodyID() const {
     return bodyID;
 }
 
+/**
+ * <summary>
+ * Applique une vitesse linéaire au corps.
+ * </summary>
+ */
 void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
@@ -56,6 +86,11 @@ void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
     }
 }
 
+/**
+ * <summary>
+ * Retourne la vitesse linéaire actuelle du corps.
+ * </summary>
+ */
 glm::vec3 RigidbodyComponent::GetLinearVelocity() const {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();

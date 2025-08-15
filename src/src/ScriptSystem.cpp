@@ -2,6 +2,11 @@
 
 using namespace NNE::Systems;
 
+/**
+ * <summary>
+ * Met à jour tous les composants script.
+ * </summary>
+ */
 void ScriptSystem::Update(float deltaTime)
 {
     for (auto* comp : _components)
@@ -10,6 +15,11 @@ void ScriptSystem::Update(float deltaTime)
     }
 }
 
+/**
+ * <summary>
+ * Applique les mises à jour tardives aux scripts.
+ * </summary>
+ */
 void ScriptSystem::LateUpdate(float deltaTime)
 {
     for (auto* comp : _components)
@@ -18,6 +28,11 @@ void ScriptSystem::LateUpdate(float deltaTime)
     }
 }
 
+/**
+ * <summary>
+ * Enregistre un composant script s'il est valide.
+ * </summary>
+ */
 void ScriptSystem::RegisterComponent(NNE::Component::AComponent* component)
 {
     if (auto* mono = dynamic_cast<NNE::Component::MonoComponent*>(component))
