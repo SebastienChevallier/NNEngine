@@ -10,6 +10,7 @@
 #include "VulkanManager.h"
 #include "PhysicsSystem.h"
 #include "RenderSystem.h"
+#include "InputSystem.h"
 #include "PlaneCollider.h"
 #include "BoxColliderComponent.h"
 #include "RigidbodyComponent.h"
@@ -45,6 +46,7 @@ namespace NNE::Systems {
                 NNE::Systems::VulkanManager* VKManager;
                 NNE::Systems::PhysicsSystem* physicsSystem;
                 NNE::Systems::RenderSystem* renderSystem;
+                NNE::Systems::InputSystem* inputSystem;
                 std::vector<NNE::AEntity*> _entities;
                 std::vector<NNE::Systems::ISystem*>& _systems;
 
