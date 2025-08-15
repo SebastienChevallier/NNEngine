@@ -8,7 +8,7 @@
 #include "TransformComponent.h"
 #include "CameraComponent.h"
 #include "VulkanManager.h"
-#include "PhysicsManager.h"
+#include "PhysicsSystem.h"
 #include "RenderSystem.h"
 #include "PlaneCollider.h"
 #include "BoxColliderComponent.h"
@@ -43,7 +43,7 @@ namespace NNE::Systems {
                 Application();
                 ~Application();
                 NNE::Systems::VulkanManager* VKManager;
-                NNE::Systems::PhysicsManager* physicsManager;
+                NNE::Systems::PhysicsSystem* physicsSystem;
                 NNE::Systems::RenderSystem* renderSystem;
                 std::vector<NNE::AEntity*> _entities;
                 std::vector<NNE::Systems::ISystem*>& _systems;

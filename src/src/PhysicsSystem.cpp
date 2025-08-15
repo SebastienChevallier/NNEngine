@@ -1,7 +1,10 @@
-#include "PhysicsManager.h"
+#include "PhysicsSystem.h"
 #include "Application.h"
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
+#include "TransformComponent.h"
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
 public:
@@ -21,7 +24,7 @@ public:
 
 namespace NNE::Systems {
 
-PhysicsManager::PhysicsManager()
+PhysicsSystem::PhysicsSystem()
     : tempAllocator(nullptr), jobSystem(nullptr)
 {
     JPH::RegisterDefaultAllocator();
@@ -32,7 +35,7 @@ PhysicsManager::PhysicsManager()
     jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 }
 
-void PhysicsManager::Initialize() {
+void PhysicsSystem::Initialize() {
     static SimpleBroadPhaseLayerInterface broadPhaseLayerInterface;
     static SimpleObjectVsBroadPhaseLayerFilter broadPhaseFilter;
     static SimpleObjectLayerPairFilter objectLayerFilter;
@@ -47,47 +50,76 @@ void PhysicsManager::Initialize() {
     physicsSystem.SetContactListener(&contactListener);
 }
 
-PhysicsManager::~PhysicsManager() {
+PhysicsSystem::~PhysicsSystem() {
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;
 }
 
-JPH::PhysicsSystem* PhysicsManager::GetPhysicsSystem() {
+JPH::PhysicsSystem* PhysicsSystem::GetPhysicsSystem() {
     return &physicsSystem;
 }
 
-void PhysicsManager::Awake()
+void PhysicsSystem::Awake()
 {
     Initialize();
 }
 
-void PhysicsManager::Start()
+void PhysicsSystem::Start()
 {
 }
 
-void PhysicsManager::Update(float deltaTime)
+void PhysicsSystem::Update(float deltaTime)
 {
     physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
+
+    JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
+    for (auto* rb : rigidbodies)
+    {
+        if (!rb->GetBodyID().IsInvalid())
+        {
+            auto* transform = rb->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+            JPH::RVec3 pos = bodyInterface.GetPosition(rb->GetBodyID());
+            JPH::Quat rot = bodyInterface.GetRotation(rb->GetBodyID());
+            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+            glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
+            transform->rotation = glm::degrees(glm::eulerAngles(glmQuat));
+        }
+    }
+
+    for (auto* collider : colliders)
+    {
+        if (collider->GetEntity()->GetComponent<NNE::Component::Physics::RigidbodyComponent>())
+            continue;
+        if (!collider->GetBodyID().IsInvalid())
+        {
+            auto* transform = collider->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+            JPH::RVec3 pos = bodyInterface.GetPosition(collider->GetBodyID());
+            JPH::Quat rot = bodyInterface.GetRotation(collider->GetBodyID());
+            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
+            glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
+            transform->rotation = glm::degrees(glm::eulerAngles(glmQuat));
+        }
+    }
 }
 
-void PhysicsManager::LateUpdate(float deltaTime)
+void PhysicsSystem::LateUpdate(float deltaTime)
 {
     (void)deltaTime;
 }
 
-void PhysicsManager::RegisterComponent(NNE::Component::AComponent* component)
+void PhysicsSystem::RegisterComponent(NNE::Component::AComponent* component)
 {
     if (auto* collider = dynamic_cast<NNE::Component::Physics::ColliderComponent*>(component))
     {
-        (void)collider; // registration handled in component
+        colliders.push_back(collider);
     }
     if (auto* rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent*>(component))
     {
-        (void)rb; // registration handled in component
+        rigidbodies.push_back(rb);
     }
 }
 
-void PhysicsManager::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
+void PhysicsSystem::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
 {
     auto* colliderA = NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());
     auto* colliderB = NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
