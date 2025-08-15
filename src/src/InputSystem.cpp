@@ -2,6 +2,11 @@
 
 using namespace NNE::Systems;
 
+/**
+ * <summary>
+ * Met à jour les valeurs des axes et boutons pour chaque composant d'entrée.
+ * </summary>
+ */
 void InputSystem::Update(float deltaTime)
 {
     (void)deltaTime;
@@ -29,6 +34,11 @@ void InputSystem::Update(float deltaTime)
     }
 }
 
+/**
+ * <summary>
+ * Ajoute un composant d'entrée s'il correspond au type attendu.
+ * </summary>
+ */
 void InputSystem::RegisterComponent(NNE::Component::AComponent* component)
 {
     if (auto* input = dynamic_cast<NNE::Component::Input::InputComponent*>(component))

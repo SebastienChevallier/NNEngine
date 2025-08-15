@@ -24,6 +24,11 @@ public:
 
 namespace NNE::Systems {
 
+/**
+ * <summary>
+ * Configure les allocations et enregistre les types Jolt.
+ * </summary>
+ */
 PhysicsSystem::PhysicsSystem()
     : tempAllocator(nullptr), jobSystem(nullptr)
 {
@@ -35,6 +40,11 @@ PhysicsSystem::PhysicsSystem()
     jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
 }
 
+/**
+ * <summary>
+ * Initialise les structures internes de Jolt Physics.
+ * </summary>
+ */
 void PhysicsSystem::Initialize() {
     static SimpleBroadPhaseLayerInterface broadPhaseLayerInterface;
     static SimpleObjectVsBroadPhaseLayerFilter broadPhaseFilter;
@@ -50,24 +60,49 @@ void PhysicsSystem::Initialize() {
     physicsSystem.SetContactListener(&contactListener);
 }
 
+/**
+ * <summary>
+ * Nettoie les ressources allouées par Jolt.
+ * </summary>
+ */
 PhysicsSystem::~PhysicsSystem() {
     delete JPH::Factory::sInstance;
     JPH::Factory::sInstance = nullptr;
 }
 
+/**
+ * <summary>
+ * Fournit un accès au système physique Jolt.
+ * </summary>
+ */
 JPH::PhysicsSystem* PhysicsSystem::GetPhysicsSystem() {
     return &physicsSystem;
 }
 
+/**
+ * <summary>
+ * Prépare le système physique avant utilisation.
+ * </summary>
+ */
 void PhysicsSystem::Awake()
 {
     Initialize();
 }
 
+/**
+ * <summary>
+ * Démarre le système physique.
+ * </summary>
+ */
 void PhysicsSystem::Start()
 {
 }
 
+/**
+ * <summary>
+ * Avance la simulation physique et synchronise les entités.
+ * </summary>
+ */
 void PhysicsSystem::Update(float deltaTime)
 {
     physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
@@ -102,11 +137,21 @@ void PhysicsSystem::Update(float deltaTime)
     }
 }
 
+/**
+ * <summary>
+ * Termine les traitements physiques après l'Update principal.
+ * </summary>
+ */
 void PhysicsSystem::LateUpdate(float deltaTime)
 {
     (void)deltaTime;
 }
 
+/**
+ * <summary>
+ * Enregistre les composants physiques pour la simulation.
+ * </summary>
+ */
 void PhysicsSystem::RegisterComponent(NNE::Component::AComponent* component)
 {
     if (auto* collider = dynamic_cast<NNE::Component::Physics::ColliderComponent*>(component))
@@ -119,6 +164,11 @@ void PhysicsSystem::RegisterComponent(NNE::Component::AComponent* component)
     }
 }
 
+/**
+ * <summary>
+ * Gère la réaction lors de l'apparition d'un contact.
+ * </summary>
+ */
 void PhysicsSystem::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
 {
     auto* colliderA = NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());

@@ -4,8 +4,18 @@
 
 using namespace NNE::Systems;
 
+/**
+ * <summary>
+ * Initialise le système de rendu avec un gestionnaire Vulkan.
+ * </summary>
+ */
 RenderSystem::RenderSystem(VulkanManager* manager) : _vkManager(manager) {}
 
+/**
+ * <summary>
+ * Charge les ressources graphiques nécessaires.
+ * </summary>
+ */
 void RenderSystem::Start()
 {
     if (_vkManager)
@@ -21,6 +31,11 @@ void RenderSystem::Start()
     }
 }
 
+/**
+ * <summary>
+ * Dessine la scène à chaque frame.
+ * </summary>
+ */
 void RenderSystem::Update(float deltaTime)
 {
     (void)deltaTime;
@@ -30,6 +45,11 @@ void RenderSystem::Update(float deltaTime)
     }
 }
 
+/**
+ * <summary>
+ * Ajoute un mesh et son transform à la liste de rendu.
+ * </summary>
+ */
 void RenderSystem::RegisterComponent(NNE::Component::AComponent* component)
 {
     if (auto* mesh = dynamic_cast<NNE::Component::Render::MeshComponent*>(component))
@@ -42,6 +62,11 @@ void RenderSystem::RegisterComponent(NNE::Component::AComponent* component)
     }
 }
 
+/**
+ * <summary>
+ * Fournit la liste des objets actuellement rendus.
+ * </summary>
+ */
 const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& RenderSystem::GetRenderObjects() const
 {
     return _renderObjects;

@@ -14,32 +14,92 @@ namespace NNE {
                 std::string _Name;
 
         public:
+                /**
+                 * <summary>
+                 * Construit une entité vide.
+                 * </summary>
+                 */
                 AEntity();
+                /**
+                 * <summary>
+                 * Détruit l'entité et ses composants.
+                 * </summary>
+                 */
                 ~AEntity();
                 NNE::Component::TransformComponent* transform;
                 std::vector<NNE::Component::AComponent*> components;
 
-		int GetID();
-		std::string GetName();
+                /**
+                 * <summary>
+                 * Retourne l'identifiant unique de l'entité.
+                 * </summary>
+                 */
+                int GetID();
+                /**
+                 * <summary>
+                 * Renvoie le nom de l'entité.
+                 * </summary>
+                 */
+                std::string GetName();
 
-		void Awake();
-		void Start();
-		void Update(float delta);
-		void LateUpdate(float delta);
+                /**
+                 * <summary>
+                 * Appelée lors de l'initialisation de l'entité.
+                 * </summary>
+                 */
+                void Awake();
+                /**
+                 * <summary>
+                 * Appelée au démarrage de l'entité.
+                 * </summary>
+                 */
+                void Start();
+                /**
+                 * <summary>
+                 * Met à jour l'entité à chaque frame.
+                 * </summary>
+                 */
+                void Update(float delta);
+                /**
+                 * <summary>
+                 * Effectue les mises à jour tardives de l'entité.
+                 * </summary>
+                 */
+                void LateUpdate(float delta);
 
-		template<typename T, typename... Args>
-		T* AddComponent(Args&&... args);
+                /**
+                 * <summary>
+                 * Ajoute un composant de type T à l'entité.
+                 * </summary>
+                 */
+                template<typename T, typename... Args>
+                T* AddComponent(Args&&... args);
 
-		template<typename T>
-		T* GetComponent();
+                /**
+                 * <summary>
+                 * Récupère le premier composant du type demandé.
+                 * </summary>
+                 */
+                template<typename T>
+                T* GetComponent();
 
-		template<typename T>
-		std::vector<T*> GetComponents();
+                /**
+                 * <summary>
+                 * Renvoie tous les composants du type demandé.
+                 * </summary>
+                 */
+                template<typename T>
+                std::vector<T*> GetComponents();
 
 	};
 
-        template<typename T, typename... Args>
-        T* NNE::AEntity::AddComponent(Args&&... args)
+/**
+ * <summary>
+ * Instancie et attache un composant à l'entité.
+ * </summary>
+ */
+template<typename T, typename... Args>
+T* NNE::AEntity::AddComponent(Args&&... args)
         {
                 T* component = new T(std::forward<Args>(args)...);
                 components.push_back(component);
@@ -48,8 +108,13 @@ namespace NNE {
                 return component;
         }
 
-        template<typename T>
-        T* NNE::AEntity::GetComponent()
+/**
+ * <summary>
+ * Recherche un composant du type donné.
+ * </summary>
+ */
+template<typename T>
+T* NNE::AEntity::GetComponent()
         {
                 for (NNE::Component::AComponent* component : components) {
                         T* casted = dynamic_cast<T*>(component);
@@ -60,8 +125,13 @@ namespace NNE {
                 return nullptr;
         }
 
-        template<typename T>
-        std::vector<T*> NNE::AEntity::GetComponents()
+/**
+ * <summary>
+ * Collecte tous les composants correspondant au type donné.
+ * </summary>
+ */
+template<typename T>
+std::vector<T*> NNE::AEntity::GetComponents()
         {
                 std::vector<T*> ref;
                 for (NNE::Component::AComponent* component : components) {

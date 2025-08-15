@@ -21,20 +21,70 @@ namespace NNE::Systems {
         std::vector<NNE::Component::Physics::ColliderComponent*> colliders;
 
     public:
+        /**
+         * <summary>
+         * Construit le système physique et ses dépendances.
+         * </summary>
+         */
         PhysicsSystem();
+        /**
+         * <summary>
+         * Détruit le système physique et libère les ressources.
+         * </summary>
+         */
         ~PhysicsSystem();
 
+        /**
+         * <summary>
+         * Initialise les structures de la bibliothèque Jolt.
+         * </summary>
+         */
         void Initialize();
+        /**
+         * <summary>
+         * Met à jour la simulation physique.
+         * </summary>
+         */
         void Update(float deltaTime) override;
+        /**
+         * <summary>
+         * Applique les mises à jour tardives de la physique.
+         * </summary>
+         */
         void LateUpdate(float deltaTime) override;
+        /**
+         * <summary>
+         * Prépare le système avant le démarrage.
+         * </summary>
+         */
         void Awake() override;
+        /**
+         * <summary>
+         * Démarre le système physique.
+         * </summary>
+         */
         void Start() override;
+        /**
+         * <summary>
+         * Enregistre un composant physique.
+         * </summary>
+         */
         void RegisterComponent(NNE::Component::AComponent* component) override;
+        /**
+         * <summary>
+         * Accède à l'objet PhysicsSystem de Jolt.
+         * </summary>
+         */
         JPH::PhysicsSystem* GetPhysicsSystem();
 
         class ContactListenerImpl : public JPH::ContactListener
         {
         public:
+            /**
+             * <summary>
+             * Réagit lorsqu'un contact physique est ajouté.
+             * </summary>
+             */
             void OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&) override;
         };
 

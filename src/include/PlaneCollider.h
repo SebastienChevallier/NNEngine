@@ -13,7 +13,17 @@ namespace NNE::Component::Physics
                 JPH::Plane plane;
 
         public:
+                /**
+                 * <summary>
+                 * Crée un collider plan avec une normale et une distance.
+                 * </summary>
+                 */
                 PlaneCollider(const glm::vec3& normal, float distance);
+                /**
+                 * <summary>
+                 * Génère la forme physique correspondant au plan.
+                 * </summary>
+                 */
                 void CreateShape() override;
         };
 }

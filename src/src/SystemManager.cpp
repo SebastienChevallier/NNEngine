@@ -6,6 +6,11 @@ namespace NNE::Systems {
 
 SystemManager* SystemManager::Instance = nullptr;
 
+/**
+ * <summary>
+ * Retourne l'unique instance du gestionnaire de systèmes.
+ * </summary>
+ */
 SystemManager* SystemManager::GetInstance()
 {
     if (!Instance)
@@ -13,16 +18,31 @@ SystemManager* SystemManager::GetInstance()
     return Instance;
 }
 
+/**
+ * <summary>
+ * Ajoute un système à la collection gérée.
+ * </summary>
+ */
 void SystemManager::AddSystem(ISystem* system)
 {
     _systems.push_back(system);
 }
 
+/**
+ * <summary>
+ * Obtient la liste des systèmes enregistrés.
+ * </summary>
+ */
 std::vector<ISystem*>& SystemManager::GetSystems()
 {
     return _systems;
 }
 
+/**
+ * <summary>
+ * Inscrit un composant auprès de chaque système.
+ * </summary>
+ */
 void SystemManager::RegisterComponent(NNE::Component::AComponent* component)
 {
     for (ISystem* system : _systems)

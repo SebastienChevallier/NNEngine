@@ -13,8 +13,23 @@ private:
 public:
     void Awake() override {}
     void Start() override {}
+    /**
+     * <summary>
+     * Met à jour tous les scripts à chaque frame.
+     * </summary>
+     */
     void Update(float deltaTime) override;
+    /**
+     * <summary>
+     * Exécute les mises à jour tardives des scripts.
+     * </summary>
+     */
     void LateUpdate(float deltaTime) override;
+    /**
+     * <summary>
+     * Ajoute un composant script à la gestion.
+     * </summary>
+     */
     void RegisterComponent(NNE::Component::AComponent* component) override;
 };
 

@@ -18,20 +18,24 @@ namespace NNE {
     public:
         std::vector<AEntity*> entities;
 
+        /**
+         * <summary>
+         * Détruit la scène et libère ses entités.
+         * </summary>
+         */
         ~AScene();
 
-
         /**
-         * @brief Save the scene to a file.
-         * @param path Path of the file to create.
-         * @return true on success
+         * <summary>
+         * Sauvegarde la scène dans un fichier.
+         * </summary>
          */
         bool Save(const std::string& path) const;
 
         /**
-         * @brief Load entities/components from a file.
-         * @param path Path of the scene file.
-         * @return true on success
+         * <summary>
+         * Charge la scène depuis un fichier.
+         * </summary>
          */
         bool Load(const std::string& path);
     };

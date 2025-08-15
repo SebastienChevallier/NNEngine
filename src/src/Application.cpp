@@ -5,6 +5,11 @@ std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
 int NNE::Systems::Application::_genericID = 0;
 
+/**
+ * <summary>
+ * Construit l'application et crée les systèmes principaux.
+ * </summary>
+ */
 NNE::Systems::Application::Application()
     : _systems(NNE::Systems::SystemManager::GetInstance()->GetSystems())
 {
@@ -21,6 +26,11 @@ NNE::Systems::Application::Application()
     delta = 0;
 }
 
+/**
+ * <summary>
+ * Libère toutes les ressources allouées par l'application.
+ * </summary>
+ */
 NNE::Systems::Application::~Application()
 {
     if (VKManager) {
@@ -59,6 +69,11 @@ NNE::Systems::Application::~Application()
     }
 }
 
+/**
+ * <summary>
+ * Initialise l'application et démarre les systèmes et entités.
+ * </summary>
+ */
 void NNE::Systems::Application::Init()
 {
     Open();
@@ -79,6 +94,11 @@ void NNE::Systems::Application::Init()
     }
 }
 
+/**
+ * <summary>
+ * Fait tourner la boucle principale de l'application.
+ * </summary>
+ */
 void NNE::Systems::Application::Update()
 {
     while (!glfwWindowShouldClose(VKManager->window)) {
@@ -107,23 +127,43 @@ void NNE::Systems::Application::Update()
     vkDeviceWaitIdle(VKManager->device);
 }
 
+/**
+ * <summary>
+ * Ouvre la fenêtre principale et prépare les entrées.
+ * </summary>
+ */
 void NNE::Systems::Application::Open()
 {
     VKManager->CreateGLFWWindow(WIDTH, HEIGHT);
     NNE::Systems::InputManager::Init(VKManager->window);
 }
 
+/**
+ * <summary>
+ * Termine l'application en fermant les bibliothèques utilisées.
+ * </summary>
+ */
 void NNE::Systems::Application::Quit()
 {
     glfwTerminate();
 }
 
+/**
+ * <summary>
+ * Fournit un nouvel identifiant unique.
+ * </summary>
+ */
 int NNE::Systems::Application::GenerateID()
 {
     _genericID++;
     return _genericID;
 }
 
+/**
+ * <summary>
+ * Crée et enregistre une entité dans l'application.
+ * </summary>
+ */
 NNE::AEntity* NNE::Systems::Application::CreateEntity()
 {
     NNE::AEntity* entity = new NNE::AEntity();
@@ -131,6 +171,11 @@ NNE::AEntity* NNE::Systems::Application::CreateEntity()
     return entity;
 }
 
+/**
+ * <summary>
+ * Calcule le temps écoulé depuis la dernière frame.
+ * </summary>
+ */
 float NNE::Systems::Application::GetDeltaTime()
 {
     static auto lastFrame = std::chrono::high_resolution_clock::now();
@@ -140,6 +185,11 @@ float NNE::Systems::Application::GetDeltaTime()
     return dt;
 }
 
+/**
+ * <summary>
+ * Accède à l'instance unique de l'application.
+ * </summary>
+ */
 NNE::Systems::Application* NNE::Systems::Application::GetInstance()
 {
     return Instance;

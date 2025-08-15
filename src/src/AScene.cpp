@@ -7,11 +7,21 @@
 
 using namespace NNE;
 
+/**
+ * <summary>
+ * Écrit un vecteur 3D au format JSON.
+ * </summary>
+ */
 static void WriteVec3(std::ostream& os, const glm::vec3& v)
 {
     os << "[" << v.x << "," << v.y << "," << v.z << "]";
 }
 
+/**
+ * <summary>
+ * Convertit une chaîne JSON en vecteur 3D.
+ * </summary>
+ */
 static glm::vec3 ParseVec3(const std::string& data)
 {
     glm::vec3 v{0.0f};
@@ -19,6 +29,11 @@ static glm::vec3 ParseVec3(const std::string& data)
     return v;
 }
 
+/**
+ * <summary>
+ * Détruit toutes les entités contenues dans la scène.
+ * </summary>
+ */
 AScene::~AScene()
 {
     for (AEntity* e : entities)
@@ -26,6 +41,11 @@ AScene::~AScene()
     entities.clear();
 }
 
+/**
+ * <summary>
+ * Sauvegarde la scène dans un fichier JSON minimal.
+ * </summary>
+ */
 bool AScene::Save(const std::string& path) const
 {
     std::ofstream file(path);
@@ -63,6 +83,11 @@ bool AScene::Save(const std::string& path) const
     return true;
 }
 
+/**
+ * <summary>
+ * Charge la scène à partir d'un fichier JSON minimal.
+ * </summary>
+ */
 bool AScene::Load(const std::string& path)
 {
     std::ifstream file(path);
