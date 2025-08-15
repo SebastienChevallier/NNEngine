@@ -12,8 +12,10 @@ NNE::Systems::Application::Application()
     VKManager = new VulkanManager();
     physicsSystem = new PhysicsSystem();
     renderSystem = new RenderSystem(VKManager);
+    inputSystem = new InputSystem();
     NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(inputSystem);
     delta = 0;
 }
 
@@ -29,6 +31,12 @@ NNE::Systems::Application::~Application()
     {
         delete renderSystem;
         renderSystem = nullptr;
+    }
+
+    if (inputSystem)
+    {
+        delete inputSystem;
+        inputSystem = nullptr;
     }
 
     for (NNE::AEntity* entity : _entities) {
@@ -68,7 +76,6 @@ void NNE::Systems::Application::Update()
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
         glfwPollEvents();
-        NNE::Systems::InputManager::Update();
         for (NNE::Systems::ISystem* system : _systems)
         {
             system->Update(delta);
