@@ -1239,13 +1239,23 @@ void NNE::Systems::VulkanManager::updateCameraAspectRatio()
 
 void NNE::Systems::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
 {
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    int texWidth = 0, texHeight = 0, texChannels = 0;
+    stbi_uc* pixels = nullptr;
+    std::array<stbi_uc, 4> roseFlash = { 255, 0, 255, 255 };
+    bool useFallback = false;
+
+    if (!texturePath.empty() && std::filesystem::exists(texturePath)) {
+        pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    }
+
     if (!pixels) {
-        throw std::runtime_error("Failed to load texture: " + texturePath);
+        useFallback = true;
+        texWidth = texHeight = 1;
+        pixels = roseFlash.data();
     }
 
     VkDeviceSize imageSize = texWidth * texHeight * 4;
+    //VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
     VkBuffer stagingBuffer;
@@ -1259,7 +1269,9 @@ void NNE::Systems::VulkanManager::createTextureImage(const std::string& textureP
     memcpy(data, pixels, static_cast<size_t>(imageSize));
     vkUnmapMemory(device, stagingBufferMemory);
 
-    stbi_image_free(pixels);
+    if (!useFallback) {
+        stbi_image_free(pixels);
+    }
 
     createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,

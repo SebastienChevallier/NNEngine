@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15...3.30)
+cmake_policy(VERSION 3.15...3.30)
 project(NNEngine)
 
 set(CMAKE_CXX_STANDARD 17)

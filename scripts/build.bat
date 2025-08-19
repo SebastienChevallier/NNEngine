@@ -32,7 +32,7 @@ if exist "%BUILD_DIR%" (
 mkdir "%BUILD_DIR%"
 
 echo [INFO] Generation de la solution Visual Studio...
-cmake -B "%BUILD_DIR%" -S "%ROOT_DIR%" -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%TOOLCHAIN%" %*
+cmake -B "%BUILD_DIR%" -S "%ROOT_DIR%" -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="%TOOLCHAIN%" %* -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 echo [INFO] Construction du projet...
 cmake --build "%BUILD_DIR%"
