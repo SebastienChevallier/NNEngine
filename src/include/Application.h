@@ -52,6 +52,7 @@ namespace NNE::Systems {
                 * </summary>
                 */
             static Application* GetInstance();
+            float GetDelta() const;
             /**
                 * <summary>
                 * Construit l'application et initialise les systèmes principaux.

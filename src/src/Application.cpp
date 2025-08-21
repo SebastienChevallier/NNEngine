@@ -35,6 +35,7 @@ NNE::Systems::Application::Application()
  */
 NNE::Systems::Application::~Application()
 {
+    DebugOverlay::Shutdown();
     if (VKManager) {
         VKManager->CleanUp();
         delete VKManager;
@@ -197,4 +198,9 @@ float NNE::Systems::Application::GetDeltaTime()
 NNE::Systems::Application* NNE::Systems::Application::GetInstance()
 {
     return Instance;
+}
+
+float NNE::Systems::Application::GetDelta() const
+{
+    return delta;
 }
