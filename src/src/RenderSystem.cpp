@@ -1,6 +1,8 @@
 #include "RenderSystem.h"
 #include "VulkanManager.h"
 #include "AComponent.h"
+#include "DebugOverlay.h"
+#include "imgui.h"
 
 using namespace NNE::Systems;
 
@@ -32,6 +34,7 @@ void RenderSystem::Start()
         _vkManager->createDescriptorSets();
         _vkManager->createCommandBuffers();
         _vkManager->createSyncObjects();
+        NNE::Debug::DebugOverlay::Init(_vkManager);
     }
 }
 

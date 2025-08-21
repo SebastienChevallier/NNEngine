@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Minimal ImGui stub for compilation in NNEngine tests.
 // Provides enough interface used by DebugOverlay and VulkanManager.
 
@@ -24,4 +25,5 @@ inline ImGuiIO& GetIO() {
     return io;
 }
 } // namespace ImGui
+
 

@@ -1,5 +1,6 @@
 #include "DebugOverlay.h"
 
+
 namespace NNE {
 
 void DebugOverlay::Init() {
@@ -19,4 +20,5 @@ void DebugOverlay::Shutdown() {
 }
 
 } // namespace NNE
+
 
