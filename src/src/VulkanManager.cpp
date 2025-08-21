@@ -1,4 +1,5 @@
 #include "VulkanManager.h"
+#include "imgui.h"
 #include <stb_image.h>
 #include <glm/gtx/hash.hpp>
 #include <filesystem>
@@ -1714,7 +1715,10 @@ std::vector<char> NNE::Systems::VulkanManager::readFile(const std::string& filen
 }
 
 void NNE::Systems::VulkanManager::CleanUp()
-{    
+{
+    ImGui::DestroyPlatformWindows();
+    ImGui::DestroyContext();
+
     if (device == VK_NULL_HANDLE) return;
 
     vkDeviceWaitIdle(device);
