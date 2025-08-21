@@ -10,6 +10,7 @@
 *.lo
 *.o
 *.obj
+!/NNEngine/assets/models/*.obj
 
 # Precompiled Headers
 *.gch
