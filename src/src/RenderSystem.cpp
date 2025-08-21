@@ -21,8 +21,12 @@ void RenderSystem::Start()
     if (_vkManager)
     {
         _vkManager->LoadMeshes(_renderObjects);
-        _vkManager->createVertexBuffer();
-        _vkManager->createIndexBuffer();
+
+        if (!_vkManager->vertices.empty() && !_vkManager->indices.empty())
+        {
+            _vkManager->createVertexBuffer();
+            _vkManager->createIndexBuffer();
+        }
         _vkManager->createUniformBuffers();
         _vkManager->createDescriptorPool();
         _vkManager->createDescriptorSets();

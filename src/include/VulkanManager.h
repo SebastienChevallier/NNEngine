@@ -138,8 +138,7 @@ namespace NNE::Systems {
 		uint32_t currentFrame = 0;
 		bool framebufferResized = false;
 
-		std::vector<Vertex> vertices;
-		std::vector<uint32_t> indices;
+		
 		
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
@@ -182,6 +181,8 @@ namespace NNE::Systems {
 	public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
 		VkInstance instance = VK_NULL_HANDLE;
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
 		GLFWwindow* window;
                 /**
                  * <summary>
