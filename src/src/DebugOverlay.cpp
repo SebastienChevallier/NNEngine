@@ -1,7 +1,7 @@
 #include "DebugOverlay.h"
 
 
-namespace NNE {
+namespace NNE::Debug {
 
 void DebugOverlay::Init() {
     ImGui::CreateContext();
@@ -19,6 +19,6 @@ void DebugOverlay::Shutdown() {
     ImGui::DestroyContext();
 }
 
-} // namespace NNE
+} // namespace NNE::Debug
 
 
