@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "SystemManager.h"
+#include "DebugOverlay.h"
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
@@ -123,6 +124,8 @@ void NNE::Systems::Application::Update()
         {
             entity->LateUpdate(delta);
         }
+
+        NNE::Debug::DebugOverlay::Render();
     }
     vkDeviceWaitIdle(VKManager->device);
 }
