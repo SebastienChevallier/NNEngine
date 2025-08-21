@@ -1,6 +1,5 @@
 #pragma once
 
-
 // Minimal ImGui stub for compilation in NNEngine tests.
 // Provides enough interface used by DebugOverlay and VulkanManager.
 
@@ -8,8 +7,11 @@ struct ImGuiIO {
     int ConfigFlags = 0;
 };
 
-// Config flag for enabling viewports
+struct ImGuiViewport {};
+
+// Config flags
 constexpr int ImGuiConfigFlags_ViewportsEnable = 1 << 10;
+constexpr int ImGuiConfigFlags_DockingEnable   = 1 << 7;
 
 namespace ImGui {
 inline void CreateContext() {}
@@ -24,6 +26,15 @@ inline ImGuiIO& GetIO() {
     static ImGuiIO io{};
     return io;
 }
-} // namespace ImGui
 
+inline ImGuiViewport* GetMainViewport() {
+    static ImGuiViewport viewport;
+    return &viewport;
+}
+inline void DockSpaceOverViewport(ImGuiViewport*, int = 0) {}
+
+inline bool Begin(const char*, bool* = nullptr, int = 0) { return true; }
+inline void End() {}
+inline void Text(const char*, ...) {}
+} // namespace ImGui
 
