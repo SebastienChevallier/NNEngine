@@ -34,7 +34,7 @@ void RenderSystem::Start()
         _vkManager->createDescriptorSets();
         _vkManager->createCommandBuffers();
         _vkManager->createSyncObjects();
-        NNE::Debug::DebugOverlay::Init(_vkManager);
+        NNE::Debug::DebugOverlay::Init();
     }
 }
 
