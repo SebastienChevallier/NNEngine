@@ -4,9 +4,9 @@
 namespace NNE::Debug {
 class DebugOverlay {
 public:
-    void Init();
-    void Render();
-    void Shutdown();
+    static void Init();
+    static void Render();
+    static void Shutdown();
 };
 } // namespace NNE::Debug
 

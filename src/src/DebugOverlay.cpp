@@ -3,18 +3,21 @@
 
 namespace NNE::Debug {
 
-void DebugOverlay::Init() {
+void  DebugOverlay::Init() {
     ImGui::CreateContext();
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	
 }
 
-void DebugOverlay::Render() {
+void  DebugOverlay::Render() {
     ImGui::Render();
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 }
 
-void DebugOverlay::Shutdown() {
+void  DebugOverlay::Shutdown() {
     ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 }
