@@ -8,9 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # ---------------- Engine Library ----------------
 file(GLOB ENGINE_SOURCES src/src/*.cpp)
 file(GLOB ENGINE_HEADERS src/include/*.h)
-add_library(NNEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+file(GLOB IMGUI_SOURCES src/imgui/*.cpp)
+add_library(NNEngine STATIC ${ENGINE_SOURCES} ${ENGINE_HEADERS} ${IMGUI_SOURCES})
 
-target_include_directories(NNEngine PUBLIC src/include)
+target_include_directories(NNEngine PUBLIC src/include src/imgui)
 
 target_compile_definitions(NNEngine PUBLIC SHADER_PATH="${CMAKE_SOURCE_DIR}/src/shaders")
 
