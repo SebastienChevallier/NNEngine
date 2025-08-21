@@ -1,13 +1,15 @@
 #pragma once
-#include <vector>
-#include "Application.h"
-#include "AEntity.h"
 
-namespace NNE::Debug {
+
+#include "imgui.h"
+
+namespace NNE {
 class DebugOverlay {
 public:
-    static void Init(NNE::Systems::VulkanManager* manager);
-    static void Render();
+    void Init();
+    void Render();
+    void Shutdown();
 };
-}
+} // namespace NNE
+
 
