@@ -1,7 +1,10 @@
 #pragma once
+#include <cstdint>
 
-// Minimal ImGui stub for compilation in NNEngine tests.
-// Provides enough interface used by DebugOverlay and VulkanManager.
+// Simplified ImGui header providing minimal declarations used by NNEngine.
+// This is not a full implementation of Dear ImGui.
+
+struct ImDrawData {};
 
 struct ImGuiIO {
     int ConfigFlags = 0;
@@ -9,7 +12,6 @@ struct ImGuiIO {
 
 struct ImGuiViewport {};
 
-// Config flags
 constexpr int ImGuiConfigFlags_ViewportsEnable = 1 << 10;
 constexpr int ImGuiConfigFlags_DockingEnable   = 1 << 7;
 
@@ -22,15 +24,10 @@ inline void UpdatePlatformWindows() {}
 inline void RenderPlatformWindowsDefault() {}
 inline void DestroyPlatformWindows() {}
 
-inline ImGuiIO& GetIO() {
-    static ImGuiIO io{};
-    return io;
-}
+inline ImGuiIO& GetIO() { static ImGuiIO io{}; return io; }
+inline ImGuiViewport* GetMainViewport() { static ImGuiViewport viewport; return &viewport; }
+inline ImDrawData* GetDrawData() { static ImDrawData drawData; return &drawData; }
 
-inline ImGuiViewport* GetMainViewport() {
-    static ImGuiViewport viewport;
-    return &viewport;
-}
 inline void DockSpaceOverViewport(ImGuiViewport*, int = 0) {}
 
 inline bool Begin(const char*, bool* = nullptr, int = 0) { return true; }

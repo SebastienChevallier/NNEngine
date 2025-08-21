@@ -1,16 +1,26 @@
 #include "DebugOverlay.h"
 #include "Application.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
 
 namespace NNE::Debug {
 
 void DebugOverlay::Init() {
     ImGui::CreateContext();
+
+    // Initialize platform/renderer backends
+    ImGui_ImplGlfw_InitForVulkan(nullptr, true);
+    ImGui_ImplVulkan_InitInfo initInfo{};
+    ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
+
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
 void DebugOverlay::Render() {
+    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplVulkan_NewFrame();
     ImGui::NewFrame();
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
@@ -23,11 +33,14 @@ void DebugOverlay::Render() {
     ImGui::End();
 
     ImGui::Render();
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), VK_NULL_HANDLE);
     ImGui::UpdatePlatformWindows();
     ImGui::RenderPlatformWindowsDefault();
 }
 
 void DebugOverlay::Shutdown() {
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyPlatformWindows();
     ImGui::DestroyContext();
 }
