@@ -1,5 +1,7 @@
 #include "Application.h"
 #include "SystemManager.h"
+#include "PerformanceMetrics.h"
+#include <algorithm>
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
@@ -16,10 +18,12 @@ NNE::Systems::Application::Application()
     Instance = this;
     VKManager = new VulkanManager();
     physicsSystem = new PhysicsSystem();
+    uiSystem = new UISystem(VKManager);
     renderSystem = new RenderSystem(VKManager);
     inputSystem = new InputSystem();
     scriptSystem = new ScriptSystem();
     NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(uiSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(inputSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(scriptSystem);
@@ -43,6 +47,12 @@ NNE::Systems::Application::~Application()
     {
         delete renderSystem;
         renderSystem = nullptr;
+    }
+
+    if (uiSystem)
+    {
+        delete uiSystem;
+        uiSystem = nullptr;
     }
 
     if (inputSystem)
@@ -103,6 +113,11 @@ void NNE::Systems::Application::Update()
 {
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
+        float dtMs = delta * 1000.0f;
+        static float smooth = dtMs;
+        smooth = 0.9f * smooth + 0.1f * dtMs;
+        g_FrameTimeMs = smooth;
+        g_FPS = 1000.0f / std::max(0.001f, g_FrameTimeMs);
         glfwPollEvents();
         for (NNE::Systems::ISystem* system : _systems)
         {
