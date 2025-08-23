@@ -10,6 +10,7 @@
 #include "VulkanManager.h"
 #include "PhysicsSystem.h"
 #include "RenderSystem.h"
+#include "UISystem.h"
 #include "InputSystem.h"
 #include "ScriptSystem.h"
 #include "PlaneCollider.h"
@@ -66,6 +67,7 @@ namespace NNE::Systems {
                 ~Application();
                 NNE::Systems::VulkanManager* VKManager;
                 NNE::Systems::PhysicsSystem* physicsSystem;
+                NNE::Systems::UISystem* uiSystem;
                 NNE::Systems::RenderSystem* renderSystem;
                 NNE::Systems::InputSystem* inputSystem;
                 NNE::Systems::ScriptSystem* scriptSystem;

@@ -170,8 +170,9 @@ namespace NNE::Systems {
 		VkDeviceMemory colorImageMemory;
 		VkImageView colorImageView;
 
-		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
+                VkDescriptorPool descriptorPool;
+                VkDescriptorPool imguiPool;
+                std::vector<VkDescriptorSet> descriptorSets;
 
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
@@ -473,6 +474,10 @@ namespace NNE::Systems {
                  * </summary>
                  */
                 void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+                void initImGui();
+                void cleanupImGui();
+                void beginImGuiFrame();
+                void renderImGui(VkCommandBuffer commandBuffer);
                 /**
                  * <summary>
                  * Change l'agencement d'une image.
