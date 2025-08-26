@@ -21,7 +21,7 @@ if not exist "%VCPKG_PATH%\vcpkg.exe" (
 )
 
 REM Install required packages
-"%VCPKG_PATH%\vcpkg.exe" install glfw3 glm stb vulkan tinyobjloader joltphysics
+"%VCPKG_PATH%\vcpkg.exe" install glfw3 glm stb vulkan tinyobjloader joltphysics nlohmann-json imgui
 
 echo Dependencies installed using vcpkg.
 echo You can now build the project with:
