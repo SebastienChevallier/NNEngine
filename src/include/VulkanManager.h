@@ -177,7 +177,7 @@ namespace NNE::Systems {
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
 		VkImageView depthImageView;
-		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
 
 	public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;

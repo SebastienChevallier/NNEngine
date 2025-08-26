@@ -37,7 +37,7 @@ include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.90.4
+    GIT_TAG v1.90.4-docking
 )
 FetchContent_GetProperties(imgui)
 if(NOT imgui_POPULATED)

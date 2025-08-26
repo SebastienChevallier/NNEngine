@@ -87,7 +87,7 @@ void NNE::Systems::VulkanManager::initVulkan()
     createDepthResources();         // 📏 Créer une image de profondeur
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
-    initImGui();
+    //initImGui();
 }
 
 
@@ -860,12 +860,13 @@ void NNE::Systems::VulkanManager::initImGui()
             throw std::runtime_error("ImGui Vulkan backend error");
         }
     };
-    ImGui_ImplVulkan_Init(&init_info, renderPass);
+	init_info.RenderPass = renderPass;
+    ImGui_ImplVulkan_Init(&init_info);
 
     VkCommandBuffer cmd = beginSingleTimeCommands();
-    ImGui_ImplVulkan_CreateFontsTexture(cmd);
+    ImGui_ImplVulkan_CreateFontsTexture();
     endSingleTimeCommands(cmd);
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    //ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void NNE::Systems::VulkanManager::beginImGuiFrame()

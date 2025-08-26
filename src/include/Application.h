@@ -20,7 +20,19 @@
 #include "ISystem.h"
 #include "SystemManager.h"
 
+namespace NNE { class AEntity; }
+namespace JPH { class BodyID; }
+
+namespace NNE::Component::Physics { class ColliderComponent; }
+
 namespace NNE::Systems {
+    class VulkanManager;
+    class PhysicsSystem;
+    class RenderSystem;
+    class UISystem;
+    class InputSystem;
+    class ScriptSystem;
+    class ISystem;
         class Application
         {
         protected:
