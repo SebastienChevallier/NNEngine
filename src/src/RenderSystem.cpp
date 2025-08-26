@@ -2,7 +2,7 @@
 #include "VulkanManager.h"
 #include "AComponent.h"
 
-using namespace NNE::Systems;
+namespace NNE::Systems {
 
 /**
  * <summary>
@@ -75,4 +75,6 @@ const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Compone
 {
     return _renderObjects;
 }
+
+} // namespace NNE::Systems
 

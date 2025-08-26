@@ -1,6 +1,6 @@
 #include "ScriptSystem.h"
 
-using namespace NNE::Systems;
+namespace NNE::Systems {
 
 /**
  * <summary>
@@ -40,3 +40,5 @@ void ScriptSystem::RegisterComponent(NNE::Component::AComponent* component)
         _components.push_back(mono);
     }
 }
+
+} // namespace NNE::Systems

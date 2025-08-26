@@ -2,7 +2,14 @@
 #include "SystemManager.h"
 #include "PerformanceMetrics.h"
 #include <algorithm>
+#include <chrono>
+#include "VulkanManager.h"
+#include "PhysicsSystem.h"
+#include "RenderSystem.h"
 #include "UISystem.h"
+#include "InputSystem.h"
+#include "ScriptSystem.h"
+#include "InputManager.h"
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;

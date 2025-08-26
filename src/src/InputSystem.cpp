@@ -1,6 +1,6 @@
 #include "InputSystem.h"
 
-using namespace NNE::Systems;
+namespace NNE::Systems {
 
 /**
  * <summary>
@@ -47,3 +47,4 @@ void InputSystem::RegisterComponent(NNE::Component::AComponent* component)
     }
 }
 
+} // namespace NNE::Systems
