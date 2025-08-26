@@ -2,6 +2,7 @@
 #include "SystemManager.h"
 #include "PerformanceMetrics.h"
 #include <algorithm>
+#include "UISystem.h"
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;

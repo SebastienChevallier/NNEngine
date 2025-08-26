@@ -6,10 +6,11 @@ namespace NNE { namespace Component { class AComponent; } }
 
 namespace NNE::Systems {
 class VulkanManager;
-
+class Application;
 
 class UISystem : public ISystem {
     VulkanManager* _vkManager;
+	Application* _app;
 public:
     explicit UISystem(VulkanManager* manager);
     void Awake() override {}

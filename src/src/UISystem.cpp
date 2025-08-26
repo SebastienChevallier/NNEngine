@@ -2,6 +2,7 @@
 #include "VulkanManager.h"
 #include "PerformanceMetrics.h"
 #include <imgui.h>
+#include "Application.h"
 
 using namespace NNE::Systems;
 using namespace NNE;
@@ -12,6 +13,8 @@ void UISystem::Start() {
     if (_vkManager) {
         _vkManager->initImGui();
     }
+
+	_app = Application::GetInstance();
 }
 
 void UISystem::Update(float deltaTime) {
@@ -42,7 +45,7 @@ void UISystem::Update(float deltaTime) {
         ImGui::End();
         ImGui::Begin("Entities", &showPerf);
 
-        for each(AEntity* var in NNE::Systems::Application::GetInstance()->_entities)
+        for each(AEntity* var in _app->_entities)
         {
             ImGui::Text("Entity : %d", var->GetName());
         }
