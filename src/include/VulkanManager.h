@@ -21,8 +21,6 @@
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
-#define VK_KHR_surface
-#define VK_KHR_win32_surface
 #define GLFW_INCLUDE_VULKAN
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define STB_IMAGE_IMPLEMENTATION
@@ -33,9 +31,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <chrono>
 
@@ -170,13 +168,14 @@ namespace NNE::Systems {
 		VkDeviceMemory colorImageMemory;
 		VkImageView colorImageView;
 
-		VkDescriptorPool descriptorPool;
-		std::vector<VkDescriptorSet> descriptorSets;
+                VkDescriptorPool descriptorPool;
+                VkDescriptorPool imguiPool;
+                std::vector<VkDescriptorSet> descriptorSets;
 
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
 		VkImageView depthImageView;
-		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
 
 	public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
@@ -473,6 +472,10 @@ namespace NNE::Systems {
                  * </summary>
                  */
                 void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+                void initImGui();
+                void cleanupImGui();
+                void beginImGuiFrame();
+                void renderImGui(VkCommandBuffer commandBuffer);
                 /**
                  * <summary>
                  * Change l'agencement d'une image.

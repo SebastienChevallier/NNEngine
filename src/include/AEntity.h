@@ -42,6 +42,8 @@ namespace NNE {
                  */
                 std::string GetName();
 
+				void SetName(const std::string& name);
+
                 /**
                  * <summary>
                  * Appelée lors de l'initialisation de l'entité.

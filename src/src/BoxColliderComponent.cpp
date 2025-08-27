@@ -1,6 +1,10 @@
 #include "BoxColliderComponent.h"
+#include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyInterface.h>
+
+#include "PhysicsSystem.h"
 #include "Application.h"
 
 /**

@@ -1,6 +1,5 @@
 #pragma once
 #include "AComponent.h"
-#include "AEntity.h"
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 

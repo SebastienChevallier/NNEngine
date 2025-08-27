@@ -1,7 +1,9 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
-#include <glm/gtx/hash.hpp>
 #include <filesystem>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
 
 const std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
@@ -33,6 +35,7 @@ NNE::Systems::VulkanManager::VulkanManager()
     graphicsPipeline = VK_NULL_HANDLE;
     commandPool = VK_NULL_HANDLE;
     descriptorPool = VK_NULL_HANDLE;
+    imguiPool = VK_NULL_HANDLE;
     descriptorSetLayout = VK_NULL_HANDLE;
     depthImage = VK_NULL_HANDLE;
     depthImageMemory = VK_NULL_HANDLE;
@@ -83,6 +86,7 @@ void NNE::Systems::VulkanManager::initVulkan()
     createDepthResources();         // 📏 Créer une image de profondeur
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
+    //initImGui();
 }
 
 
@@ -802,6 +806,91 @@ void NNE::Systems::VulkanManager::createFramebuffers()
     }
 }
 
+void NNE::Systems::VulkanManager::initImGui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    ImGui::StyleColorsDark();
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+
+    VkDescriptorPoolSize pool_sizes[] = {
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
+    VkDescriptorPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000 * (uint32_t)std::size(pool_sizes);
+    pool_info.poolSizeCount = (uint32_t)std::size(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+    vkCreateDescriptorPool(device, &pool_info, nullptr, &imguiPool);
+
+    ImGui_ImplGlfw_InitForVulkan(window, true);
+
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    ImGui_ImplVulkan_InitInfo init_info{};
+    init_info.Instance = instance;
+    init_info.PhysicalDevice = physicalDevice;
+    init_info.Device = device;
+    init_info.QueueFamily = indices.graphicsFamily.value();
+    init_info.Queue = graphicsQueue;
+    init_info.DescriptorPool = imguiPool;
+    init_info.MinImageCount = static_cast<uint32_t>(swapChainImages.size());
+    init_info.ImageCount = static_cast<uint32_t>(swapChainImages.size());
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.CheckVkResultFn = [](VkResult err) {
+        if (err != VK_SUCCESS) {
+            throw std::runtime_error("ImGui Vulkan backend error");
+        }
+    };
+	init_info.RenderPass = renderPass;
+    ImGui_ImplVulkan_Init(&init_info);
+
+    VkCommandBuffer cmd = beginSingleTimeCommands();
+    ImGui_ImplVulkan_CreateFontsTexture();
+    endSingleTimeCommands(cmd);
+    //ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
+void NNE::Systems::VulkanManager::beginImGuiFrame()
+{
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void NNE::Systems::VulkanManager::renderImGui(VkCommandBuffer commandBuffer)
+{
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+}
+
+void NNE::Systems::VulkanManager::cleanupImGui()
+{
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    if (imguiPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, imguiPool, nullptr);
+        imguiPool = VK_NULL_HANDLE;
+    }
+}
+
 void NNE::Systems::VulkanManager::createCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
@@ -945,6 +1034,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         //std::cout << "Rendering " << mesh->getIndexCount() << " indices from offset " << mesh->getIndexOffset() << std::endl;
     }
 
+    renderImGui(commandBuffer);
     vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("❌ Erreur : Échec de la finalisation du command buffer !");
@@ -1154,6 +1244,11 @@ void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Com
         presentInfo.pImageIndices = &imageIndex;
 
         result = vkQueuePresentKHR(presentQueue, &presentInfo);
+
+        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
             framebufferResized = false;
@@ -1718,6 +1813,8 @@ void NNE::Systems::VulkanManager::CleanUp()
     if (device == VK_NULL_HANDLE) return;
 
     vkDeviceWaitIdle(device);
+
+    cleanupImGui();
 
     for (NNE::Component::Render::MeshComponent* mesh : loadedMeshes) {
         if (mesh) {
