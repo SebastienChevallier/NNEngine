@@ -1,6 +1,5 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
-#include <glm/gtx/hash.hpp>
 #include <filesystem>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>

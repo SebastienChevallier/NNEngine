@@ -1,7 +1,11 @@
 #include "RigidbodyComponent.h"
-#include "Application.h"
 #include "TransformComponent.h"
+#include "PhysicsSystem.h"
+#include "Application.h"
+#include "AEntity.h"
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyInterface.h>
+#include <Jolt/Physics/Body/BodyActivationState.h>
 
 namespace NNE::Component::Physics {
 

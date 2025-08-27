@@ -4,8 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstdio>
-
-using namespace NNE;
+#include <glm/glm.hpp>
 
 /**
  * <summary>
@@ -28,6 +27,8 @@ static glm::vec3 ParseVec3(const std::string& data)
     std::sscanf(data.c_str(), "[%f,%f,%f]", &v.x, &v.y, &v.z);
     return v;
 }
+
+namespace NNE {
 
 /**
  * <summary>
@@ -166,4 +167,6 @@ bool AScene::Load(const std::string& path)
 
     return true;
 }
+
+} // namespace NNE
 
