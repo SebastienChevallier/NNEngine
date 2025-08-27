@@ -34,8 +34,18 @@ NNE::AEntity::~AEntity()
  */
 int NNE::AEntity::GetID()
 {
-	
-	return _ID;
+
+        return _ID;
+}
+
+/**
+ * <summary>
+ * Renvoie le nom attribué à l'entité.
+ * </summary>
+ */
+std::string NNE::AEntity::GetName()
+{
+        return _Name;
 }
 
 /**
