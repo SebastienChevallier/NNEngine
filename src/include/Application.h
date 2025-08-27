@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 
+#include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/BodyID.h>
 
 #include <unordered_map>
