@@ -7,6 +7,7 @@
 #include "AComponent.h"
 #include "AScene.h"
 #include "Application.h"
+#include <glm/gtc/epsilon.hpp>
 #include <cstdio>
 
 static void test_default_transform()

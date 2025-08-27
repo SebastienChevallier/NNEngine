@@ -2,39 +2,25 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include "AEntity.h"
-#include "AComponent.h"
-#include "MeshComponent.h"
-#include "TransformComponent.h"
-#include "CameraComponent.h"
-#include "VulkanManager.h"
-#include "PhysicsSystem.h"
-#include "RenderSystem.h"
-//#include "UISystem.h"
-#include "InputSystem.h"
-#include "ScriptSystem.h"
-#include "PlaneCollider.h"
-#include "BoxColliderComponent.h"
-#include "RigidbodyComponent.h"
-#include "InputManager.h"
-#include "ISystem.h"
-#include "SystemManager.h"
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/BodyID.h>
+#include <unordered_map>
 
 namespace NNE { class AEntity; }
-namespace JPH { class BodyID; }
 
 namespace NNE::Component::Physics { class ColliderComponent; }
 
 namespace NNE::Systems {
-    class VulkanManager;
-    class PhysicsSystem;
-    class RenderSystem;
-    class UISystem;
-    class InputSystem;
-    class ScriptSystem;
-    class ISystem;
-        class Application
-        {
+class VulkanManager;
+class PhysicsSystem;
+class RenderSystem;
+class UISystem;
+class InputSystem;
+class ScriptSystem;
+class ISystem;
+
+class Application
+{
         protected:
 
                 std::map<int, int> _link;
@@ -154,7 +140,7 @@ namespace NNE::Systems {
                 void UnregisterCollider(JPH::BodyID id) {
                         colliderMap.erase(id);
                 }
-        };
+};
 }
 
 
