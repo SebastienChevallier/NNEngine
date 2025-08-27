@@ -21,8 +21,6 @@
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
-#define VK_KHR_surface
-#define VK_KHR_win32_surface
 #define GLFW_INCLUDE_VULKAN
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define STB_IMAGE_IMPLEMENTATION
@@ -33,9 +31,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <chrono>
 

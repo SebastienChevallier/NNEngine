@@ -1,4 +1,10 @@
 #include "Application.h"
+#include "TransformComponent.h"
+#include "BoxColliderComponent.h"
+#include "RigidbodyComponent.h"
+#include "MeshComponent.h"
+#include "CameraComponent.h"
+#include "VulkanManager.h"
 #include "../include/PlayerController.h"
 
 int main() {

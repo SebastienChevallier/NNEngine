@@ -3,6 +3,8 @@
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
 #include "TransformComponent.h"
+#include "AEntity.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
