@@ -21,33 +21,77 @@ void UISystem::Update(float deltaTime) {
 
     _vkManager->beginImGuiFrame();
 
-    static bool showPerf = true;
-    static bool perfMax = false;
-    //if (ImGui::IsKeyPressed(ImGuiKey_F11)) perfMax = !perfMax;
+    static bool showPerf = false;
+    
+    if (ImGui::IsKeyPressed(ImGuiKey_F11)) showPerf = !showPerf;
 
     if (showPerf) {
         ImGuiIO& io = ImGui::GetIO();
 
         ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Appearing);
-        ImGui::Begin("Performance", &showPerf);
+        if (ImGui::Begin("Debug", &showPerf)) {
+            
+            io.FontGlobalScale = 1.1f;
 
-        io.FontGlobalScale = 1.3f;
+            
+            if (ImGui::BeginTabBar("DebugTabs")) {
+                if (ImGui::BeginTabItem("Performance")) {
+                    ImGui::Text("Frame time: %.2f ms  (%.1f FPS)", g_FrameTimeMs, g_FPS);
 
-        ImGui::Text("Frame time: %.2f ms  (%.1f FPS)", g_FrameTimeMs, g_FPS);
+                    static float history[120] = {};
+                    static int idx = 0;
+                    history[idx] = g_FrameTimeMs;
+                    idx = (idx + 1) % IM_ARRAYSIZE(history);
 
-        static float history[120] = {};
-        static int idx = 0;
-        history[idx] = g_FrameTimeMs;
-        idx = (idx + 1) % IM_ARRAYSIZE(history);
-        ImGui::PlotLines("Frametime (ms)", history, IM_ARRAYSIZE(history), idx, nullptr, 0.0f, 50.0f, ImVec2(-1, 80));
+                    ImGui::PlotLines("Frametime (ms)",
+                        history, IM_ARRAYSIZE(history),
+                        idx, nullptr, 0.0f, 50.0f, ImVec2(-1, 80));
+                    ImGui::EndTabItem();
+                }
 
-        ImGui::End();
-        ImGui::Begin("Entities", &showPerf);
+                if (ImGui::BeginTabItem("Entities")) {
+                    for (NNE::AEntity* e : _app->_entities) {
+                        ImGui::PushID(e); 
+                        bool open = ImGui::CollapsingHeader(e->GetName().c_str(),
+                            ImGuiTreeNodeFlags_SpanAvailWidth);
+                        if (open) {                            
+                            ImGui::Text("Id: %u", (unsigned)e->GetID());
+                            
+                            const auto& comps = e->components; 
+                            for (auto* c : comps) {
+                                ImGui::PushID(c);
 
-        for (NNE::AEntity* entity : _app->_entities) {
-            ImGui::Text("Entity : %d", entity->GetName());
+                                // Récup du nom de type
+                                std::string typeName;                                
+                                typeName = typeid(*c).name();
+
+                                // Node repliable pour le composant
+                                if (ImGui::TreeNodeEx("##comp",
+                                    ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen,
+                                    "%s", typeName.c_str())) {
+                                    // Contenu debug du composant
+                                    //if (auto* ui = dynamic_cast<IDebugUI*>(c)) {
+                                    //    ui->DrawImGui();  // chaque composant dessine ses propres champs
+                                    //}
+                                    //else {
+                                    //    ImGui::TextUnformatted("Pas d'UI pour ce composant.");
+                                    //}
+                                    ImGui::TreePop();
+                                }
+
+                                ImGui::PopID();
+                            }
+                        }
+
+                        ImGui::PopID();
+                    }
+
+                    ImGui::EndTabItem();
+                }
+
+                ImGui::EndTabBar();
+            }
         }
-
         ImGui::End();
     }
 

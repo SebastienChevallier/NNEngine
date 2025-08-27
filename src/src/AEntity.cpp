@@ -12,6 +12,7 @@ NNE::AEntity::AEntity()
 {
         _ID = NNE::Systems::Application::GetInstance()->GenerateID();
         transform = this->AddComponent<NNE::Component::TransformComponent>();
+		_Name = "Entity_" + std::to_string(_ID);
 }
 
 /**
@@ -46,6 +47,11 @@ int NNE::AEntity::GetID()
 std::string NNE::AEntity::GetName()
 {
         return _Name;
+}
+
+void NNE::AEntity::SetName(const std::string& name)
+{
+	_Name = name;
 }
 
 /**

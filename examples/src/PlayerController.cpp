@@ -44,7 +44,7 @@ void PlayerController::Update(float deltaTime)
 	direction.y += (gravity / speed);
 	
         _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
-	std::cout << _entity->transform->position.x << std::endl;
+	//std::cout << _entity->transform->position.x << std::endl;
 }
 
 void PlayerController::OnHit(NNE::Component::Physics::ColliderComponent* other)

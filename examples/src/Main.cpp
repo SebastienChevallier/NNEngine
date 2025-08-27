@@ -13,6 +13,7 @@ int main() {
     NNE::Systems::Application app;
 
         NNE::AEntity* floor = app.CreateEntity();
+		floor->SetName("Floor");
         //NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(0, 1, 0), 10.0f);
         NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();
         NNE::Component::Physics::BoxColliderComponent const* BCFloor = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.50f, 100.0f));
