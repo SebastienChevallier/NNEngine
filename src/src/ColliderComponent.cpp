@@ -1,5 +1,7 @@
 #include "ColliderComponent.h"
 #include "MonoComponent.h"
+#include "AEntity.h"
+#include <vector>
 
 
 /**
@@ -11,12 +13,11 @@ void NNE::Component::Physics::ColliderComponent::OnHit(ColliderComponent* other)
 {
         std::vector<NNE::Component::MonoComponent*> list = _entity->GetComponents<NNE::Component::MonoComponent>();
 
-	if (!list.empty()) {
-                for each (NNE::Component::MonoComponent * comp in list)
-                {
+        if (!list.empty()) {
+                for (NNE::Component::MonoComponent* comp : list) {
                         comp->OnHit(other);
                 }
-	}
+        }
 	
 }
 
@@ -29,10 +30,9 @@ void NNE::Component::Physics::ColliderComponent::OnTriggerHit(ColliderComponent*
 {
         std::vector<NNE::Component::MonoComponent*> list = _entity->GetComponents<NNE::Component::MonoComponent>();
 
-	if (!list.empty()) {
-                for each (NNE::Component::MonoComponent * comp in list)
-                {
+        if (!list.empty()) {
+                for (NNE::Component::MonoComponent* comp : list) {
                         comp->OnTriggerHit(other);
                 }
-	}
+        }
 }
