@@ -2,10 +2,12 @@
 #include <iostream>
 #include <vector>
 #include <map>
+
+#include <Jolt/Physics/Body/BodyID.h>
+
 #include <unordered_map>
 
 namespace NNE { class AEntity; }
-namespace JPH { class BodyID; }
 
 namespace NNE::Component::Physics { class ColliderComponent; }
 
