@@ -23,47 +23,47 @@ void PlayerController::Awake()
 
 void PlayerController::Update(float deltaTime)
 {
-        direction = glm::vec3(0.0f);
+    direction = glm::vec3(0.0f);
 
-        glm::vec2 mousePos = NNE::Systems::InputManager::GetMousePosition();
-        glm::vec2 offset = mousePos - lastMousePos;
-        lastMousePos = mousePos;
+    glm::vec2 mousePos = NNE::Systems::InputManager::GetMousePosition();
+    glm::vec2 offset = mousePos - lastMousePos;
+    lastMousePos = mousePos;
 
-        yaw += offset.x * mouseSensitivity;
-        pitch -= offset.y * mouseSensitivity;
-        pitch = std::clamp(pitch, -89.0f, 89.0f);
+    yaw += offset.x * mouseSensitivity;
+    pitch -= offset.y * mouseSensitivity;
+    pitch = std::clamp(pitch, -89.0f, 89.0f);
 
-        _entity->transform->rotation.y = yaw;
-        if (cameraTransform) {
-                cameraTransform->rotation.x = pitch;
-        }
+    _entity->transform->rotation.y = yaw;
+    if (cameraTransform) {
+            cameraTransform->rotation.x = pitch;
+    }
 
-        if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_W)) {
-                direction.z = 1;
-        }
+    if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_W)) {
+            direction.z = 1;
+    }
 
-        if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_S)) {
-                direction.z = -1;
-        }
+    if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_S)) {
+            direction.z = -1;
+    }
 
-        if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_A)) {
-                direction.x = 1;
-        }
+    if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_A)) {
+            direction.x = 1;
+    }
 
 
-        if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_D)) {
-                direction.x = -1;
-        }
+    if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_D)) {
+            direction.x = -1;
+    }
 	
 
-        if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
-                direction.y = 1;
-        }
+    if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
+            direction.y = 1;
+    }
 
 	direction.y += (gravity / speed);
 	
-        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
-	//std::cout << _entity->transform->position.x << std::endl;
+    _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
+	std::cout << _entity->transform->rotation.y << std::endl;
 }
 
 void PlayerController::OnHit(NNE::Component::Physics::ColliderComponent* other)

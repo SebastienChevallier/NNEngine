@@ -8,13 +8,14 @@
 #include "VulkanManager.h"
 
 #include "../include/PlayerController.h"
+#include <PlaneCollider.h>
 
 int main() {
     NNE::Systems::Application app;
 
         NNE::AEntity* floor = app.CreateEntity();
 		floor->SetName("Floor");
-        //NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(0, 1, 0), 10.0f);
+        NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(0, 1, 0), 10.0f);
         NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();
         NNE::Component::Physics::BoxColliderComponent const* BCFloor = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.50f, 100.0f));
         NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(10.0f, true);
@@ -34,10 +35,10 @@ int main() {
         NNE::AEntity* player = app.CreateEntity();
         NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
         NNE::Component::Physics::BoxColliderComponent* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-        NNE::Component::Physics::RigidbodyComponent* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false);
+        NNE::Component::Physics::RigidbodyComponent* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, true);
         PlayerController* PlayerC = player->AddComponent<PlayerController>();
 
-	TCplayer->position = glm::vec3(0.0f, 0.0f, 5.0f);
+	TCplayer->position = glm::vec3(0.0f, 0.0f, -2.0f);
 
         NNE::AEntity* camera = app.CreateEntity();
         NNE::Component::Render::CameraComponent* CC = camera->AddComponent<NNE::Component::Render::CameraComponent>();
