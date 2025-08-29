@@ -21,6 +21,10 @@ void InputManager::Update() {
     for (int key = GLFW_KEY_SPACE; key <= GLFW_KEY_LAST; ++key) {
         currentKeys[key] = glfwGetKey(window, key) == GLFW_PRESS;
     }
+
+    if(InputManager::IsKeyJustPressed(GLFW_KEY_ESCAPE)) {
+        ShowMouseCursor = !ShowMouseCursor;
+	}
 }
 
 /**
@@ -57,6 +61,12 @@ bool InputManager::IsKeyJustReleased(int key) {
  */
 glm::vec2 InputManager::GetMousePosition() {
     double x, y;
+
+    if(ShowMouseCursor)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glfwGetCursorPos(window, &x, &y);
     return glm::vec2(x, y);
 }

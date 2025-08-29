@@ -51,6 +51,7 @@ namespace NNE::Systems {
          * </summary>
          */
         static bool IsMouseButtonPressed(int button);
+        static inline bool ShowMouseCursor;
 
     private:
         static inline GLFWwindow* window = nullptr;
