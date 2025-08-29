@@ -1010,22 +1010,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
             vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &modelMatrix);
         }
 
-        VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = mesh->textureImageView;
-        imageInfo.sampler = mesh->textureSampler;
-
-        VkWriteDescriptorSet descriptorWrite{};
-        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrite.dstSet = descriptorSets[currentFrame];
-        descriptorWrite.dstBinding = 1;
-        descriptorWrite.descriptorCount = 1;
-        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptorWrite.pImageInfo = &imageInfo;
-        vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+            pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
 
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
     };
@@ -1203,19 +1189,22 @@ void NNE::Systems::VulkanManager::createDescriptorSetLayout()
 
 void NNE::Systems::VulkanManager::createDescriptorPool()
 {
+    uint32_t meshCount = static_cast<uint32_t>(loadedMeshes.size());
+    uint32_t descriptorCount = meshCount * MAX_FRAMES_IN_FLIGHT;
+
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[0].descriptorCount = descriptorCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[2].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[2].descriptorCount = descriptorCount;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.maxSets = descriptorCount;
 
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
@@ -1224,34 +1213,47 @@ void NNE::Systems::VulkanManager::createDescriptorPool()
 
 void NNE::Systems::VulkanManager::createDescriptorSets()
 {
-    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    for (auto* mesh : loadedMeshes) {
+        mesh->descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
 
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        VkDescriptorSetAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = descriptorPool;
-        allocInfo.descriptorSetCount = 1;
-        allocInfo.pSetLayouts = &descriptorSetLayout;
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            VkDescriptorSetAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = descriptorPool;
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &descriptorSetLayout;
 
-        if (vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets[i]) != VK_SUCCESS) {
-            throw std::runtime_error("❌ Impossible d'allouer un descriptor set !");
+            if (vkAllocateDescriptorSets(device, &allocInfo, &mesh->descriptorSets[i]) != VK_SUCCESS) {
+                throw std::runtime_error("❌ Impossible d'allouer un descriptor set !");
+            }
+
+            VkDescriptorBufferInfo globalBufferInfo{};
+            globalBufferInfo.buffer = uniformBuffers[i];
+            globalBufferInfo.offset = 0;
+            globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = mesh->textureImageView;
+            imageInfo.sampler = mesh->textureSampler;
+
+            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+            descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[0].dstSet = mesh->descriptorSets[i];
+            descriptorWrites[0].dstBinding = 0;
+            descriptorWrites[0].descriptorCount = 1;
+            descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[0].pBufferInfo = &globalBufferInfo;
+
+            descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[1].dstSet = mesh->descriptorSets[i];
+            descriptorWrites[1].dstBinding = 1;
+            descriptorWrites[1].descriptorCount = 1;
+            descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[1].pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
-
-        // Associer le buffer UBO global (Vue/Projection)
-        VkDescriptorBufferInfo globalBufferInfo{};
-        globalBufferInfo.buffer = uniformBuffers[i];
-        globalBufferInfo.offset = 0;
-        globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
-
-        std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
-        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptorWrites[0].dstSet = descriptorSets[i];
-        descriptorWrites[0].dstBinding = 0;
-        descriptorWrites[0].descriptorCount = 1;
-        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptorWrites[0].pBufferInfo = &globalBufferInfo;
-
-        vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 }
 

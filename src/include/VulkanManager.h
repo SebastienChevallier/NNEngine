@@ -170,7 +170,6 @@ namespace NNE::Systems {
 
                 VkDescriptorPool descriptorPool;
                 VkDescriptorPool imguiPool;
-                std::vector<VkDescriptorSet> descriptorSets;
 
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;

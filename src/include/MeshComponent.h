@@ -1,6 +1,7 @@
 #pragma once
 #include "AComponent.h"
 #include <string>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace NNE::Component::Render {
@@ -33,6 +34,7 @@ namespace NNE::Component::Render {
         VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
         VkImageView textureImageView = VK_NULL_HANDLE;
         VkSampler textureSampler = VK_NULL_HANDLE;
+        std::vector<VkDescriptorSet> descriptorSets;
 
         /**
          * <summary>
