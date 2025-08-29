@@ -34,9 +34,9 @@ int main() {
         
         NNE::AEntity* player = app.CreateEntity();
         NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
-        NNE::Component::Physics::BoxColliderComponent* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-        NNE::Component::Physics::RigidbodyComponent* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, true);
-        PlayerController* PlayerC = player->AddComponent<PlayerController>();
+        NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+        NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, true);
+        PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 	TCplayer->position = glm::vec3(0.0f, 0.0f, -2.0f);
 
