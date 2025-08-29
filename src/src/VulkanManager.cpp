@@ -1,6 +1,7 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
 #include <filesystem>
+#include <cstring>
 #include <glm/gtc/constants.hpp>
 #include <cmath>
 #include <imgui.h>
@@ -147,6 +148,23 @@ bool NNE::Systems::VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice d
     return requiredExtensions.empty();
 }
 
+bool NNE::Systems::VulkanManager::hasExtension(VkPhysicalDevice device, const char* extensionName)
+{
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+    for (const auto& extension : availableExtensions) {
+        if (strcmp(extension.extensionName, extensionName) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 NNE::Systems::SwapChainSupportDetails NNE::Systems::VulkanManager::querySwapChainSupport(VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
@@ -239,7 +257,7 @@ void NNE::Systems::VulkanManager::CreateVulkanInstance()
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "NoNameEngine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.apiVersion = VK_API_VERSION_1_1;
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -314,6 +332,7 @@ void NNE::Systems::VulkanManager::pickPhysicalDevice()
             if (isDeviceSuitable(device)) {
                 physicalDevice = device;
                 msaaSamples = getMaxUsableSampleCount();
+                supportsRenderToSingleSampled = hasExtension(device, VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME);
                 break;
             }
         }
@@ -340,9 +359,10 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
+    std::vector<const char*> extensions = deviceExtensions;
+
     VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT msToSingle{};
     msToSingle.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_FEATURES_EXT;
-    msToSingle.multisampledRenderToSingleSampled = VK_TRUE;
 
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
@@ -351,17 +371,23 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
 
     VkPhysicalDeviceFeatures2 feats2{};
     feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    feats2.pNext = &msToSingle;        // chaînage
-    vkGetPhysicalDeviceFeatures2(physicalDevice, &feats2);
+    feats2.pNext = nullptr;
+    feats2.features = deviceFeatures;
+
+    if (supportsRenderToSingleSampled) {
+        extensions.push_back(VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME);
+        msToSingle.multisampledRenderToSingleSampled = VK_TRUE;
+        feats2.pNext = &msToSingle;
+    }
 
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = &feats2;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &deviceFeatures;
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    createInfo.pEnabledFeatures = nullptr;
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
     
 
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
