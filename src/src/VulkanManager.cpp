@@ -13,6 +13,7 @@ const std::vector<const char*> validationLayers = {
 
 const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    
 };
 
 
@@ -858,7 +859,7 @@ void NNE::Systems::VulkanManager::initImGui()
     init_info.DescriptorPool = imguiPool;
     init_info.MinImageCount = static_cast<uint32_t>(swapChainImages.size());
     init_info.ImageCount = static_cast<uint32_t>(swapChainImages.size());
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.MSAASamples = msaaSamples;
     init_info.CheckVkResultFn = [](VkResult err) {
         if (err != VK_SUCCESS) {
             throw std::runtime_error("ImGui Vulkan backend error");
