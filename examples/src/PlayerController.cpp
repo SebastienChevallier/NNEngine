@@ -29,7 +29,7 @@ void PlayerController::Update(float deltaTime)
     glm::vec2 offset = mousePos - lastMousePos;
     lastMousePos = mousePos;
 
-    yaw += offset.x * mouseSensitivity;
+    yaw -= offset.x * mouseSensitivity;
     pitch -= offset.y * mouseSensitivity;
     pitch = std::clamp(pitch, -89.0f, 89.0f);
 
@@ -61,8 +61,9 @@ void PlayerController::Update(float deltaTime)
     }
 
 	direction.y += (gravity / speed);
+	_entity->transform->position += _entity->transform->GetForward() * direction.z * speed * deltaTime;
 	
-    _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
+    //_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
 	std::cout << _entity->transform->position.y << std::endl;
 }
 

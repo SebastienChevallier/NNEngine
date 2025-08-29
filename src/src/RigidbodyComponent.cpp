@@ -40,22 +40,30 @@ RigidbodyComponent::~RigidbodyComponent() {
  */
 void RigidbodyComponent::Awake() {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
-    auto* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-    auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
+    auto const* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+    auto const* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
     if (!collider || !collider->GetShape()) {
         return;
     }
 
+    JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
+        : JPH::EMotionType::Dynamic;
+
+
     JPH::BodyCreationSettings bodySettings(
         collider->GetShape(),
         JPH::RVec3(transform->position.x, transform->position.y, transform->position.z),
         JPH::Quat::sIdentity(),
-        (mass > 0.0f) ? JPH::EMotionType::Dynamic : (isKinematic ? JPH::EMotionType::Kinematic : JPH::EMotionType::Dynamic),
+        motionType,
         0);
 
-    if (mass > 0.0f) {
+    if (!isKinematic && mass > 0.0f) {
         bodySettings.mMassPropertiesOverride.mMass = mass;
+    }
+
+    if (isKinematic) {
+        bodySettings.mGravityFactor = 0.0f;
     }
 
     JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();
