@@ -1,6 +1,8 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
 #include <filesystem>
+#include <glm/gtc/constants.hpp>
+#include <cmath>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -968,36 +970,13 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     renderPassInfo.renderArea.extent = swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.7f, 0.7f, 0.7f, 1.0f} }; // Couleur de base (gris)
+    clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-    // Dégradé vertical du ciel : du bleu vers le gris
-    const glm::vec3 topColor(0.0f, 0.5f, 0.9f);
-    const glm::vec3 bottomColor(0.7f, 0.7f, 0.7f);
-    const int slices = 64;
-    for (int i = 0; i < slices; ++i) {
-        float t = static_cast<float>(i) / static_cast<float>(slices - 1);
-        glm::vec3 color = glm::mix(topColor, bottomColor, t);
-
-        VkClearAttachment attachment{};
-        attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        attachment.colorAttachment = 0;
-        attachment.clearValue.color = { { color.r, color.g, color.b, 1.0f } };
-
-        VkClearRect rect{};
-        rect.baseArrayLayer = 0;
-        rect.layerCount = 1;
-        rect.rect.offset = { 0, static_cast<int32_t>(i * swapChainExtent.height / slices) };
-        uint32_t nextY = (i + 1) * swapChainExtent.height / slices;
-        rect.rect.extent = { swapChainExtent.width, nextY - static_cast<uint32_t>(rect.rect.offset.y) };
-
-        vkCmdClearAttachments(commandBuffer, 1, &attachment, 1, &rect);
-    }
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
@@ -1022,18 +1001,15 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     scissor.extent = swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    for (auto& pair : objects) {
-        NNE::Component::Render::MeshComponent* mesh = pair.first;
-        NNE::Component::TransformComponent* transform = pair.second;
-        if (!mesh || mesh->getIndexCount() == 0) continue;
+    auto drawMesh = [&](NNE::Component::Render::MeshComponent* mesh,
+                        NNE::Component::TransformComponent* transform) {
+        if (!mesh || mesh->getIndexCount() == 0) return;
 
-        // Envoyer la matrice modèle via Push Constants
         if (transform) {
             glm::mat4 modelMatrix = transform->getModelMatrix();
             vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &modelMatrix);
         }
 
-        // 🔥 Mise à jour du `descriptorSet` avec la bonne texture
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = mesh->textureImageView;
@@ -1046,16 +1022,22 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         descriptorWrite.descriptorCount = 1;
         descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         descriptorWrite.pImageInfo = &imageInfo;
-
         vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 
-        // 🔥 Correction : Lier le `descriptorSet` avant de dessiner
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-        // 🔥 Correction : Dessin avec `vkCmdDrawIndexed()`
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(), 0, 0);
-        //std::cout << "Rendering " << mesh->getIndexCount() << " indices from offset " << mesh->getIndexOffset() << std::endl;
+    };
+
+    for (auto& pair : objects) {
+        if (pair.first && pair.first->IsSkybox()) {
+            drawMesh(pair.first, pair.second);
+        }
+    }
+    for (auto& pair : objects) {
+        if (!pair.first || pair.first->IsSkybox()) continue;
+        drawMesh(pair.first, pair.second);
     }
 
     renderImGui(commandBuffer);
@@ -1125,6 +1107,65 @@ void NNE::Systems::VulkanManager::loadModel(const std::string& modelPath)
 
     /*std::cout << "Nombre de sommets après chargement : " << vertices.size() << std::endl;
     std::cout << "Nombre d'indices : " << indices.size() << std::endl;*/
+}
+
+void NNE::Systems::VulkanManager::generateCube(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData)
+{
+    vertexData = {
+        {{-1.f, -1.f,  1.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}},
+        {{ 1.f, -1.f,  1.f}, {1.f, 1.f, 1.f}, {1.f, 0.f}},
+        {{ 1.f,  1.f,  1.f}, {1.f, 1.f, 1.f}, {1.f, 1.f}},
+        {{-1.f,  1.f,  1.f}, {1.f, 1.f, 1.f}, {0.f, 1.f}},
+        {{-1.f, -1.f, -1.f}, {1.f, 1.f, 1.f}, {1.f, 0.f}},
+        {{ 1.f, -1.f, -1.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}},
+        {{ 1.f,  1.f, -1.f}, {1.f, 1.f, 1.f}, {0.f, 1.f}},
+        {{-1.f,  1.f, -1.f}, {1.f, 1.f, 1.f}, {1.f, 1.f}},
+    };
+
+    indexData = {
+        0, 1, 2, 2, 3, 0,
+        1, 5, 6, 6, 2, 1,
+        5, 4, 7, 7, 6, 5,
+        4, 0, 3, 3, 7, 4,
+        3, 2, 6, 6, 7, 3,
+        4, 5, 1, 1, 0, 4
+    };
+}
+
+void NNE::Systems::VulkanManager::generateSphere(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData)
+{
+    const uint32_t X_SEGMENTS = 32;
+    const uint32_t Y_SEGMENTS = 32;
+    for (uint32_t y = 0; y <= Y_SEGMENTS; ++y) {
+        for (uint32_t x = 0; x <= X_SEGMENTS; ++x) {
+            float xSegment = static_cast<float>(x) / static_cast<float>(X_SEGMENTS);
+            float ySegment = static_cast<float>(y) / static_cast<float>(Y_SEGMENTS);
+            float xPos = std::cos(xSegment * 2.0f * glm::pi<float>()) * std::sin(ySegment * glm::pi<float>());
+            float yPos = std::cos(ySegment * glm::pi<float>());
+            float zPos = std::sin(xSegment * 2.0f * glm::pi<float>()) * std::sin(ySegment * glm::pi<float>());
+
+            Vertex vertex{};
+            vertex.pos = { xPos, yPos, zPos };
+            vertex.color = { 1.f, 1.f, 1.f };
+            vertex.texCoord = { xSegment, 1.0f - ySegment };
+            vertexData.push_back(vertex);
+        }
+    }
+
+    for (uint32_t y = 0; y < Y_SEGMENTS; ++y) {
+        for (uint32_t x = 0; x < X_SEGMENTS; ++x) {
+            uint32_t i0 = y       * (X_SEGMENTS + 1) + x;
+            uint32_t i1 = (y + 1) * (X_SEGMENTS + 1) + x;
+            uint32_t i2 = i0 + 1;
+            uint32_t i3 = i1 + 1;
+            indexData.push_back(i0);
+            indexData.push_back(i1);
+            indexData.push_back(i2);
+            indexData.push_back(i2);
+            indexData.push_back(i1);
+            indexData.push_back(i3);
+        }
+    }
 }
 
 void NNE::Systems::VulkanManager::createDescriptorSetLayout()
@@ -1434,8 +1475,27 @@ void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Co
         if (!mesh || mesh->getIndexCount() != 0) continue;
 
         uint32_t startOffset = static_cast<uint32_t>(indices.size());
+        uint32_t startVertex = static_cast<uint32_t>(vertices.size());
 
-        loadModel(mesh->GetModelPath());
+        if (mesh->GetPrimitive() == NNE::Component::Render::MeshComponent::PrimitiveType::CUBE) {
+            std::vector<Vertex> primVerts;
+            std::vector<uint32_t> primIdx;
+            generateCube(primVerts, primIdx);
+            vertices.insert(vertices.end(), primVerts.begin(), primVerts.end());
+            for (uint32_t idx : primIdx) {
+                indices.push_back(idx + startVertex);
+            }
+        } else if (mesh->GetPrimitive() == NNE::Component::Render::MeshComponent::PrimitiveType::SPHERE) {
+            std::vector<Vertex> primVerts;
+            std::vector<uint32_t> primIdx;
+            generateSphere(primVerts, primIdx);
+            vertices.insert(vertices.end(), primVerts.begin(), primVerts.end());
+            for (uint32_t idx : primIdx) {
+                indices.push_back(idx + startVertex);
+            }
+        } else {
+            loadModel(mesh->GetModelPath());
+        }
 
         if (mesh->GetTexturePath().empty()) {
             mesh->SetTexturePath("../assets/textures/texture.jpg");
