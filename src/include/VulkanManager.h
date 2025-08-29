@@ -171,10 +171,11 @@ namespace NNE::Systems {
                 VkDescriptorPool descriptorPool;
                 VkDescriptorPool imguiPool;
 
-		VkImage depthImage;
-		VkDeviceMemory depthImageMemory;
-		VkImageView depthImageView;
-		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
+                VkImage depthImage;
+                VkDeviceMemory depthImageMemory;
+                VkImageView depthImageView;
+                VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
+                bool supportsRenderToSingleSampled = false;
 
 	public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
@@ -541,6 +542,7 @@ namespace NNE::Systems {
                  * </summary>
                  */
                 bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+                bool hasExtension(VkPhysicalDevice device, const char* extensionName);
 
                 /**
                  * <summary>
