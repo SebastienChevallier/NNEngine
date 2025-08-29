@@ -968,13 +968,37 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     renderPassInfo.renderArea.extent = swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues{};
-    clearValues[0].color = { {0.39f, 0.82f, 0.245f, 1.0f} }; // Fond bleu
+    clearValues[0].color = { {0.7f, 0.7f, 0.7f, 1.0f} }; // Couleur de base (gris)
     clearValues[1].depthStencil = { 1.0f, 0 };
 
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    // Dégradé vertical du ciel : du bleu vers le gris
+    const glm::vec3 topColor(0.0f, 0.5f, 0.9f);
+    const glm::vec3 bottomColor(0.7f, 0.7f, 0.7f);
+    const int slices = 64;
+    for (int i = 0; i < slices; ++i) {
+        float t = static_cast<float>(i) / static_cast<float>(slices - 1);
+        glm::vec3 color = glm::mix(topColor, bottomColor, t);
+
+        VkClearAttachment attachment{};
+        attachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        attachment.colorAttachment = 0;
+        attachment.clearValue.color = { { color.r, color.g, color.b, 1.0f } };
+
+        VkClearRect rect{};
+        rect.baseArrayLayer = 0;
+        rect.layerCount = 1;
+        rect.rect.offset = { 0, static_cast<int32_t>(i * swapChainExtent.height / slices) };
+        uint32_t nextY = (i + 1) * swapChainExtent.height / slices;
+        rect.rect.extent = { swapChainExtent.width, nextY - static_cast<uint32_t>(rect.rect.offset.y) };
+
+        vkCmdClearAttachments(commandBuffer, 1, &attachment, 1, &rect);
+    }
+
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
     // 🔥 Correction : Bind du vertex et index buffer AVANT de dessiner
@@ -1332,25 +1356,43 @@ void NNE::Systems::VulkanManager::updateCameraAspectRatio()
     }
 }
 
-void NNE::Systems::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory)
+void NNE::Systems::VulkanManager::createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory, VkFormat& imageFormat)
 {
     int texWidth = 0, texHeight = 0, texChannels = 0;
-    stbi_uc* pixels = nullptr;
+    stbi_uc* pixels8 = nullptr;
+    float* pixelsHDR = nullptr;
     std::array<stbi_uc, 4> roseFlash = { 255, 0, 255, 255 };
     bool useFallback = false;
+    bool isHDR = false;
 
     if (!texturePath.empty() && std::filesystem::exists(texturePath)) {
-        pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        isHDR = stbi_is_hdr(texturePath.c_str());
+        if (isHDR) {
+            pixelsHDR = stbi_loadf(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        } else {
+            pixels8 = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+        }
     }
 
-    if (!pixels) {
+    void* pixels = nullptr;
+    VkDeviceSize imageSize = 0;
+
+    if (isHDR && pixelsHDR) {
+        pixels = pixelsHDR;
+        imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4 * sizeof(float);
+        imageFormat = VK_FORMAT_R32G32B32A32_SFLOAT;
+    } else if (pixels8) {
+        pixels = pixels8;
+        imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
+        imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+    } else {
         useFallback = true;
         texWidth = texHeight = 1;
         pixels = roseFlash.data();
+        imageSize = 4;
+        imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
     }
 
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
-    //VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
 
     VkBuffer stagingBuffer;
@@ -1365,20 +1407,24 @@ void NNE::Systems::VulkanManager::createTextureImage(const std::string& textureP
     vkUnmapMemory(device, stagingBufferMemory);
 
     if (!useFallback) {
-        stbi_image_free(pixels);
+        if (isHDR) {
+            stbi_image_free(pixelsHDR);
+        } else {
+            stbi_image_free(pixels8);
+        }
     }
 
-    createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB,
+    createImage(texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, imageFormat,
         VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
-    transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+    transitionImageLayout(textureImage, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
     copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
 
-    generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+    generateMipmaps(textureImage, imageFormat, texWidth, texHeight, mipLevels);
 }
 
 void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
@@ -1395,8 +1441,9 @@ void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Co
             mesh->SetTexturePath("../assets/textures/texture.jpg");
         }
 
-        createTextureImage(mesh->GetTexturePath(), mesh->textureImage, mesh->textureImageMemory);
-        createTextureImageView(mesh->textureImage, mesh->textureImageView);
+        VkFormat textureFormat;
+        createTextureImage(mesh->GetTexturePath(), mesh->textureImage, mesh->textureImageMemory, textureFormat);
+        createTextureImageView(mesh->textureImage, mesh->textureImageView, textureFormat);
         createTextureSampler(mesh->textureSampler);
 
         uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
@@ -1443,9 +1490,9 @@ void NNE::Systems::VulkanManager::createImage(uint32_t width, uint32_t height, u
     vkBindImageMemory(device, image, imageMemory, 0);
 }
 
-void NNE::Systems::VulkanManager::createTextureImageView(VkImage textureImage, VkImageView& textureImageView)
+void NNE::Systems::VulkanManager::createTextureImageView(VkImage textureImage, VkImageView& textureImageView, VkFormat format)
 {
-    textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
+    textureImageView = createImageView(textureImage, format, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 }
 
 void NNE::Systems::VulkanManager::createTextureSampler(VkSampler& textureSampler)
