@@ -1477,7 +1477,7 @@ void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Co
         uint32_t startOffset = static_cast<uint32_t>(indices.size());
         uint32_t startVertex = static_cast<uint32_t>(vertices.size());
 
-        if (mesh->GetPrimitive() == NNE::Component::Render::MeshComponent::PrimitiveType::CUBE) {
+        if (mesh->GetPrimitive() == NNE::Component::Render::PrimitiveType::CUBE) {
             std::vector<Vertex> primVerts;
             std::vector<uint32_t> primIdx;
             generateCube(primVerts, primIdx);
@@ -1485,7 +1485,7 @@ void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Co
             for (uint32_t idx : primIdx) {
                 indices.push_back(idx + startVertex);
             }
-        } else if (mesh->GetPrimitive() == NNE::Component::Render::MeshComponent::PrimitiveType::SPHERE) {
+        } else if (mesh->GetPrimitive() == NNE::Component::Render::PrimitiveType::SPHERE) {
             std::vector<Vertex> primVerts;
             std::vector<uint32_t> primIdx;
             generateSphere(primVerts, primIdx);

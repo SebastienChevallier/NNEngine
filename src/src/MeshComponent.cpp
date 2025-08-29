@@ -14,6 +14,11 @@ NNE::Component::Render::MeshComponent::MeshComponent()
     textureSampler = VK_NULL_HANDLE;
 }
 
+NNE::Component::Render::MeshComponent::~MeshComponent()
+{
+
+}
+
 /**
  * <summary>
  * Définit le chemin vers le modèle à charger.

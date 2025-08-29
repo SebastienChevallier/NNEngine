@@ -27,6 +27,7 @@ namespace NNE::Component::Render {
          * </summary>
          */
         MeshComponent();
+        ~MeshComponent();
 
         VkImage textureImage = VK_NULL_HANDLE;
         VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
