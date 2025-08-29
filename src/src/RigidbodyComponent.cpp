@@ -86,6 +86,7 @@ JPH::BodyID RigidbodyComponent::GetBodyID() const {
  * </summary>
  */
 void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
+    
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {

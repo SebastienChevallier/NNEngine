@@ -13,8 +13,7 @@ const std::vector<const char*> validationLayers = {
 };
 
 const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
 
@@ -332,6 +331,9 @@ void NNE::Systems::VulkanManager::pickPhysicalDevice()
         for (const auto& device : devices) {
             if (isDeviceSuitable(device)) {
                 physicalDevice = device;
+				VkPhysicalDeviceProperties deviceProperties;
+				vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+				std::cout << "Selected GPU: " << deviceProperties.deviceName << std::endl;
                 msaaSamples = getMaxUsableSampleCount();
                 supportsRenderToSingleSampled = hasExtension(device, VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME);
                 break;
@@ -1230,14 +1232,17 @@ void NNE::Systems::VulkanManager::createDescriptorSetLayout()
 
 void NNE::Systems::VulkanManager::createDescriptorPool()
 {
+    uint32_t meshCount = static_cast<uint32_t>(loadedMeshes.size());
+    uint32_t descriptorCount = meshCount * MAX_FRAMES_IN_FLIGHT;
+
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    poolSizes[0].descriptorCount = descriptorCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-    uint32_t descriptorCount = static_cast<uint32_t>(loadedMeshes.size() * MAX_FRAMES_IN_FLIGHT);
-    poolSizes[0].descriptorCount = descriptorCount;
-    poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].descriptorCount = descriptorCount;
 
     VkDescriptorPoolCreateInfo poolInfo{};
@@ -1267,10 +1272,12 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
                 throw std::runtime_error("❌ Impossible d'allouer un descriptor set !");
             }
 
-            VkDescriptorBufferInfo bufferInfo{};
-            bufferInfo.buffer = uniformBuffers[i];
-            bufferInfo.offset = 0;
-            bufferInfo.range = sizeof(GlobalUniformBufferObject);
+
+            VkDescriptorBufferInfo globalBufferInfo{};
+            globalBufferInfo.buffer = uniformBuffers[i];
+            globalBufferInfo.offset = 0;
+            globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1284,8 +1291,7 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             descriptorWrites[0].dstBinding = 0;
             descriptorWrites[0].descriptorCount = 1;
             descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            descriptorWrites[0].pBufferInfo = &bufferInfo;
-
+            descriptorWrites[0].pBufferInfo = &globalBufferInfo;
             descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet = mesh->descriptorSets[i];
             descriptorWrites[1].dstBinding = 1;
