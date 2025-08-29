@@ -9,6 +9,28 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/constants.hpp>
+
+namespace {
+
+// Conversion depuis le repère Y-up/Z-forward de Jolt vers
+// le repère Z-up/-Y-forward du moteur
+const glm::quat kAxisCorrection =
+    glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
+
+inline glm::vec3 ToEnginePosition(const JPH::RVec3& pos)
+{
+    return { pos.GetX(), -pos.GetZ(), pos.GetY() };
+}
+
+inline glm::vec3 ToEngineRotation(const JPH::Quat& rot)
+{
+    glm::quat q(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
+    q = kAxisCorrection * q;
+    return glm::degrees(glm::eulerAngles(q));
+}
+
+} // namespace
 
 class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
 public:
@@ -112,16 +134,20 @@ void PhysicsSystem::Update(float deltaTime)
     physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
 
     JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
+
+    auto syncTransform = [&](const JPH::BodyID& id, NNE::Component::TransformComponent* transform) {
+        JPH::RVec3 pos = bodyInterface.GetPosition(id);
+        JPH::Quat rot = bodyInterface.GetRotation(id);
+        transform->position = ToEnginePosition(pos);
+        transform->rotation = ToEngineRotation(rot);
+    };
+
     for (auto* rb : rigidbodies)
     {
         if (!rb->GetBodyID().IsInvalid())
         {
             auto* transform = rb->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-            JPH::RVec3 pos = bodyInterface.GetPosition(rb->GetBodyID());
-            JPH::Quat rot = bodyInterface.GetRotation(rb->GetBodyID());
-            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
-            glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
-            transform->rotation = glm::degrees(glm::eulerAngles(glmQuat));
+            syncTransform(rb->GetBodyID(), transform);
         }
     }
 
@@ -132,11 +158,7 @@ void PhysicsSystem::Update(float deltaTime)
         if (!collider->GetBodyID().IsInvalid())
         {
             auto* transform = collider->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-            JPH::RVec3 pos = bodyInterface.GetPosition(collider->GetBodyID());
-            JPH::Quat rot = bodyInterface.GetRotation(collider->GetBodyID());
-            transform->position = glm::vec3(pos.GetX(), pos.GetY(), pos.GetZ());
-            glm::quat glmQuat(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
-            transform->rotation = glm::degrees(glm::eulerAngles(glmQuat));
+            syncTransform(collider->GetBodyID(), transform);
         }
     }
 }
