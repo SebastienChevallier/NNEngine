@@ -313,6 +313,9 @@ void NNE::Systems::VulkanManager::pickPhysicalDevice()
         for (const auto& device : devices) {
             if (isDeviceSuitable(device)) {
                 physicalDevice = device;
+				VkPhysicalDeviceProperties deviceProperties;
+				vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+				std::cout << "Selected GPU: " << deviceProperties.deviceName << std::endl;
                 msaaSamples = getMaxUsableSampleCount();
                 break;
             }
