@@ -1,6 +1,7 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
 #include <filesystem>
+#include <cstring>
 #include <glm/gtc/constants.hpp>
 #include <cmath>
 #include <imgui.h>
@@ -13,7 +14,6 @@ const std::vector<const char*> validationLayers = {
 
 const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    
 };
 
 
@@ -148,6 +148,23 @@ bool NNE::Systems::VulkanManager::checkDeviceExtensionSupport(VkPhysicalDevice d
     return requiredExtensions.empty();
 }
 
+bool NNE::Systems::VulkanManager::hasExtension(VkPhysicalDevice device, const char* extensionName)
+{
+    uint32_t extensionCount;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+    for (const auto& extension : availableExtensions) {
+        if (strcmp(extension.extensionName, extensionName) == 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 NNE::Systems::SwapChainSupportDetails NNE::Systems::VulkanManager::querySwapChainSupport(VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
@@ -240,7 +257,7 @@ void NNE::Systems::VulkanManager::CreateVulkanInstance()
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "NoNameEngine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.apiVersion = VK_API_VERSION_1_1;
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -318,6 +335,7 @@ void NNE::Systems::VulkanManager::pickPhysicalDevice()
 				vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 				std::cout << "Selected GPU: " << deviceProperties.deviceName << std::endl;
                 msaaSamples = getMaxUsableSampleCount();
+                supportsRenderToSingleSampled = hasExtension(device, VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME);
                 break;
             }
         }
@@ -344,18 +362,39 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
+    std::vector<const char*> extensions = deviceExtensions;
+
+    VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT msToSingle{};
+    msToSingle.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_FEATURES_EXT;
+
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     deviceFeatures.sampleRateShading = VK_TRUE;
     deviceFeatures.robustBufferAccess = VK_TRUE;
 
+    VkPhysicalDeviceFeatures2 feats2{};
+    feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+    feats2.pNext = nullptr;
+    feats2.features = deviceFeatures;
+
+    if (supportsRenderToSingleSampled) {
+        extensions.push_back(VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME);
+        msToSingle.multisampledRenderToSingleSampled = VK_TRUE;
+        feats2.pNext = &msToSingle;
+    }
+
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pNext = &feats2;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &deviceFeatures;
-    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    createInfo.pEnabledFeatures = nullptr;
+
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    createInfo.ppEnabledExtensionNames = extensions.data();
+
     
 
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
@@ -1198,10 +1237,12 @@ void NNE::Systems::VulkanManager::createDescriptorPool()
 
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
     poolSizes[0].descriptorCount = descriptorCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
     poolSizes[2].descriptorCount = descriptorCount;
 
     VkDescriptorPoolCreateInfo poolInfo{};
@@ -1231,10 +1272,12 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
                 throw std::runtime_error("❌ Impossible d'allouer un descriptor set !");
             }
 
+
             VkDescriptorBufferInfo globalBufferInfo{};
             globalBufferInfo.buffer = uniformBuffers[i];
             globalBufferInfo.offset = 0;
             globalBufferInfo.range = sizeof(GlobalUniformBufferObject);
+
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1242,13 +1285,13 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             imageInfo.sampler = mesh->textureSampler;
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet = mesh->descriptorSets[i];
             descriptorWrites[0].dstBinding = 0;
             descriptorWrites[0].descriptorCount = 1;
             descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[0].pBufferInfo = &globalBufferInfo;
-
             descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet = mesh->descriptorSets[i];
             descriptorWrites[1].dstBinding = 1;
