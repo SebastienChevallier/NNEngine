@@ -389,7 +389,7 @@ namespace NNE::Systems {
                  * Crée une vue pour une image de texture.
                  * </summary>
                  */
-                void createTextureImageView(VkImage textureImage, VkImageView& textureImageView);
+                void createTextureImageView(VkImage textureImage, VkImageView& textureImageView, VkFormat format);
                 /**
                  * <summary>
                  * Crée un sampler pour les textures.
@@ -427,7 +427,7 @@ namespace NNE::Systems {
                  * Charge une texture depuis le disque.
                  * </summary>
                  */
-                void createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory);
+                void createTextureImage(const std::string& texturePath, VkImage& textureImage, VkDeviceMemory& textureImageMemory, VkFormat& imageFormat);
                 /**
                  * <summary>
                  * Charge les meshes des objets fournis.
