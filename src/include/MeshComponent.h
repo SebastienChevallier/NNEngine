@@ -4,13 +4,21 @@
 #include <vulkan/vulkan.h>
 
 namespace NNE::Component::Render {
-        class MeshComponent : public NNE::Component::AComponent
-        {
+    enum class PrimitiveType {
+        NONE,
+        CUBE,
+        SPHERE
+    };
+
+    class MeshComponent : public NNE::Component::AComponent
+    {
     private:
         std::string modelPath;
         std::string texturePath;
         uint32_t indexOffset = 0;
         uint32_t indexCount = 0;
+        PrimitiveType primitive = PrimitiveType::NONE;
+        bool skybox = false;
 
     public:
         /**
@@ -74,5 +82,11 @@ namespace NNE::Component::Render {
          * </summary>
          */
         uint32_t getIndexCount() const { return indexCount; }
+
+        PrimitiveType GetPrimitive() const { return primitive; }
+        void SetPrimitive(PrimitiveType p) { primitive = p; }
+
+        bool IsSkybox() const { return skybox; }
+        void SetSkybox(bool value) { skybox = value; }
         };
 }

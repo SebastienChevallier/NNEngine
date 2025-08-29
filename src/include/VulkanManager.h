@@ -422,6 +422,8 @@ namespace NNE::Systems {
                  * </summary>
                  */
                 void loadModel(const std::string& modelPath);
+                void generateCube(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData);
+                void generateSphere(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData);
                 /**
                  * <summary>
                  * Charge une texture depuis le disque.
