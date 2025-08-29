@@ -340,13 +340,23 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
+    VkPhysicalDeviceMultisampledRenderToSingleSampledFeaturesEXT msToSingle{};
+    msToSingle.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_FEATURES_EXT;
+    msToSingle.multisampledRenderToSingleSampled = VK_TRUE;
+
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
     deviceFeatures.sampleRateShading = VK_TRUE;
     deviceFeatures.robustBufferAccess = VK_TRUE;
 
+    VkPhysicalDeviceFeatures2 feats2{};
+    feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    feats2.pNext = &msToSingle;        // chaînage
+    vkGetPhysicalDeviceFeatures2(physicalDevice, &feats2);
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pNext = &feats2;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
     createInfo.pEnabledFeatures = &deviceFeatures;
@@ -855,7 +865,7 @@ void NNE::Systems::VulkanManager::initImGui()
     init_info.DescriptorPool = imguiPool;
     init_info.MinImageCount = static_cast<uint32_t>(swapChainImages.size());
     init_info.ImageCount = static_cast<uint32_t>(swapChainImages.size());
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.MSAASamples = msaaSamples;
     init_info.CheckVkResultFn = [](VkResult err) {
         if (err != VK_SUCCESS) {
             throw std::runtime_error("ImGui Vulkan backend error");
