@@ -12,7 +12,8 @@ const std::vector<const char*> validationLayers = {
 };
 
 const std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    VK_EXT_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_EXTENSION_NAME
 };
 
 
@@ -239,7 +240,7 @@ void NNE::Systems::VulkanManager::CreateVulkanInstance()
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "NoNameEngine";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_0;
+    appInfo.apiVersion = VK_API_VERSION_1_1;
 
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -352,6 +353,7 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
     VkPhysicalDeviceFeatures2 feats2{};
     feats2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     feats2.pNext = &msToSingle;        // chaînage
+    feats2.features = deviceFeatures;
     vkGetPhysicalDeviceFeatures2(physicalDevice, &feats2);
 
     VkDeviceCreateInfo createInfo{};
@@ -359,7 +361,7 @@ void NNE::Systems::VulkanManager::createLogicalDevice()
     createInfo.pNext = &feats2;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     createInfo.pQueueCreateInfos = queueCreateInfos.data();
-    createInfo.pEnabledFeatures = &deviceFeatures;
+    createInfo.pEnabledFeatures = nullptr;
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
     
