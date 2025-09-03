@@ -2,6 +2,7 @@
 
 #include "AComponent.h"
 #include "ColliderComponent.h"
+#include "IDebugUI.h"
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Body/BodyID.h>
@@ -9,7 +10,7 @@
 
 namespace NNE::Component::Physics {
 
-    class RigidbodyComponent : public NNE::Component::AComponent {
+    class RigidbodyComponent : public NNE::Component::AComponent, public NNE::IDebugUI {
     private:
         JPH::BodyID bodyID;
         float mass;
@@ -65,6 +66,8 @@ namespace NNE::Component::Physics {
          * </summary>
          */
         glm::vec3 GetLinearVelocity() const;
+
+        void DrawImGui() override;
     };
 
 }
