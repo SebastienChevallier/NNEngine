@@ -26,9 +26,9 @@ int main() {
 	floor->SetName("Floor");
     //NNE::Component::Physics::BoxColliderComponent const* PC = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.5f, 100.0f));
     NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(
-        glm::vec3(1.0f, 1.0f, 1.0f), 0.0f);
+        glm::vec3(1.0f, 1.0f, 1.0f));
     NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();    
-    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(1, 1, 1));
+    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, true);
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
 	MFC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
 	MFC->SetTexturePath("../assets/textures/checker.png");
@@ -51,7 +51,7 @@ int main() {
     NNE::AEntity* player = app.CreateEntity();
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
     NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false);
+    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(0, 0, 0), glm::bvec3(1, 0, 1));
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 

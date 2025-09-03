@@ -64,6 +64,8 @@ void RigidbodyComponent::Awake() {
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
         : JPH::EMotionType::Dynamic;
 
+    //JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
+
 
     JPH::BodyCreationSettings bodySettings(
         collider->GetShape(),
@@ -93,6 +95,8 @@ void RigidbodyComponent::Awake() {
         bodySettings.mMassPropertiesOverride.mMass = 1.0f;
         bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
         bodySettings.mGravityFactor = 0.0f;
+		bodySettings.mUseManifoldReduction = false; // Important pour les kinematic		
+		
     }
 
     JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();

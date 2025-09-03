@@ -22,7 +22,7 @@ inline glm::vec3 ToEngineRotation(const JPH::Quat &rot) {
   return glm::degrees(glm::eulerAngles(q));
 }
 
-} // namespace
+} 
 
 class SimpleBroadPhaseLayerInterface final
     : public JPH::BroadPhaseLayerInterface {
@@ -211,4 +211,4 @@ void PhysicsSystem::ContactListenerImpl::OnContactAdded(
   }
 }
 
-} // namespace NNE::Systems
+} 
