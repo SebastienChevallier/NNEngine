@@ -44,15 +44,34 @@ void RigidbodyComponent::Awake() {
     auto colliders = GetEntity()->GetComponents<NNE::Component::Physics::ColliderComponent>();
     NNE::Component::Physics::ColliderComponent* collider = nullptr;
 
+    // Prefer a collider that already created a body
     for (auto *c : colliders) {
-        if (c->GetShape()) {
+        if (!c->bodyID.IsInvalid()) {
             collider = c;
             break;
         }
     }
 
+    // Fall back to the first collider with a shape
     if (!collider) {
+        for (auto *c : colliders) {
+            if (c->GetShape()) {
+                collider = c;
+                break;
+            }
+        }
+    }
+
+    if (!collider || !collider->GetShape()) {
         return;
+    }
+
+    JPH::BodyInterface &bodyInterface = physicsSystem->GetBodyInterface();
+
+    // Remove any previously created body
+    if (!collider->bodyID.IsInvalid()) {
+        bodyInterface.RemoveBody(collider->bodyID);
+        NNE::Systems::Application::GetInstance()->UnregisterCollider(collider->bodyID);
     }
 
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
@@ -73,7 +92,6 @@ void RigidbodyComponent::Awake() {
         bodySettings.mGravityFactor = 0.0f;
     }
 
-    JPH::BodyInterface &bodyInterface = physicsSystem->GetBodyInterface();
     bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 
     collider->bodyID = bodyID;

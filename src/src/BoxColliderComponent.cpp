@@ -6,7 +6,6 @@
 
 #include "PhysicsSystem.h"
 #include "Application.h"
-#include "RigidbodyComponent.h"
 
 /**
  * <summary>
@@ -36,18 +35,15 @@ void NNE::Component::Physics::BoxColliderComponent::CreateShape()
 {
         shape = new JPH::BoxShape(JPH::Vec3(size.x, size.y, size.z));
 
-        // Only create a physics body if no RigidbodyComponent is attached
-        if (!GetEntity()->GetComponent<NNE::Component::Physics::RigidbodyComponent>()) {
-                JPH::BodyCreationSettings bodySettings(
-                        shape,
-                        JPH::RVec3::sZero(),
-                        JPH::Quat::sIdentity(),
-                        JPH::EMotionType::Static,
-                        0);
+        JPH::BodyCreationSettings bodySettings(
+                shape,
+                JPH::RVec3::sZero(),
+                JPH::Quat::sIdentity(),
+                JPH::EMotionType::Static,
+                0);
 
-                auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
-                bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
+        auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
+        bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 
-                NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
-        }
+        NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
 }
