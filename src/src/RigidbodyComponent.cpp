@@ -55,7 +55,7 @@ void RigidbodyComponent::Awake() {
         return;
 
     if (!collider->GetShape()) {
-        collider->CreateShape();
+        collider->Awake();
         if (!collider->GetShape())
             return;
     }
