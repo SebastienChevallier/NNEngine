@@ -17,8 +17,8 @@ namespace NNE::Component::Physics {
  * Instancie un corps rigide avec masse et type kinematic.
  * </summary>
  */
-RigidbodyComponent::RigidbodyComponent(float mass, bool kinematic)
-    : bodyID(), mass(mass), isKinematic(kinematic) {
+RigidbodyComponent::RigidbodyComponent(float mass, bool kinematic, glm::bvec3 lockPosition)
+    : bodyID(), mass(mass), isKinematic(kinematic), lockPosition(lockPosition) {
 }
 
 /**
@@ -41,7 +41,7 @@ RigidbodyComponent::~RigidbodyComponent() {
 void RigidbodyComponent::Awake() {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto const* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-    auto const* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
+    auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
     if (!collider || !collider->GetShape()) {
         return;
@@ -57,6 +57,13 @@ void RigidbodyComponent::Awake() {
         JPH::Quat::sIdentity(),
         motionType,
         0);
+    bodySettings.mIsSensor = collider->IsTrigger();
+
+    JPH::EAllowedDOFs allowed = JPH::EAllowedDOFs::All;
+    if (lockPosition.x) allowed = allowed & ~JPH::EAllowedDOFs::TranslationX;
+    if (lockPosition.y) allowed = allowed & ~JPH::EAllowedDOFs::TranslationY;
+    if (lockPosition.z) allowed = allowed & ~JPH::EAllowedDOFs::TranslationZ;
+    bodySettings.mAllowedDOFs = allowed;
 
     if (!isKinematic && mass > 0.0f) {
         bodySettings.mMassPropertiesOverride.mMass = mass;
@@ -68,6 +75,8 @@ void RigidbodyComponent::Awake() {
 
     JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();
     bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
+    collider->bodyID = bodyID;
+    NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, collider);
 }
 
 /**

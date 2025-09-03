@@ -14,6 +14,7 @@ namespace NNE::Component::Physics {
         JPH::BodyID bodyID;
         float mass;
         bool isKinematic;
+        glm::bvec3 lockPosition;
 
     public:
         /**
@@ -21,7 +22,7 @@ namespace NNE::Component::Physics {
          * Initialise un rigidbody avec masse et type souhaités.
          * </summary>
          */
-        RigidbodyComponent(float mass = 1.0f, bool kinematic = false);
+        RigidbodyComponent(float mass = 1.0f, bool kinematic = false, glm::bvec3 lockPosition = glm::bvec3(false));
         /**
          * <summary>
          * Libère les ressources du rigidbody.

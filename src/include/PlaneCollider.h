@@ -18,7 +18,7 @@ namespace NNE::Component::Physics
                  * Crée un collider plan avec une normale et une distance.
                  * </summary>
                  */
-                PlaneCollider(const glm::vec3& normal, float distance);
+                PlaneCollider(const glm::vec3& normal, float distance, bool isTrigger = false);
                 /**
                  * <summary>
                  * Génère la forme physique correspondant au plan.

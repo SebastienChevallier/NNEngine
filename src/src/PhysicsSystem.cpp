@@ -190,8 +190,19 @@ void PhysicsSystem::ContactListenerImpl::OnContactAdded(
       NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
 
   if (colliderA && colliderB) {
-    colliderA->OnHit(colliderB);
-    colliderB->OnHit(colliderA);
+    if (colliderA->IsTrigger() || colliderB->IsTrigger()) {
+      if (colliderA->IsTrigger())
+        colliderA->OnTriggerHit(colliderB);
+      else
+        colliderA->OnHit(colliderB);
+      if (colliderB->IsTrigger())
+        colliderB->OnTriggerHit(colliderA);
+      else
+        colliderB->OnHit(colliderA);
+    } else {
+      colliderA->OnHit(colliderB);
+      colliderB->OnHit(colliderA);
+    }
   }
 }
 

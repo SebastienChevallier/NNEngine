@@ -9,16 +9,17 @@ namespace NNE::Component::Physics
     {
     protected:
         JPH::ShapeRefC shape;
+        bool isTrigger = false;
 
     public:
         JPH::BodyID bodyID;
 
         /**
          * <summary>
-         * Constructeur par défaut du collider.
+         * Constructeur du collider, permet de définir s'il est trigger.
          * </summary>
          */
-        ColliderComponent() = default;
+        ColliderComponent(bool isTrigger = false) : isTrigger(isTrigger) {}
         /**
          * <summary>
          * Destructeur virtuel pour un nettoyage adéquat.
@@ -39,6 +40,20 @@ namespace NNE::Component::Physics
          * </summary>
          */
         JPH::ShapeRefC GetShape() const { return shape; }
+
+        /**
+         * <summary>
+         * Indique si ce collider est un trigger (n'engendre pas de collision physique).
+         * </summary>
+         */
+        bool IsTrigger() const { return isTrigger; }
+
+        /**
+         * <summary>
+         * Définit ce collider comme trigger ou non.
+         * </summary>
+         */
+        void SetTrigger(bool trigger) { isTrigger = trigger; }
 
         /**
          * <summary>
