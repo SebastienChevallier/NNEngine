@@ -17,6 +17,8 @@ namespace NNE::Component::Physics {
         bool isKinematic;
         glm::bvec3 lockPosition;
         glm::bvec3 lockRotation;
+        glm::vec3 lastPosition;
+        glm::vec3 lastRotation;
 
     public:
         /**
@@ -65,7 +67,9 @@ namespace NNE::Component::Physics {
          * Déplace un corps cinématique vers une nouvelle position.
          * </summary>
          */
-        void MoveKinematic(glm::vec3 position, float deltaTime);
+
+        void MoveKinematic(glm::vec3 position, glm::vec3 rotation, float deltaTime);
+
         /**
          * <summary>
          * Obtient la vitesse linéaire actuelle.
