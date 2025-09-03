@@ -74,6 +74,7 @@ add_custom_command(TARGET GameTemplate POST_BUILD
 
 # ---------------- Tests ----------------
 enable_testing()
-add_executable(UnitTests tests/test_main.cpp)
+file(GLOB TEST_SOURCES tests/*.cpp)
+add_executable(UnitTests ${TEST_SOURCES})
 target_link_libraries(UnitTests PRIVATE NNEngine)
 add_test(NAME UnitTests COMMAND UnitTests)
