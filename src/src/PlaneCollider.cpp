@@ -52,9 +52,13 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
                 JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
                 bodySettings.mIsSensor = IsTrigger();
 
-                bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
-                bodySettings.mMassPropertiesOverride.mMass = 0.0f;
-                bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
+                bodySettings.mOverrideMassProperties =
+                    JPH::EOverrideMassProperties::MassAndInertiaProvided;
+                // Jolt n'accepte pas une masse nulle lors de la création du corps.
+                // Le plan étant statique, une petite valeur arbitraire suffit.
+                bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+                bodySettings.mMassPropertiesOverride.mInertia =
+                    JPH::Mat44::sIdentity();
 
                 auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
                 bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
