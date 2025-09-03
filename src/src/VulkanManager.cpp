@@ -89,7 +89,7 @@ void NNE::Systems::VulkanManager::initVulkan()
     createDepthResources();         // 📏 Créer une image de profondeur
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
-    //initImGui();
+    initImGui();
 }
 
 
@@ -857,13 +857,7 @@ void NNE::Systems::VulkanManager::initImGui()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     ImGui::StyleColorsDark();
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-        style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
 
     VkDescriptorPoolSize pool_sizes[] = {
         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -904,7 +898,7 @@ void NNE::Systems::VulkanManager::initImGui()
             throw std::runtime_error("ImGui Vulkan backend error");
         }
     };
-	init_info.RenderPass = renderPass;
+    init_info.RenderPass = renderPass;
     ImGui_ImplVulkan_Init(&init_info);
 
     VkCommandBuffer cmd = beginSingleTimeCommands();
@@ -1415,6 +1409,12 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
 
     vkDeviceWaitIdle(device); // Attendre l'inactivité du GPU avant la mise à jour
 
+    // Les ressources ImGui sont liées au render pass et au swapchain.
+    // Lors d'une recréation du swapchain, le render pass change et les
+    // pipelines ImGui deviennent incompatibles (mismatch de format/samples).
+    // On détruit donc proprement ImGui avant de recréer les ressources.
+    cleanupImGui();
+
     cleanupSwapChain(); // Nettoyer correctement les ressources liées au swapchain
 
     // 🔥 Recréer les ressources du swapchain
@@ -1432,7 +1432,10 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
     createDescriptorSets();
     createCommandBuffers();
 
-        updateCameraAspectRatio();
+    // Recréer les ressources ImGui avec le nouveau render pass / swapchain
+    initImGui();
+
+    updateCameraAspectRatio();
 }
 
 void NNE::Systems::VulkanManager::updateCameraAspectRatio()

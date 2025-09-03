@@ -10,9 +10,6 @@ namespace NNE::Systems {
 UISystem::UISystem(VulkanManager* manager) : _vkManager(manager) {}
 
 void UISystem::Start() {
-    if (_vkManager) {
-        _vkManager->initImGui();
-    }
     _app = Application::GetInstance();
 }
 
