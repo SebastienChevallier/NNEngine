@@ -28,7 +28,8 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
  */
 void NNE::Component::Physics::PlaneCollider::Awake()
 {
-        CreateShape();
+        if (!shape)
+                CreateShape();
 }
 
 /**
@@ -38,6 +39,9 @@ void NNE::Component::Physics::PlaneCollider::Awake()
  */
 void NNE::Component::Physics::PlaneCollider::CreateShape()
 {
+        if (shape)
+                return;
+
         shape = new JPH::PlaneShape(plane);
 
         if (!_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()) {

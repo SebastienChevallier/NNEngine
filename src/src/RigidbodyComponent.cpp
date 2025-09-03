@@ -43,8 +43,13 @@ void RigidbodyComponent::Awake() {
     auto const* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
     auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
-    if (!collider || !collider->GetShape()) {
+    if (!collider)
         return;
+
+    if (!collider->GetShape()) {
+        collider->CreateShape();
+        if (!collider->GetShape())
+            return;
     }
 
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic

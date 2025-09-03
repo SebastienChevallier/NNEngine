@@ -6,6 +6,7 @@
 #include "MeshComponent.h"
 #include "TransformComponent.h"
 #include "PlaneCollider.h"
+#include "RigidbodyComponent.h"
 #include <cassert>
 #include <cstdio>
 #include <glm/gtc/epsilon.hpp>
@@ -102,6 +103,15 @@ static void test_plane_collider_awake_creates_shape() {
   auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
       glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
   pc->Awake();
+  assert(pc->GetShape().GetPtr() != nullptr);
+}
+
+static void test_rigidbody_awake_initializes_collider() {
+  NNE::AEntity e;
+  auto *rb = e.AddComponent<NNE::Component::Physics::RigidbodyComponent>();
+  auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
+      glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  rb->Awake();
   assert(pc->GetShape().GetPtr() != nullptr);
 }
 
