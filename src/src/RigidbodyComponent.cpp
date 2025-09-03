@@ -18,8 +18,15 @@ namespace NNE::Component::Physics {
  * Instancie un corps rigide avec masse et type kinematic.
  * </summary>
  */
-RigidbodyComponent::RigidbodyComponent(float mass, bool kinematic, glm::bvec3 lockPosition)
-    : bodyID(), mass(mass), isKinematic(kinematic), lockPosition(lockPosition) {
+RigidbodyComponent::RigidbodyComponent(float mass,
+                                       bool kinematic,
+                                       glm::bvec3 lockPosition,
+                                       glm::bvec3 lockRotation)
+    : bodyID(),
+      mass(mass),
+      isKinematic(kinematic),
+      lockPosition(lockPosition),
+      lockRotation(lockRotation) {
 }
 
 /**
@@ -69,6 +76,9 @@ void RigidbodyComponent::Awake() {
     if (lockPosition.x) allowed = allowed & ~JPH::EAllowedDOFs::TranslationX;
     if (lockPosition.y) allowed = allowed & ~JPH::EAllowedDOFs::TranslationY;
     if (lockPosition.z) allowed = allowed & ~JPH::EAllowedDOFs::TranslationZ;
+    if (lockRotation.x) allowed = allowed & ~JPH::EAllowedDOFs::RotationX;
+    if (lockRotation.y) allowed = allowed & ~JPH::EAllowedDOFs::RotationY;
+    if (lockRotation.z) allowed = allowed & ~JPH::EAllowedDOFs::RotationZ;
     bodySettings.mAllowedDOFs = allowed;
 
     if (!isKinematic && mass > 0.0f) {
