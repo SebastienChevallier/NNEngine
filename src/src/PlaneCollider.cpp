@@ -1,12 +1,21 @@
 #include "PlaneCollider.h"
+#include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyInterface.h>
+
+#include "PhysicsSystem.h"
+#include "Application.h"
+#include "TransformComponent.h"
+#include "RigidbodyComponent.h"
 
 /**
  * <summary>
  * Initialise un plan collision avec une normale et une distance.
  * </summary>
  */
-NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, float distance)
+NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, float distance, bool isTrigger)
+    : ColliderComponent(isTrigger)
 {
         plane = JPH::Plane(JPH::Vec3(normal.x, normal.y, normal.z), distance);
 }
@@ -19,4 +28,19 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
 void NNE::Component::Physics::PlaneCollider::CreateShape()
 {
         shape = new JPH::PlaneShape(plane);
+
+        if (!_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()) {
+                auto* transform = _entity->GetComponent<NNE::Component::TransformComponent>();
+                JPH::RVec3 position = JPH::RVec3::sZero();
+                if (transform) {
+                        position = JPH::RVec3(transform->position.x, transform->position.y, transform->position.z);
+                }
+
+                JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
+                bodySettings.mIsSensor = IsTrigger();
+                auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
+                bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
+
+                NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
+        }
 }

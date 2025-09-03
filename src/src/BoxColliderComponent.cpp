@@ -6,15 +6,17 @@
 
 #include "PhysicsSystem.h"
 #include "Application.h"
+#include "TransformComponent.h"
+#include "RigidbodyComponent.h"
 
 /**
  * <summary>
  * Initialise un collider boîte avec la taille spécifiée.
  * </summary>
  */
-NNE::Component::Physics::BoxColliderComponent::BoxColliderComponent(const glm::vec3& size) : size(size)
-{
-}
+NNE::Component::Physics::BoxColliderComponent::BoxColliderComponent(const glm::vec3& size, bool isTrigger)
+    : ColliderComponent(isTrigger), size(size)
+{}
 
 /**
  * <summary>
@@ -35,9 +37,19 @@ void NNE::Component::Physics::BoxColliderComponent::CreateShape()
 {
         shape = new JPH::BoxShape(JPH::Vec3(size.x, size.y, size.z));
 
-        JPH::BodyCreationSettings bodySettings(shape, JPH::RVec3::sZero(), JPH::Quat::sIdentity(), JPH::EMotionType::Dynamic, 0);
-        auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
-        bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
+        // Crée un corps statique uniquement si aucun rigidbody n'est associé à l'entité
+        if (!_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()) {
+                auto* transform = _entity->GetComponent<NNE::Component::TransformComponent>();
+                JPH::RVec3 position = JPH::RVec3::sZero();
+                if (transform) {
+                        position = JPH::RVec3(transform->position.x, transform->position.y, transform->position.z);
+                }
 
-        NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
+                JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
+                bodySettings.mIsSensor = IsTrigger();
+                auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
+                bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
+
+                NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
+        }
 }

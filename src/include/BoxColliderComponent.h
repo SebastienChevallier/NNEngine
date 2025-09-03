@@ -16,7 +16,7 @@ namespace NNE::Component::Physics
          * Crée un collider de type boîte avec une taille donnée.
          * </summary>
          */
-        BoxColliderComponent(const glm::vec3& size);
+        BoxColliderComponent(const glm::vec3& size, bool isTrigger = false);
 
         /**
          * <summary>
