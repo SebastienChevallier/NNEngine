@@ -10,6 +10,7 @@
 #include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Body/MassProperties.h>
 #include <imgui.h>
+#include <iostream>
 
 
 namespace NNE::Component::Physics {
@@ -59,6 +60,11 @@ void RigidbodyComponent::Awake() {
         collider->Awake();
         if (!collider->GetShape())
             return;
+    }
+
+    if (collider->IsTrigger()) {
+        std::cerr << "Collider on entity '" << GetEntity()->GetName()
+                  << "' is marked as trigger; dynamic bodies will pass through." << std::endl;
     }
 
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
@@ -129,11 +135,30 @@ JPH::BodyID RigidbodyComponent::GetBodyID() const {
  * </summary>
  */
 void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
-    
+
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
         bodyInterface.SetLinearVelocity(bodyID, JPH::RVec3(velocity.x, velocity.y, velocity.z));
+    }
+}
+
+/**
+ * <summary>
+ * Déplace un corps cinématique vers une nouvelle position.
+ * </summary>
+ */
+void RigidbodyComponent::MoveKinematic(glm::vec3 position, float deltaTime) {
+    if (!isKinematic)
+        return;
+
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        bodyInterface.MoveKinematic(bodyID,
+                                    JPH::RVec3(position.x, position.y, position.z),
+                                    JPH::Quat::sIdentity(),
+                                    deltaTime);
     }
 }
 
