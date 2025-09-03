@@ -4,6 +4,9 @@
 #include "Application.h"
 #include "CameraComponent.h"
 #include "MeshComponent.h"
+#include "BoxColliderComponent.h"
+#include "RigidbodyComponent.h"
+#include <PlaneCollider.h>
 #include "TransformComponent.h"
 #include <cassert>
 #include <cstdio>
@@ -138,6 +141,18 @@ static void test_scene_serialization() {
   std::remove("test_scene.json");
 }
 
+static void test_rigidbody_selects_box_collider() {
+  NNE::Systems::Application app;
+  app.physicsSystem->Awake();
+  NNE::AEntity *floor = app.CreateEntity();
+  floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(0, 1, 0), 0.0f);
+  auto *box = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+  auto *rb = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, true);
+  floor->Awake();
+  assert(!rb->GetBodyID().IsInvalid());
+  assert(rb->GetBodyID() == box->bodyID);
+}
+
 int main() {
   NNE::Systems::Application app;
   test_application_id_increment();
@@ -151,6 +166,7 @@ int main() {
   test_camera_perspective();
   test_entity_component_management();
   test_get_components_multiple();
+  test_rigidbody_selects_box_collider();
   std::cout << "All tests passed" << std::endl;
   return 0;
 }
