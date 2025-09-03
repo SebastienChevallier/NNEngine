@@ -9,7 +9,10 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Body/MassProperties.h>
+#include <Jolt/Physics/Body/MotionProperties.h>
+#include <glm/gtc/quaternion.hpp>
 #include <imgui.h>
+#include <iostream>
 
 
 namespace NNE::Component::Physics {
@@ -27,7 +30,9 @@ RigidbodyComponent::RigidbodyComponent(float mass,
       mass(mass),
       isKinematic(kinematic),
       lockPosition(lockPosition),
-      lockRotation(lockRotation) {
+      lockRotation(lockRotation),
+      lastPosition(0.0f),
+      lastRotation(0.0f) {
 }
 
 /**
@@ -50,6 +55,10 @@ RigidbodyComponent::~RigidbodyComponent() {
 void RigidbodyComponent::Awake() {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto const* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+    if (transform) {
+        lastPosition = transform->position;
+        lastRotation = transform->rotation;
+    }
     auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
     if (!collider)
@@ -61,8 +70,18 @@ void RigidbodyComponent::Awake() {
             return;
     }
 
+    if (collider->IsTrigger()) {
+        std::cerr << "Collider on entity '" << GetEntity()->GetName()
+
+                  << "' is marked as trigger; forcing IsTrigger to false for physical collisions." << std::endl;
+        collider->SetTrigger(false);
+
+    }
+
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
         : JPH::EMotionType::Dynamic;
+
+    //JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
 
 
     JPH::BodyCreationSettings bodySettings(
@@ -83,9 +102,11 @@ void RigidbodyComponent::Awake() {
     bodySettings.mAllowedDOFs = allowed;
 
     if (!isKinematic && mass > 0.0f) {
+        JPH::MassProperties mp = collider->GetShape()->GetMassProperties();
+        mp.ScaleToMass(mass);
+        bodySettings.mMassPropertiesOverride = mp;
         bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
-        bodySettings.mMassPropertiesOverride.mMass = mass;
-        bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
+        bodySettings.mMotionQuality = JPH::EMotionQuality::LinearCast;
     }
 
     if (isKinematic) {
@@ -93,6 +114,8 @@ void RigidbodyComponent::Awake() {
         bodySettings.mMassPropertiesOverride.mMass = 1.0f;
         bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
         bodySettings.mGravityFactor = 0.0f;
+        bodySettings.mUseManifoldReduction = false; // Important pour les kinematic
+        bodySettings.mMotionQuality = JPH::EMotionQuality::LinearCast;
     }
 
     JPH::BodyInterface& bodyInterface = physicsSystem->GetBodyInterface();
@@ -107,7 +130,15 @@ void RigidbodyComponent::Awake() {
  * </summary>
  */
 void RigidbodyComponent::Update(float deltaTime) {
-    (void)deltaTime;
+    if (!isKinematic)
+        return;
+
+    auto* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+    if (transform && (transform->position != lastPosition || transform->rotation != lastRotation)) {
+        MoveKinematic(transform->position, transform->rotation, deltaTime);
+        lastPosition = transform->position;
+        lastRotation = transform->rotation;
+    }
 }
 
 /**
@@ -125,11 +156,35 @@ JPH::BodyID RigidbodyComponent::GetBodyID() const {
  * </summary>
  */
 void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
-    
+
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
         bodyInterface.SetLinearVelocity(bodyID, JPH::RVec3(velocity.x, velocity.y, velocity.z));
+    }
+}
+
+/**
+ * <summary>
+ * Déplace un corps cinématique vers une nouvelle position.
+ * </summary>
+ */
+
+void RigidbodyComponent::MoveKinematic(glm::vec3 position, glm::vec3 rotation, float deltaTime) {
+
+    if (!isKinematic)
+        return;
+
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        glm::vec3 radians = glm::radians(rotation);
+        glm::quat q = glm::quat(radians);
+        JPH::Quat orient(q.x, q.y, q.z, q.w);
+        bodyInterface.MoveKinematic(bodyID,
+                                    JPH::RVec3(position.x, position.y, position.z),
+                                    orient,
+                                    deltaTime);
     }
 }
 
