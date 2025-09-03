@@ -1421,17 +1421,18 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
     createSwapChain();
     createImageViews();
     createRenderPass();   // Assurez-vous que le render pass est bien recréé !
+    createGraphicsPipeline(); // Le pipeline dépend du render pass
     createColorResources();
     createDepthResources();
     createFramebuffers();
 
-    // 🔥 Recréer les buffers uniformes et le pipeline si nécessaire
+    // 🔥 Recréer les buffers uniformes et les descripteurs
     createUniformBuffers();
     createDescriptorPool();
     createDescriptorSets();
     createCommandBuffers();
 
-	updateCameraAspectRatio();
+        updateCameraAspectRatio();
 }
 
 void NNE::Systems::VulkanManager::updateCameraAspectRatio()
@@ -2226,6 +2227,16 @@ void NNE::Systems::VulkanManager::cleanupSwapChain()
     if (descriptorPool != VK_NULL_HANDLE) {
         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
         descriptorPool = VK_NULL_HANDLE;
+    }
+
+    // Détruire le pipeline et son layout avant de recréer le swapchain
+    if (graphicsPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(device, graphicsPipeline, nullptr);
+        graphicsPipeline = VK_NULL_HANDLE;
+    }
+    if (pipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+        pipelineLayout = VK_NULL_HANDLE;
     }
 
     if (renderPass != VK_NULL_HANDLE) {
