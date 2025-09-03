@@ -25,7 +25,8 @@ int main() {
     NNE::AEntity* floor = app.CreateEntity();
 	floor->SetName("Floor");
     //NNE::Component::Physics::BoxColliderComponent const* PC = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.5f, 100.0f));
-    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(1.0f, 1.0f, 1.0f));
+    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(
+        glm::vec3(1.0f, 1.0f, 1.0f), 0.0f);
     NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();    
     NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(1, 1, 1));
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
