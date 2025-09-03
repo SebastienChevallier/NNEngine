@@ -16,11 +16,11 @@ int main() {
 
 	NNE::AEntity* Skybox = app.CreateEntity();
 	Skybox->SetName("Skybox");
-	NNE::Component::Render::MeshComponent* SBC = Skybox->AddComponent<NNE::Component::Render::MeshComponent>();
-	SBC->SetPrimitive(NNE::Component::Render::PrimitiveType::SPHERE);
-	SBC->SetSkybox(true);
-	SBC->SetModelPath("../assets/textures/skybox.hdr");
-	Skybox->GetComponent<NNE::Component::TransformComponent>()->scale = glm::vec3(50.0f, 50.0f, 50.0f);
+        NNE::Component::Render::MeshComponent* SBC = Skybox->AddComponent<NNE::Component::Render::MeshComponent>();
+        SBC->SetPrimitive(NNE::Component::Render::PrimitiveType::SPHERE);
+        SBC->SetSkybox(true);
+        SBC->SetTexturePath("../assets/textures/skybox.hdr");
+        Skybox->GetComponent<NNE::Component::TransformComponent>()->scale = glm::vec3(50.0f, 50.0f, 50.0f);
 
     NNE::AEntity* floor = app.CreateEntity();
 	floor->SetName("Floor");
