@@ -3,6 +3,7 @@
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
+#include <Jolt/Physics/Body/MassProperties.h>
 
 #include "PhysicsSystem.h"
 #include "Application.h"
@@ -19,6 +20,17 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
     : ColliderComponent(isTrigger)
 {
         plane = JPH::Plane(JPH::Vec3(normal.x, normal.y, normal.z), distance);
+        shape = new JPH::PlaneShape(plane);
+}
+
+/**
+ * <summary>
+ * Prépare le collider lors de l'initialisation du composant.
+ * </summary>
+ */
+void NNE::Component::Physics::PlaneCollider::Awake()
+{
+         CreateShape();
 }
 
 /**
@@ -39,6 +51,11 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
 
                 JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
                 bodySettings.mIsSensor = IsTrigger();
+
+                bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
+                bodySettings.mMassPropertiesOverride.mMass = 0.0f;
+                bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
+
                 auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
                 bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 

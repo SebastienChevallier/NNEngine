@@ -5,6 +5,8 @@
 #include "CameraComponent.h"
 #include "MeshComponent.h"
 #include "TransformComponent.h"
+#include "PlaneCollider.h"
+#include "RigidbodyComponent.h"
 #include <cassert>
 #include <cstdio>
 #include <glm/gtc/epsilon.hpp>
@@ -96,6 +98,23 @@ static void test_model_matrix_translation() {
       glm::all(glm::epsilonEqual(trans, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
 }
 
+static void test_plane_collider_awake_creates_shape() {
+  NNE::AEntity e;
+  auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
+      glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  pc->Awake();
+  assert(pc->GetShape().GetPtr() != nullptr);
+}
+
+static void test_rigidbody_awake_initializes_collider() {
+  NNE::AEntity e;
+  auto *rb = e.AddComponent<NNE::Component::Physics::RigidbodyComponent>();
+  auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
+      glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  rb->Awake();
+  assert(pc->GetShape().GetPtr() != nullptr);
+}
+
 static void test_scene_serialization() {
   NNE::AScene scene;
 
@@ -151,6 +170,8 @@ int main() {
   test_camera_perspective();
   test_entity_component_management();
   test_get_components_multiple();
+  test_rigidbody_awake_initializes_collider();
+  test_plane_collider_awake_creates_shape();
   std::cout << "All tests passed" << std::endl;
   return 0;
 }

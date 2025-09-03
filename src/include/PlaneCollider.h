@@ -21,6 +21,12 @@ namespace NNE::Component::Physics
                 PlaneCollider(const glm::vec3& normal, float distance, bool isTrigger = false);
                 /**
                  * <summary>
+                 * Prépare le collider lors de son initialisation.
+                 * </summary>
+                 */
+                void Awake() override;
+                /**
+                 * <summary>
                  * Génère la forme physique correspondant au plan.
                  * </summary>
                  */

@@ -8,6 +8,7 @@
 #include "AEntity.h"
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
+#include <Jolt/Physics/Body/MassProperties.h>
 
 
 namespace NNE::Component::Physics {
@@ -43,8 +44,13 @@ void RigidbodyComponent::Awake() {
     auto const* transform = GetEntity()->GetComponent<NNE::Component::TransformComponent>();
     auto* collider = GetEntity()->GetComponent<NNE::Component::Physics::ColliderComponent>();
 
-    if (!collider || !collider->GetShape()) {
+    if (!collider)
         return;
+
+    if (!collider->GetShape()) {
+        collider->CreateShape();
+        if (!collider->GetShape())
+            return;
     }
 
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
@@ -66,10 +72,15 @@ void RigidbodyComponent::Awake() {
     bodySettings.mAllowedDOFs = allowed;
 
     if (!isKinematic && mass > 0.0f) {
+        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
         bodySettings.mMassPropertiesOverride.mMass = mass;
+        bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
     }
 
     if (isKinematic) {
+        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
+        bodySettings.mMassPropertiesOverride.mMass = 0.0f;
+        bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
         bodySettings.mGravityFactor = 0.0f;
     }
 
