@@ -9,43 +9,43 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <glm/gtc/constants.hpp>
 
 namespace {
 
-// Conversion depuis le repère Y-up/Z-forward de Jolt vers
-// le repère Z-up/-Y-forward du moteur
-const glm::quat kAxisCorrection =
-    glm::angleAxis(glm::half_pi<float>(), glm::vec3(1.0f, 0.0f, 0.0f));
-
-inline glm::vec3 ToEnginePosition(const JPH::RVec3& pos)
-{
-    return { pos.GetX(), -pos.GetZ(), pos.GetY() };
+// Conversion directe des coordonnées de Jolt vers le moteur
+inline glm::vec3 ToEnginePosition(const JPH::RVec3 &pos) {
+  return {pos.GetX(), pos.GetY(), pos.GetZ()};
 }
 
-inline glm::vec3 ToEngineRotation(const JPH::Quat& rot)
-{
-    glm::quat q(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
-    q = kAxisCorrection * q;
-    return glm::degrees(glm::eulerAngles(q));
+inline glm::vec3 ToEngineRotation(const JPH::Quat &rot) {
+  glm::quat q(rot.GetW(), rot.GetX(), rot.GetY(), rot.GetZ());
+  return glm::degrees(glm::eulerAngles(q));
 }
 
 } // namespace
 
-class SimpleBroadPhaseLayerInterface final : public JPH::BroadPhaseLayerInterface {
+class SimpleBroadPhaseLayerInterface final
+    : public JPH::BroadPhaseLayerInterface {
 public:
-    JPH::uint GetNumBroadPhaseLayers() const override { return 1; }
-    JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer) const override { return JPH::BroadPhaseLayer(0); }
+  JPH::uint GetNumBroadPhaseLayers() const override { return 1; }
+  JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer) const override {
+    return JPH::BroadPhaseLayer(0);
+  }
 };
 
-class SimpleObjectVsBroadPhaseLayerFilter final : public JPH::ObjectVsBroadPhaseLayerFilter {
+class SimpleObjectVsBroadPhaseLayerFilter final
+    : public JPH::ObjectVsBroadPhaseLayerFilter {
 public:
-    bool ShouldCollide(JPH::ObjectLayer, JPH::BroadPhaseLayer) const override { return true; }
+  bool ShouldCollide(JPH::ObjectLayer, JPH::BroadPhaseLayer) const override {
+    return true;
+  }
 };
 
 class SimpleObjectLayerPairFilter final : public JPH::ObjectLayerPairFilter {
 public:
-    bool ShouldCollide(JPH::ObjectLayer, JPH::ObjectLayer) const override { return true; }
+  bool ShouldCollide(JPH::ObjectLayer, JPH::ObjectLayer) const override {
+    return true;
+  }
 };
 
 namespace NNE::Systems {
@@ -55,15 +55,15 @@ namespace NNE::Systems {
  * Configure les allocations et enregistre les types Jolt.
  * </summary>
  */
-PhysicsSystem::PhysicsSystem()
-    : tempAllocator(nullptr), jobSystem(nullptr)
-{
-    JPH::RegisterDefaultAllocator();
-    JPH::Factory::sInstance = new JPH::Factory();
-    JPH::RegisterTypes();
+PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr) {
+  JPH::RegisterDefaultAllocator();
+  JPH::Factory::sInstance = new JPH::Factory();
+  JPH::RegisterTypes();
 
-    tempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
-    jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
+  tempAllocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
+  jobSystem = new JPH::JobSystemThreadPool(
+      JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers,
+      std::thread::hardware_concurrency() - 1);
 }
 
 /**
@@ -72,18 +72,14 @@ PhysicsSystem::PhysicsSystem()
  * </summary>
  */
 void PhysicsSystem::Initialize() {
-    static SimpleBroadPhaseLayerInterface broadPhaseLayerInterface;
-    static SimpleObjectVsBroadPhaseLayerFilter broadPhaseFilter;
-    static SimpleObjectLayerPairFilter objectLayerFilter;
+  static SimpleBroadPhaseLayerInterface broadPhaseLayerInterface;
+  static SimpleObjectVsBroadPhaseLayerFilter broadPhaseFilter;
+  static SimpleObjectLayerPairFilter objectLayerFilter;
 
-    physicsSystem.Init(
-        1024, 0, 1024, 1024,
-        broadPhaseLayerInterface,
-        broadPhaseFilter,
-        objectLayerFilter
-    );
+  physicsSystem.Init(1024, 0, 1024, 1024, broadPhaseLayerInterface,
+                     broadPhaseFilter, objectLayerFilter);
 
-    physicsSystem.SetContactListener(&contactListener);
+  physicsSystem.SetContactListener(&contactListener);
 }
 
 /**
@@ -92,8 +88,8 @@ void PhysicsSystem::Initialize() {
  * </summary>
  */
 PhysicsSystem::~PhysicsSystem() {
-    delete JPH::Factory::sInstance;
-    JPH::Factory::sInstance = nullptr;
+  delete JPH::Factory::sInstance;
+  JPH::Factory::sInstance = nullptr;
 }
 
 /**
@@ -101,66 +97,59 @@ PhysicsSystem::~PhysicsSystem() {
  * Fournit un accès au système physique Jolt.
  * </summary>
  */
-JPH::PhysicsSystem* PhysicsSystem::GetPhysicsSystem() {
-    return &physicsSystem;
-}
+JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() { return &physicsSystem; }
 
 /**
  * <summary>
  * Prépare le système physique avant utilisation.
  * </summary>
  */
-void PhysicsSystem::Awake()
-{
-    Initialize();
-}
+void PhysicsSystem::Awake() { Initialize(); }
 
 /**
  * <summary>
  * Démarre le système physique.
  * </summary>
  */
-void PhysicsSystem::Start()
-{
-}
+void PhysicsSystem::Start() {}
 
 /**
  * <summary>
  * Avance la simulation physique et synchronise les entités.
  * </summary>
  */
-void PhysicsSystem::Update(float deltaTime)
-{
-    physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
+void PhysicsSystem::Update(float deltaTime) {
+  physicsSystem.Update(deltaTime, 1, tempAllocator, jobSystem);
 
-    JPH::BodyInterface& bodyInterface = physicsSystem.GetBodyInterface();
+  JPH::BodyInterface &bodyInterface = physicsSystem.GetBodyInterface();
 
-    auto syncTransform = [&](const JPH::BodyID& id, NNE::Component::TransformComponent* transform) {
-        JPH::RVec3 pos = bodyInterface.GetPosition(id);
-        JPH::Quat rot = bodyInterface.GetRotation(id);
-        transform->position = ToEnginePosition(pos);
-        transform->rotation = ToEngineRotation(rot);
-    };
+  auto syncTransform = [&](const JPH::BodyID &id,
+                           NNE::Component::TransformComponent *transform) {
+    JPH::RVec3 pos = bodyInterface.GetPosition(id);
+    JPH::Quat rot = bodyInterface.GetRotation(id);
+    transform->position = ToEnginePosition(pos);
+    transform->rotation = ToEngineRotation(rot);
+  };
 
-    for (auto* rb : rigidbodies)
-    {
-        if (!rb->GetBodyID().IsInvalid())
-        {
-            auto* transform = rb->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-            syncTransform(rb->GetBodyID(), transform);
-        }
+  for (auto *rb : rigidbodies) {
+    if (!rb->GetBodyID().IsInvalid()) {
+      auto *transform =
+          rb->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
+      syncTransform(rb->GetBodyID(), transform);
     }
+  }
 
-    for (auto* collider : colliders)
-    {
-        if (collider->GetEntity()->GetComponent<NNE::Component::Physics::RigidbodyComponent>())
-            continue;
-        if (!collider->GetBodyID().IsInvalid())
-        {
-            auto* transform = collider->GetEntity()->GetComponent<NNE::Component::TransformComponent>();
-            syncTransform(collider->GetBodyID(), transform);
-        }
+  for (auto *collider : colliders) {
+    if (collider->GetEntity()
+            ->GetComponent<NNE::Component::Physics::RigidbodyComponent>())
+      continue;
+    if (!collider->GetBodyID().IsInvalid()) {
+      auto *transform =
+          collider->GetEntity()
+              ->GetComponent<NNE::Component::TransformComponent>();
+      syncTransform(collider->GetBodyID(), transform);
     }
+  }
 }
 
 /**
@@ -168,26 +157,23 @@ void PhysicsSystem::Update(float deltaTime)
  * Termine les traitements physiques après l'Update principal.
  * </summary>
  */
-void PhysicsSystem::LateUpdate(float deltaTime)
-{
-    (void)deltaTime;
-}
+void PhysicsSystem::LateUpdate(float deltaTime) { (void)deltaTime; }
 
 /**
  * <summary>
  * Enregistre les composants physiques pour la simulation.
  * </summary>
  */
-void PhysicsSystem::RegisterComponent(NNE::Component::AComponent* component)
-{
-    if (auto* collider = dynamic_cast<NNE::Component::Physics::ColliderComponent*>(component))
-    {
-        colliders.push_back(collider);
-    }
-    if (auto* rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent*>(component))
-    {
-        rigidbodies.push_back(rb);
-    }
+void PhysicsSystem::RegisterComponent(NNE::Component::AComponent *component) {
+  if (auto *collider =
+          dynamic_cast<NNE::Component::Physics::ColliderComponent *>(
+              component)) {
+    colliders.push_back(collider);
+  }
+  if (auto *rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent *>(
+          component)) {
+    rigidbodies.push_back(rb);
+  }
 }
 
 /**
@@ -195,16 +181,18 @@ void PhysicsSystem::RegisterComponent(NNE::Component::AComponent* component)
  * Gère la réaction lors de l'apparition d'un contact.
  * </summary>
  */
-void PhysicsSystem::ContactListenerImpl::OnContactAdded(const JPH::Body& body1, const JPH::Body& body2, const JPH::ContactManifold& manifold, JPH::ContactSettings&)
-{
-    auto* colliderA = NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());
-    auto* colliderB = NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
+void PhysicsSystem::ContactListenerImpl::OnContactAdded(
+    const JPH::Body &body1, const JPH::Body &body2,
+    const JPH::ContactManifold &manifold, JPH::ContactSettings &) {
+  auto *colliderA =
+      NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());
+  auto *colliderB =
+      NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
 
-    if (colliderA && colliderB)
-    {
-        colliderA->OnHit(colliderB);
-        colliderB->OnHit(colliderA);
-    }
+  if (colliderA && colliderB) {
+    colliderA->OnHit(colliderB);
+    colliderB->OnHit(colliderA);
+  }
 }
 
 } // namespace NNE::Systems
