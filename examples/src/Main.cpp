@@ -19,7 +19,7 @@ int main() {
 	NNE::Component::Render::MeshComponent* SBC = Skybox->AddComponent<NNE::Component::Render::MeshComponent>();
 	SBC->SetPrimitive(NNE::Component::Render::PrimitiveType::SPHERE);
 	SBC->SetSkybox(true);
-	SBC->SetModelPath("../assets/textures/skybox.hdr");
+	SBC->SetTexturePath("../assets/textures/skybox.hdr");
 	Skybox->GetComponent<NNE::Component::TransformComponent>()->scale = glm::vec3(50.0f, 50.0f, 50.0f);
 
     NNE::AEntity* floor = app.CreateEntity();
@@ -49,12 +49,12 @@ int main() {
 
     NNE::AEntity* player = app.CreateEntity();
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
-    //NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-    //NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, true);
+    NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false);
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 
-        TCplayer->position = glm::vec3(0.0f, 0.0f, 2.0f);
+        TCplayer->position = glm::vec3(0.0f, 5.0f, 0.0f);
 
     NNE::AEntity* camera = app.CreateEntity();
     NNE::Component::Render::CameraComponent* CC = camera->AddComponent<NNE::Component::Render::CameraComponent>();

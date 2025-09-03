@@ -35,7 +35,7 @@ void PlayerController::Update(float deltaTime)
 
     _entity->transform->rotation.y = yaw;
     if (cameraTransform) {
-            cameraTransform->rotation.x = pitch;
+            cameraTransform->rotation.x = -pitch;
     }
 
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_W)) {
