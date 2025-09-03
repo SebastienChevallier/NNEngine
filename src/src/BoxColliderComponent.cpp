@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "TransformComponent.h"
 #include "RigidbodyComponent.h"
+#include "AEntity.h"
 
 /**
  * <summary>
