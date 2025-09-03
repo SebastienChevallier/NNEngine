@@ -19,6 +19,7 @@ namespace NNE::Systems {
         JPH::JobSystemThreadPool* jobSystem;
         std::vector<NNE::Component::Physics::RigidbodyComponent*> rigidbodies;
         std::vector<NNE::Component::Physics::ColliderComponent*> colliders;
+        bool initialized;
 
     public:
         /**
