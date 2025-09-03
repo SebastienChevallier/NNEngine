@@ -23,6 +23,16 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
 
 /**
  * <summary>
+ * Prépare le collider lors de l'initialisation du composant.
+ * </summary>
+ */
+void NNE::Component::Physics::PlaneCollider::Awake()
+{
+        CreateShape();
+}
+
+/**
+ * <summary>
  * Crée l'objet shape représentant le plan.
  * </summary>
  */
