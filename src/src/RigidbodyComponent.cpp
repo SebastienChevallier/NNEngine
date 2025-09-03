@@ -9,6 +9,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
 #include <Jolt/Physics/Body/MassProperties.h>
+#include <imgui.h>
 
 
 namespace NNE::Component::Physics {
@@ -145,6 +146,13 @@ glm::vec3 RigidbodyComponent::GetLinearVelocity() const {
         return glm::vec3(velocity.GetX(), velocity.GetY(), velocity.GetZ());
     }
     return glm::vec3();
+}
+
+void RigidbodyComponent::DrawImGui() {
+    ImGui::Text("Mass: %.2f", mass);
+    ImGui::Text("Kinematic: %s", isKinematic ? "true" : "false");
+    ImGui::Text("Lock Position: %d %d %d", lockPosition.x, lockPosition.y, lockPosition.z);
+    ImGui::Text("Lock Rotation: %d %d %d", lockRotation.x, lockRotation.y, lockRotation.z);
 }
 
 } // namespace NNE::Component::Physics

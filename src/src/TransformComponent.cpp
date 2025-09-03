@@ -1,4 +1,5 @@
 #include "TransformComponent.h"
+#include <imgui.h>
 
 /**
  * <summary>
@@ -20,4 +21,11 @@ NNE::Component::TransformComponent::TransformComponent()
 void NNE::Component::TransformComponent::Update(float deltaTime)
 {
         //rotation.y += 20.0f * deltaTime;
+}
+
+void NNE::Component::TransformComponent::DrawImGui()
+{
+        ImGui::DragFloat3("Position", &position[0], 0.1f);
+        ImGui::DragFloat3("Rotation", &rotation[0], 0.1f);
+        ImGui::DragFloat3("Scale", &scale[0], 0.1f);
 }

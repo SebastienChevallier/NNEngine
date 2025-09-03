@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "AComponent.h"
+#include "IDebugUI.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -7,7 +8,7 @@
 #include <vector>
 
 namespace NNE::Component {
-class alignas(16) TransformComponent : public AComponent {
+class alignas(16) TransformComponent : public AComponent, public NNE::IDebugUI {
 public:
   alignas(16) glm::vec3 position;
   alignas(16) glm::vec3 rotation; // en degrés ou radians selon votre convention
@@ -29,6 +30,8 @@ public:
    * </summary>
    */
   virtual void Update(float deltaTime);
+
+  void DrawImGui() override;
 
   /**
    * <summary>

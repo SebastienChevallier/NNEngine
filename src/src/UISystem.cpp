@@ -3,6 +3,7 @@
 #include "PerformanceMetrics.h"
 #include <imgui.h>
 #include "Application.h"
+#include "IDebugUI.h"
 
 namespace NNE::Systems {
 
@@ -61,7 +62,7 @@ void UISystem::Update(float deltaTime) {
                             for (auto* c : comps) {
                                 ImGui::PushID(c);
 
-                                // Récup du nom de type
+                                // RÃ©cup du nom de type
                                 std::string typeName;                                
                                 typeName = typeid(*c).name();
 
@@ -70,12 +71,12 @@ void UISystem::Update(float deltaTime) {
                                     ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen,
                                     "%s", typeName.c_str())) {
                                     // Contenu debug du composant
-                                    //if (auto* ui = dynamic_cast<IDebugUI*>(c)) {
-                                    //    ui->DrawImGui();  // chaque composant dessine ses propres champs
-                                    //}
-                                    //else {
-                                    //    ImGui::TextUnformatted("Pas d'UI pour ce composant.");
-                                    //}
+                                    if (auto* ui = dynamic_cast<NNE::IDebugUI*>(c)) {
+                                        ui->DrawImGui();  // chaque composant dessine ses propres champs
+                                    }
+                                    else {
+                                        ImGui::TextUnformatted("Pas d'UI pour ce composant.");
+                                    }
                                     ImGui::TreePop();
                                 }
 
