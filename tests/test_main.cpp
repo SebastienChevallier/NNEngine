@@ -170,6 +170,7 @@ int main() {
   test_camera_perspective();
   test_entity_component_management();
   test_get_components_multiple();
+  test_rigidbody_awake_initializes_collider();
   test_plane_collider_awake_creates_shape();
   std::cout << "All tests passed" << std::endl;
   return 0;

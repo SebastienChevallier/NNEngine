@@ -3,6 +3,7 @@
 #include <Jolt/Physics/Collision/Shape/PlaneShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyInterface.h>
+#include <Jolt/Physics/Body/MassProperties.h>
 
 #include "PhysicsSystem.h"
 #include "Application.h"
@@ -53,6 +54,9 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
 
                 JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
                 bodySettings.mIsSensor = IsTrigger();
+                bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassProperties;
+                bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+                bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
                 auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
                 bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 
