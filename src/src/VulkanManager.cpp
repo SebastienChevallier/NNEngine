@@ -1415,6 +1415,12 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
 
     vkDeviceWaitIdle(device); // Attendre l'inactivité du GPU avant la mise à jour
 
+    // Les ressources ImGui sont liées au render pass et au swapchain.
+    // Lors d'une recréation du swapchain, le render pass change et les
+    // pipelines ImGui deviennent incompatibles (mismatch de format/samples).
+    // On détruit donc proprement ImGui avant de recréer les ressources.
+    cleanupImGui();
+
     cleanupSwapChain(); // Nettoyer correctement les ressources liées au swapchain
 
     // 🔥 Recréer les ressources du swapchain
@@ -1432,7 +1438,10 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
     createDescriptorSets();
     createCommandBuffers();
 
-        updateCameraAspectRatio();
+    // Recréer les ressources ImGui avec le nouveau render pass / swapchain
+    initImGui();
+
+    updateCameraAspectRatio();
 }
 
 void NNE::Systems::VulkanManager::updateCameraAspectRatio()
