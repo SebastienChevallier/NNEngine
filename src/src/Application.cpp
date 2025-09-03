@@ -26,6 +26,7 @@ NNE::Systems::Application::Application()
     Instance = this;
     VKManager = new VulkanManager();
     physicsSystem = new PhysicsSystem();
+    physicsSystem->Awake();
     uiSystem = new UISystem(VKManager);
     renderSystem = new RenderSystem(VKManager);
     inputSystem = new InputSystem();

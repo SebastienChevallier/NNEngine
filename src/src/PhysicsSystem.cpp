@@ -55,7 +55,7 @@ namespace NNE::Systems {
  * Configure les allocations et enregistre les types Jolt.
  * </summary>
  */
-PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr) {
+PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr), initialized(false) {
   JPH::RegisterDefaultAllocator();
   JPH::Factory::sInstance = new JPH::Factory();
   JPH::RegisterTypes();
@@ -104,7 +104,12 @@ JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() { return &physicsSystem; }
  * Prépare le système physique avant utilisation.
  * </summary>
  */
-void PhysicsSystem::Awake() { Initialize(); }
+void PhysicsSystem::Awake() {
+  if (!initialized) {
+    Initialize();
+    initialized = true;
+  }
+}
 
 /**
  * <summary>
