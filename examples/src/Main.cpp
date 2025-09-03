@@ -24,9 +24,8 @@ int main() {
 
     NNE::AEntity* floor = app.CreateEntity();
 	floor->SetName("Floor");
-    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(0, 0, 1), 10.0f);
-    NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();
-    NNE::Component::Physics::BoxColliderComponent const* BCFloor = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.50f, 100.0f));
+    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(10, 1, 10), 10.0f);
+    NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();    
     NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(10.0f, true);
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
 	MFC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
@@ -54,7 +53,7 @@ int main() {
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 
-        TCplayer->position = glm::vec3(0.0f, 5.0f, 0.0f);
+    TCplayer->position = glm::vec3(0.0f, 5.0f, 0.0f);
 
     NNE::AEntity* camera = app.CreateEntity();
     NNE::Component::Render::CameraComponent* CC = camera->AddComponent<NNE::Component::Render::CameraComponent>();
@@ -63,9 +62,9 @@ int main() {
 	TC2->SetParent(TCplayer);
 
 	CC->SetPerspective(55.0f, 16.0f / 9.0f, 0.1f, 500.0f);	
-        TC2->position = glm::vec3(0.0f, 0.0f, 2.0f);
-        TC2->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-        app.VKManager->activeCamera = CC;
+    TC2->position = glm::vec3(0.0f, 0.0f, 2.0f);
+    TC2->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    app.VKManager->activeCamera = CC;
 
     app.Init();
     app.Update();
