@@ -89,7 +89,7 @@ void NNE::Systems::VulkanManager::initVulkan()
     createDepthResources();         // 📏 Créer une image de profondeur
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
-    //initImGui();
+    initImGui();
 }
 
 
@@ -904,7 +904,7 @@ void NNE::Systems::VulkanManager::initImGui()
             throw std::runtime_error("ImGui Vulkan backend error");
         }
     };
-	init_info.RenderPass = renderPass;
+    init_info.RenderPass = renderPass;
     ImGui_ImplVulkan_Init(&init_info);
 
     VkCommandBuffer cmd = beginSingleTimeCommands();
