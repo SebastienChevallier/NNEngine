@@ -72,12 +72,15 @@ void RigidbodyComponent::Awake() {
     bodySettings.mAllowedDOFs = allowed;
 
     if (!isKinematic && mass > 0.0f) {
-        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassProperties;
+        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
         bodySettings.mMassPropertiesOverride.mMass = mass;
         bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
     }
 
     if (isKinematic) {
+        bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
+        bodySettings.mMassPropertiesOverride.mMass = 0.0f;
+        bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
         bodySettings.mGravityFactor = 0.0f;
     }
 

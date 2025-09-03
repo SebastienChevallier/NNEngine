@@ -20,6 +20,7 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
     : ColliderComponent(isTrigger)
 {
         plane = JPH::Plane(JPH::Vec3(normal.x, normal.y, normal.z), distance);
+        shape = new JPH::PlaneShape(plane);
 }
 
 /**
@@ -29,8 +30,7 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
  */
 void NNE::Component::Physics::PlaneCollider::Awake()
 {
-        if (!shape)
-                CreateShape();
+         CreateShape();
 }
 
 /**
@@ -40,9 +40,6 @@ void NNE::Component::Physics::PlaneCollider::Awake()
  */
 void NNE::Component::Physics::PlaneCollider::CreateShape()
 {
-        if (shape)
-                return;
-
         shape = new JPH::PlaneShape(plane);
 
         if (!_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()) {
@@ -54,9 +51,11 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
 
                 JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
                 bodySettings.mIsSensor = IsTrigger();
-                bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassProperties;
-                bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+
+                bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
+                bodySettings.mMassPropertiesOverride.mMass = 0.0f;
                 bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
+
                 auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
                 bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 

@@ -24,9 +24,9 @@ int main() {
 
     NNE::AEntity* floor = app.CreateEntity();
 	floor->SetName("Floor");
-    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(1, 0.01f, 1), 100.0f);
+    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(1, 1, 1), 1.0f);
     NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();    
-    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, false);
+    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, true);
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
 	MFC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
 	MFC->SetTexturePath("../assets/textures/viking_room.png");
@@ -49,7 +49,7 @@ int main() {
     NNE::AEntity* player = app.CreateEntity();
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
     NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false);
+    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, false);
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 
@@ -62,7 +62,7 @@ int main() {
 	TC2->SetParent(TCplayer);
 
 	CC->SetPerspective(55.0f, 16.0f / 9.0f, 0.1f, 500.0f);	
-    TC2->position = glm::vec3(0.0f, 0.0f, 2.0f);
+    TC2->position = glm::vec3(0.0f, 1.0f, 0.0f);
     TC2->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
     app.VKManager->activeCamera = CC;
 
