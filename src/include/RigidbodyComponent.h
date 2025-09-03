@@ -67,7 +67,9 @@ namespace NNE::Component::Physics {
          * Déplace un corps cinématique vers une nouvelle position.
          * </summary>
          */
+
         void MoveKinematic(glm::vec3 position, glm::vec3 rotation, float deltaTime);
+
         /**
          * <summary>
          * Obtient la vitesse linéaire actuelle.

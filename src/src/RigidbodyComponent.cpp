@@ -72,8 +72,10 @@ void RigidbodyComponent::Awake() {
 
     if (collider->IsTrigger()) {
         std::cerr << "Collider on entity '" << GetEntity()->GetName()
+
                   << "' is marked as trigger; forcing IsTrigger to false for physical collisions." << std::endl;
         collider->SetTrigger(false);
+
     }
 
     JPH::EMotionType motionType = isKinematic ? JPH::EMotionType::Kinematic
@@ -167,7 +169,9 @@ void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
  * Déplace un corps cinématique vers une nouvelle position.
  * </summary>
  */
+
 void RigidbodyComponent::MoveKinematic(glm::vec3 position, glm::vec3 rotation, float deltaTime) {
+
     if (!isKinematic)
         return;
 
