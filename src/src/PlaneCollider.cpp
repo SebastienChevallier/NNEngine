@@ -20,7 +20,7 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
     : ColliderComponent(isTrigger)
 {
         plane = JPH::Plane(JPH::Vec3(normal.x, normal.y, normal.z), distance);
-        //shape = new JPH::PlaneShape(plane);
+        shape = new JPH::PlaneShape(plane);
 }
 
 /**

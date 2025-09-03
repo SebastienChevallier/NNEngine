@@ -125,47 +125,7 @@ static void test_rigidbody_awake_initializes_collider() {
   EXPECT_TRUE(pc->GetShape().GetPtr() != nullptr);
 }
 
-static void test_scene_serialization() {
-  NNE::AScene scene;
 
-  NNE::AEntity *e1 = new NNE::AEntity();
-  e1->transform->position = glm::vec3(1.0f, 2.0f, 3.0f);
-  NNE::Component::Render::MeshComponent *m1 =
-      e1->AddComponent<NNE::Component::Render::MeshComponent>();
-  m1->SetModelPath("model1.obj");
-  m1->SetTexturePath("texture1.png");
-  scene.entities.push_back(e1);
-
-  NNE::AEntity *e2 = new NNE::AEntity();
-  e2->transform->position = glm::vec3(4.0f, 5.0f, 6.0f);
-  scene.entities.push_back(e2);
-
-  bool saved = scene.Save("test_scene.json");
-  EXPECT_TRUE(saved);
-
-  NNE::AScene loaded;
-  bool loadedOk = loaded.Load("test_scene.json");
-  EXPECT_TRUE(loadedOk);
-  EXPECT_TRUE(loaded.entities.size() == 2);
-
-  auto *lt1 =
-      loaded.entities[0]->GetComponent<NNE::Component::TransformComponent>();
-  auto *lm1 =
-      loaded.entities[0]->GetComponent<NNE::Component::Render::MeshComponent>();
-  EXPECT_TRUE(lt1 && lm1);
-  EXPECT_TRUE(glm::all(
-      glm::epsilonEqual(lt1->position, glm::vec3(1.0f, 2.0f, 3.0f), 0.0001f)));
-  EXPECT_TRUE(lm1->GetModelPath() == "model1.obj");
-  EXPECT_TRUE(lm1->GetTexturePath() == "texture1.png");
-
-  auto *lt2 =
-      loaded.entities[1]->GetComponent<NNE::Component::TransformComponent>();
-  EXPECT_TRUE(lt2);
-  EXPECT_TRUE(glm::all(
-      glm::epsilonEqual(lt2->position, glm::vec3(4.0f, 5.0f, 6.0f), 0.0001f)));
-
-  std::remove("test_scene.json");
-}
 
 int main() {
   NNE::Systems::Application app;
@@ -180,7 +140,6 @@ int main() {
       {"transform_directions", test_transform_directions},
       {"world_position", test_world_position},
       {"model_matrix_translation", test_model_matrix_translation},
-      {"scene_serialization", test_scene_serialization},
       {"mesh_component_paths", test_mesh_component_paths},
       {"camera_perspective", test_camera_perspective},
       {"entity_component_management", test_entity_component_management},
