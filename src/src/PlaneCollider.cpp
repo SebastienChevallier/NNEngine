@@ -20,7 +20,7 @@ NNE::Component::Physics::PlaneCollider::PlaneCollider(const glm::vec3& normal, f
     : ColliderComponent(isTrigger)
 {
         plane = JPH::Plane(JPH::Vec3(normal.x, normal.y, normal.z), distance);
-        shape = new JPH::PlaneShape(plane);
+        //shape = new JPH::PlaneShape(plane);
 }
 
 /**
@@ -54,8 +54,7 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
 
                 bodySettings.mOverrideMassProperties =
                     JPH::EOverrideMassProperties::MassAndInertiaProvided;
-                // Jolt n'accepte pas une masse nulle lors de la création du corps.
-                // Le plan étant statique, une petite valeur arbitraire suffit.
+                
                 bodySettings.mMassPropertiesOverride.mMass = 1.0f;
                 bodySettings.mMassPropertiesOverride.mInertia =
                     JPH::Mat44::sIdentity();

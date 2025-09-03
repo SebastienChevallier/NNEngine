@@ -20,16 +20,16 @@ int main() {
 	SBC->SetPrimitive(NNE::Component::Render::PrimitiveType::SPHERE);
 	SBC->SetSkybox(true);
 	SBC->SetTexturePath("../assets/textures/skybox.hdr");
-	Skybox->GetComponent<NNE::Component::TransformComponent>()->scale = glm::vec3(50.0f, 50.0f, 50.0f);
+	Skybox->GetComponent<NNE::Component::TransformComponent>()->scale = glm::vec3(500.0f, 500.0f, 500.0f);
 
     NNE::AEntity* floor = app.CreateEntity();
 	floor->SetName("Floor");
-    NNE::Component::Physics::PlaneCollider const* PC = floor->AddComponent<NNE::Component::Physics::PlaneCollider>(glm::vec3(1, 1, 1), 1.0f);
+    NNE::Component::Physics::BoxColliderComponent const* PC = floor->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(100.0f, 0.5f, 100.0f));
     NNE::Component::TransformComponent* TCfloor = floor->GetComponent<NNE::Component::TransformComponent>();    
-    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, true);
+    NNE::Component::Physics::RigidbodyComponent const* RBCFloor = floor->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(1, 1, 1));
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
 	MFC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
-	MFC->SetTexturePath("../assets/textures/viking_room.png");
+	MFC->SetTexturePath("../assets/textures/checker.png");
         TCfloor->position = glm::vec3(0.0f, 0.0f, 0.0f);
         TCfloor->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	TCfloor->scale = glm::vec3(100.0f, 0.5f, 100.0f);
@@ -49,7 +49,7 @@ int main() {
     NNE::AEntity* player = app.CreateEntity();
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
     NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.0f, false);
+    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false);
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 

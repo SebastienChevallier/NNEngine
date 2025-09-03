@@ -89,7 +89,7 @@ void RigidbodyComponent::Awake() {
 
     if (isKinematic) {
         bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
-        bodySettings.mMassPropertiesOverride.mMass = 0.0f;
+        bodySettings.mMassPropertiesOverride.mMass = 1.0f;
         bodySettings.mMassPropertiesOverride.mInertia = JPH::Mat44::sIdentity();
         bodySettings.mGravityFactor = 0.0f;
     }
