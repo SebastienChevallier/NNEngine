@@ -164,6 +164,14 @@ void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
     }
 }
 
+void RigidbodyComponent::ApplyForce(glm::vec3 force) {
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        bodyInterface.AddForce(bodyID, JPH::RVec3(force.x, force.y, force.z));
+    }
+}
+
 /**
  * <summary>
  * Déplace un corps cinématique vers une nouvelle position.

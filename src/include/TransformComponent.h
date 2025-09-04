@@ -100,6 +100,16 @@ public:
 
   /**
    * <summary>
+   * Retourne le vecteur droit dans l'espace monde.
+   * </summary>
+   */
+  glm::vec3 GetRight() const {
+      glm::mat4 world = getWorldMatrix();
+      return glm::normalize(glm::vec3(world * glm::vec4(1, 0, 0, 0)));
+  }
+
+  /**
+   * <summary>
    * Retourne le vecteur haut dans l'espace monde.
    * </summary>
    */

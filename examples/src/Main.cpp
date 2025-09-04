@@ -50,7 +50,7 @@ int main() {
     NNE::AEntity* player = app.CreateEntity();
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
     NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(0, 0, 0), glm::bvec3(1, 0, 1));
+    NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(0, 0, 0), glm::bvec3(1, 1, 1));
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 
 
@@ -61,6 +61,7 @@ int main() {
     NNE::Component::TransformComponent* TC2 = camera->GetComponent<NNE::Component::TransformComponent>();
 
 	TC2->SetParent(TCplayer);
+	Skybox->GetComponent<NNE::Component::TransformComponent>()->SetParent(TCplayer);
 
 	CC->SetPerspective(55.0f, 16.0f / 9.0f, 0.1f, 500.0f);	
     TC2->position = glm::vec3(0.0f, 1.0f, 0.0f);
