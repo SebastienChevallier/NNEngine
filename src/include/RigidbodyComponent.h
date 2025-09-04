@@ -62,6 +62,9 @@ namespace NNE::Component::Physics {
          * </summary>
          */
         void SetLinearVelocity(glm::vec3 velocity);
+
+        void ApplyForce(glm::vec3 velocity);
+
         /**
          * <summary>
          * Déplace un corps cinématique vers une nouvelle position.

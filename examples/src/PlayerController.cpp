@@ -57,14 +57,22 @@ void PlayerController::Update(float deltaTime)
 	
 
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
-            direction.y = 1;
+        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyForce(_entity->transform->GetUp() * speed * deltaTime);
     }
 
-	direction.y += (gravity / speed);
-	_entity->transform->position += _entity->transform->GetForward() * direction.z * speed * deltaTime;
+    if (glm::length(direction) > 0.0f) {
+            direction = glm::normalize(direction);
+            glm::vec3 forward = _entity->transform->GetForward();
+            glm::vec3 right = _entity->transform->GetRight();
+            direction = (forward * direction.z + right * direction.x) * speed;
+	}
+
+	direction.y += (_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->GetLinearVelocity().y);
 	
-    //_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction * speed);
-	std::cout << _entity->transform->position.y << std::endl;
+
+	_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction);
+
+	std::cout << "X : " << direction.x << "|Y : " << direction.y << "|Z : " << direction.z << std::endl;
 }
 
 void PlayerController::OnHit(NNE::Component::Physics::ColliderComponent* other)

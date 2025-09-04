@@ -26,7 +26,7 @@ void UISystem::Update(float deltaTime) {
     if (showPerf) {
         ImGuiIO& io = ImGui::GetIO();
 
-        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_::ImGuiCond_Appearing);
         if (ImGui::Begin("Debug", &showPerf)) {
             
             io.FontGlobalScale = 1.1f;
