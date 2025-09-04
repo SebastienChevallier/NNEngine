@@ -29,12 +29,7 @@ class Application
                 static Application* Instance;
                 /*GLFWwindow* window;*/
                 float delta;
-                /**
-                 * <summary>
-                 * Calcule le temps écoulé entre deux frames.
-                 * </summary>
-                 */
-                float GetDeltaTime();
+                
 
                 static int _genericID;
 
@@ -45,14 +40,22 @@ class Application
 
 
 	public:
-		const uint32_t WIDTH = 960;
-                const uint32_t HEIGHT = 540;
+		int WIDTH = 960;
+        int HEIGHT = 540;
                 /**
                  * <summary>
                  * Retourne l'instance unique de l'application.
                  * </summary>
                  */
                 static Application* GetInstance();
+
+                /**
+                 * <summary>
+                 * Calcule le temps écoulé entre deux frames.
+                 * </summary>
+                 */
+                float GetDeltaTime();
+
                 /**
                  * <summary>
                  * Construit l'application et initialise les systèmes principaux.

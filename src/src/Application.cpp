@@ -128,6 +128,10 @@ void NNE::Systems::Application::Update()
         g_FrameTimeMs = smooth;
         g_FPS = 1000.0f / std::max(0.001f, g_FrameTimeMs);
         glfwPollEvents();
+
+		glfwGetWindowSize(VKManager->window, &WIDTH,&HEIGHT);
+		
+
         for (NNE::Systems::ISystem* system : _systems)
         {
             system->Update(delta);

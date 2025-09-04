@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "TransformComponent.h"
 #include "BoxColliderComponent.h"
+#include "SphereCollider.h"
 #include "RigidbodyComponent.h"
 #include "MeshComponent.h"
 #include "CameraComponent.h"
@@ -39,12 +40,23 @@ int main() {
     NNE::Component::Render::MeshComponent* MC = entity->AddComponent<NNE::Component::Render::MeshComponent>();
     NNE::Component::TransformComponent* TC = entity->GetComponent<NNE::Component::TransformComponent>();
     TC->position = glm::vec3(0.0f, 0.0f, 5.0f);
-    NNE::Component::Physics::BoxColliderComponent const* BCC = entity->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    NNE::Component::Physics::SphereCollider const* BCC = entity->AddComponent<NNE::Component::Physics::SphereCollider>(1.0f);
     NNE::Component::Physics::RigidbodyComponent const* RBC = entity->AddComponent<NNE::Component::Physics::RigidbodyComponent>( 0.1f, false);
 	
     //MC->SetModelPath("../assets/models/viking_room.obj");
 	MC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
     MC->SetTexturePath("../assets/textures/viking_room.png");
+
+    NNE::AEntity* Sphere = app.CreateEntity();
+    NNE::Component::Render::MeshComponent* MCs = Sphere->AddComponent<NNE::Component::Render::MeshComponent>();
+    NNE::Component::TransformComponent* TCs = Sphere->GetComponent<NNE::Component::TransformComponent>();
+    TCs->position = glm::vec3(0.0f, 2.0f, 0.0f);
+    NNE::Component::Physics::BoxColliderComponent const* SCC = Sphere->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    NNE::Component::Physics::RigidbodyComponent const* RBS = Sphere->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.1f, false);
+
+    
+    MCs->SetPrimitive(NNE::Component::Render::PrimitiveType::SPHERE);
+    MCs->SetTexturePath("../assets/textures/checker.png");
         
 
     NNE::AEntity* player = app.CreateEntity();
