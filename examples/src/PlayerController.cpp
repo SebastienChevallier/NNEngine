@@ -57,7 +57,7 @@ void PlayerController::Update(float deltaTime)
 	
 
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
-        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyForce(_entity->transform->GetUp() * speed * deltaTime);
+        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyForce(_entity->transform->GetUp() * speed, deltaTime);
     }
 
     if (glm::length(direction) > 0.0f) {

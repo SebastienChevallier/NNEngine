@@ -63,7 +63,12 @@ namespace NNE::Component::Physics {
          */
         void SetLinearVelocity(glm::vec3 velocity);
 
-        void ApplyForce(glm::vec3 velocity);
+        /**
+         * <summary>
+         * Applique une force au corps pendant un certain temps.
+         * </summary>
+         */
+        void ApplyForce(glm::vec3 force, float deltaTime);
 
         /**
          * <summary>

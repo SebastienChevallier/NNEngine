@@ -9,6 +9,9 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/NarrowPhaseQuery.h>
+#include <algorithm>
 
 namespace {
 
@@ -179,6 +182,37 @@ void PhysicsSystem::RegisterComponent(NNE::Component::AComponent *component) {
           component)) {
     rigidbodies.push_back(rb);
   }
+}
+
+void PhysicsSystem::UnregisterComponent(NNE::Component::AComponent *component) {
+  if (auto *collider =
+          dynamic_cast<NNE::Component::Physics::ColliderComponent *>(component)) {
+    colliders.erase(
+        std::remove(colliders.begin(), colliders.end(), collider),
+        colliders.end());
+  }
+  if (auto *rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent *>(
+          component)) {
+    rigidbodies.erase(
+        std::remove(rigidbodies.begin(), rigidbodies.end(), rb),
+        rigidbodies.end());
+  }
+}
+
+bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distance,
+                            RaycastHit &outHit) {
+  JPH::RRayCast ray({origin.x, origin.y, origin.z},
+                    JPH::Vec3(direction.x, direction.y, direction.z) * distance);
+  JPH::RayCastResult result;
+  if (!physicsSystem.GetNarrowPhaseQuery().CastRay(ray, result))
+    return false;
+  outHit.bodyID = result.mBodyID;
+  outHit.position =
+      glm::vec3(result.mHitPointOnBody.GetX(), result.mHitPointOnBody.GetY(),
+                result.mHitPointOnBody.GetZ());
+  outHit.normal = glm::vec3(result.mHitNormal.GetX(), result.mHitNormal.GetY(),
+                            result.mHitNormal.GetZ());
+  return true;
 }
 
 /**
