@@ -10,6 +10,10 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/RayCastResult.h>
+#include <Jolt/Physics/Collision/BroadPhaseLayer.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Body/BodyFilter.h>
 #include <Jolt/Physics/Collision/NarrowPhaseQuery.h>
 #include <algorithm>
 
@@ -204,7 +208,12 @@ bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distanc
   JPH::RRayCast ray({origin.x, origin.y, origin.z},
                     JPH::Vec3(direction.x, direction.y, direction.z) * distance);
   JPH::RayCastResult result;
-  if (!physicsSystem.GetNarrowPhaseQuery().CastRay(ray, result))
+  // Use default filters to include all bodies
+  JPH::BroadPhaseLayerFilter broadPhaseFilter;
+  JPH::ObjectLayerFilter objectLayerFilter;
+  JPH::BodyFilter bodyFilter;
+  if (!physicsSystem.GetNarrowPhaseQuery().CastRay(
+          ray, result, broadPhaseFilter, objectLayerFilter, bodyFilter))
     return false;
   outHit.bodyID = result.mBodyID;
   outHit.position =
