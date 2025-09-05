@@ -3,9 +3,11 @@
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/RegisterTypes.h>
 #include "ISystem.h"
 #include <vector>
+#include <array>
 #include <glm/glm.hpp>
 #include "AEntity.h"
 
@@ -21,6 +23,7 @@ namespace NNE::Systems {
         JPH::JobSystemThreadPool* jobSystem;
         std::vector<NNE::Component::Physics::RigidbodyComponent*> rigidbodies;
         std::vector<NNE::Component::Physics::ColliderComponent*> colliders;
+        std::array<uint32_t, 32> layerMasks;
         bool initialized;
 
     public:
@@ -80,6 +83,20 @@ namespace NNE::Systems {
          * </summary>
          */
         JPH::PhysicsSystem* GetPhysicsSystem();
+
+        /**
+         * <summary>
+         * Définit si deux couches doivent entrer en collision.
+         * </summary>
+         */
+        void SetLayerCollision(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2, bool shouldCollide);
+
+        /**
+         * <summary>
+         * Vérifie si deux couches peuvent entrer en collision.
+         * </summary>
+         */
+        bool LayersShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const;
 
         struct RaycastHit {
             JPH::BodyID bodyID;

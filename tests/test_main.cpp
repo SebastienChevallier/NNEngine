@@ -7,6 +7,7 @@
 #include "TransformComponent.h"
 #include "PlaneCollider.h"
 #include "RigidbodyComponent.h"
+#include "PhysicsSystem.h"
 #include <cstdio>
 #include <glm/gtc/epsilon.hpp>
 #include <iostream>
@@ -125,6 +126,19 @@ static void test_rigidbody_awake_initializes_collider() {
   EXPECT_TRUE(pc->GetShape().GetPtr() != nullptr);
 }
 
+static void test_collision_layers_matrix() {
+  auto *phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+  NNE::AEntity e;
+  auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
+      glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  pc->SetLayer(2);
+  EXPECT_TRUE(pc->GetLayer() == 2);
+  phys->SetLayerCollision(0, 1, false);
+  EXPECT_TRUE(!phys->LayersShouldCollide(0, 1));
+  phys->SetLayerCollision(0, 1, true);
+  EXPECT_TRUE(phys->LayersShouldCollide(0, 1));
+}
+
 
 
 int main() {
@@ -148,6 +162,7 @@ int main() {
        test_rigidbody_awake_initializes_collider},
       {"plane_collider_awake_creates_shape",
        test_plane_collider_awake_creates_shape},
+      {"collision_layers_matrix", test_collision_layers_matrix},
   };
 
   int failed = 0;

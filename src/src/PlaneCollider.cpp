@@ -49,7 +49,7 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
                         position = JPH::RVec3(transform->position.x, transform->position.y, transform->position.z);
                 }
 
-                JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, 0);
+                JPH::BodyCreationSettings bodySettings(shape, position, JPH::Quat::sIdentity(), JPH::EMotionType::Static, GetLayer());
                 bodySettings.mIsSensor = IsTrigger();
 
                 bodySettings.mOverrideMassProperties =

@@ -93,7 +93,7 @@ void RigidbodyComponent::Awake() {
         JPH::RVec3(transform->position.x, transform->position.y, transform->position.z),
         JPH::Quat::sIdentity(),
         motionType,
-        0);
+        collider->GetLayer());
     bodySettings.mIsSensor = collider->IsTrigger();
 
     JPH::EAllowedDOFs allowed = JPH::EAllowedDOFs::All;
