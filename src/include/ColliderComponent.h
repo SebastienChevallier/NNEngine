@@ -25,7 +25,7 @@ namespace NNE::Component::Physics
          * Destructeur virtuel pour un nettoyage adéquat.
          * </summary>
          */
-        virtual ~ColliderComponent() = default;
+        virtual ~ColliderComponent();
 
         /**
          * <summary>

@@ -1,6 +1,7 @@
 #pragma once
 #include "AComponent.h"
 #include "InputManager.h"
+#include "PhysicsSystem.h"
 #include "MonoComponent.h"
 #include "AEntity.h"
 #include "TransformComponent.h"

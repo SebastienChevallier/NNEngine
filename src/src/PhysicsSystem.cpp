@@ -9,6 +9,15 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
+//#include <BroadPhaseLayer.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Body/BodyFilter.h>
+#include <Jolt/Physics/Body/BodyInterface.h>
+#include <Jolt/Physics/Collision/NarrowPhaseQuery.h>
+#include <algorithm>
+
 
 namespace {
 
@@ -179,6 +188,56 @@ void PhysicsSystem::RegisterComponent(NNE::Component::AComponent *component) {
           component)) {
     rigidbodies.push_back(rb);
   }
+}
+
+void PhysicsSystem::UnregisterComponent(NNE::Component::AComponent *component) {
+  if (auto *collider =
+          dynamic_cast<NNE::Component::Physics::ColliderComponent *>(component)) {
+    colliders.erase(
+        std::remove(colliders.begin(), colliders.end(), collider),
+        colliders.end());
+  }
+  if (auto *rb = dynamic_cast<NNE::Component::Physics::RigidbodyComponent *>(
+          component)) {
+    rigidbodies.erase(
+        std::remove(rigidbodies.begin(), rigidbodies.end(), rb),
+        rigidbodies.end());
+  }
+}
+
+bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distance,
+                            RaycastHit &outHit) {
+    auto* system = NNE::Systems::Application::GetInstance()->physicsSystem;
+    if (!system)
+        return false;
+    JPH::PhysicsSystem& phys = system->physicsSystem;
+
+    JPH::RRayCast ray({ origin.x, origin.y, origin.z },
+        JPH::Vec3(direction.x, direction.y, direction.z) * distance);
+    JPH::RayCastResult result;
+    // Use default filters to include all bodies
+    JPH::BroadPhaseLayerFilter broadPhaseFilter;
+    JPH::ObjectLayerFilter objectLayerFilter;
+    JPH::BodyFilter bodyFilter;
+    if (!phys.GetNarrowPhaseQuery().CastRay(
+        ray, result, broadPhaseFilter, objectLayerFilter, bodyFilter))
+        return false;
+
+    outHit.bodyID = result.mBodyID;
+    outHit.subShapeID = result.mSubShapeID2;
+    outHit.fraction = result.mFraction;
+	outHit.entity = NNE::Systems::Application::GetInstance()->GetCollider(result.mBodyID)->GetEntity();
+
+    JPH::RVec3 point = ray.GetPointOnRay(result.mFraction);
+    outHit.position = glm::vec3(point.GetX(), point.GetY(), point.GetZ());
+
+    JPH::BodyLockRead lock(phys.GetBodyLockInterface(), result.mBodyID);
+    if (lock.Succeeded()) {
+        const JPH::Body& body = lock.GetBody();
+        JPH::Vec3 normal = body.GetWorldSpaceSurfaceNormal(result.mSubShapeID2, point);
+        outHit.normal = glm::vec3(normal.GetX(), normal.GetY(), normal.GetZ());
+    }
+    return true;
 }
 
 /**

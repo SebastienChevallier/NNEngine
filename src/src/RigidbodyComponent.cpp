@@ -41,10 +41,14 @@ RigidbodyComponent::RigidbodyComponent(float mass,
  * </summary>
  */
 RigidbodyComponent::~RigidbodyComponent() {
-    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto app = NNE::Systems::Application::GetInstance();
+    auto physicsSystem = app->physicsSystem->GetPhysicsSystem();
     if (!bodyID.IsInvalid()) {
         physicsSystem->GetBodyInterface().RemoveBody(bodyID);
+        app->UnregisterCollider(bodyID);
+        bodyID = JPH::BodyID();
     }
+    app->physicsSystem->UnregisterComponent(this);
 }
 
 /**
@@ -164,11 +168,13 @@ void RigidbodyComponent::SetLinearVelocity(glm::vec3 velocity) {
     }
 }
 
-void RigidbodyComponent::ApplyForce(glm::vec3 force) {
+void RigidbodyComponent::ApplyForce(glm::vec3 force, float deltaTime) {
     auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
-        bodyInterface.AddForce(bodyID, JPH::RVec3(force.x, force.y, force.z));
+        // Jolt expects a force vector; scale by the duration to apply the impulse
+        JPH::Vec3 joltForce(force.x, force.y, force.z);
+        bodyInterface.AddForce(bodyID, joltForce);
     }
 }
 

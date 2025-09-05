@@ -6,6 +6,8 @@
 #include <Jolt/RegisterTypes.h>
 #include "ISystem.h"
 #include <vector>
+#include <glm/glm.hpp>
+#include "AEntity.h"
 
 namespace NNE { namespace Component { class AComponent; } }
 namespace NNE { namespace Component { namespace Physics { class RigidbodyComponent; class ColliderComponent; } } }
@@ -71,12 +73,24 @@ namespace NNE::Systems {
          * </summary>
          */
         void RegisterComponent(NNE::Component::AComponent* component) override;
+        void UnregisterComponent(NNE::Component::AComponent* component);
         /**
          * <summary>
          * Accède à l'objet PhysicsSystem de Jolt.
          * </summary>
          */
         JPH::PhysicsSystem* GetPhysicsSystem();
+
+        struct RaycastHit {
+            JPH::BodyID bodyID;
+            JPH::SubShapeID subShapeID;
+            float fraction;
+            glm::vec3 position;
+            glm::vec3 normal;
+			NNE::AEntity* entity;
+        };
+
+        static bool Raycast(glm::vec3 origin, glm::vec3 direction, float distance, RaycastHit& outHit);
 
         class ContactListenerImpl : public JPH::ContactListener
         {
