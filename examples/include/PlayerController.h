@@ -14,6 +14,8 @@ private:
         float speed = 10.0f;
         float gravity = -9.81f;
         glm::vec3 direction = glm::vec3(0.0f);
+		bool isGrounded = false;
+		float jumpHeight = 0.50f;
 
         float mouseSensitivity = 0.1f;
         glm::vec2 lastMousePos = glm::vec2(0.0f);

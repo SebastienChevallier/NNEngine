@@ -52,8 +52,9 @@ public:
 
 class SimpleObjectLayerPairFilter final : public JPH::ObjectLayerPairFilter {
 public:
-  bool ShouldCollide(JPH::ObjectLayer, JPH::ObjectLayer) const override {
-    return true;
+  bool ShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const override {
+    auto* phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+    return phys->LayersShouldCollide(layer1, layer2);
   }
 };
 
@@ -64,7 +65,7 @@ namespace NNE::Systems {
  * Configure les allocations et enregistre les types Jolt.
  * </summary>
  */
-PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr), initialized(false) {
+PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr), layerMasks(), initialized(false) {
   JPH::RegisterDefaultAllocator();
   JPH::Factory::sInstance = new JPH::Factory();
   JPH::RegisterTypes();
@@ -73,6 +74,7 @@ PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr), ini
   jobSystem = new JPH::JobSystemThreadPool(
       JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers,
       std::thread::hardware_concurrency() - 1);
+  layerMasks.fill(0xFFFFFFFF);
 }
 
 /**
@@ -107,6 +109,20 @@ PhysicsSystem::~PhysicsSystem() {
  * </summary>
  */
 JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() { return &physicsSystem; }
+
+void PhysicsSystem::SetLayerCollision(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2, bool shouldCollide) {
+  if (shouldCollide) {
+    layerMasks[layer1] |= (1u << layer2);
+    layerMasks[layer2] |= (1u << layer1);
+  } else {
+    layerMasks[layer1] &= ~(1u << layer2);
+    layerMasks[layer2] &= ~(1u << layer1);
+  }
+}
+
+bool PhysicsSystem::LayersShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const {
+  return (layerMasks[layer1] & (1u << layer2)) != 0;
+}
 
 /**
  * <summary>
@@ -206,18 +222,28 @@ void PhysicsSystem::UnregisterComponent(NNE::Component::AComponent *component) {
 }
 
 bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distance,
-                            RaycastHit &outHit) {
+                            RaycastHit &outHit, JPH::ObjectLayer rayLayer) {
     auto* system = NNE::Systems::Application::GetInstance()->physicsSystem;
     if (!system)
         return false;
     JPH::PhysicsSystem& phys = system->physicsSystem;
 
+    class RaycastLayerFilter final : public JPH::ObjectLayerFilter {
+    public:
+        explicit RaycastLayerFilter(JPH::ObjectLayer layer) : mLayer(layer) {}
+        bool ShouldCollide(JPH::ObjectLayer other) const override {
+            auto* phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+            return phys->LayersShouldCollide(mLayer, other);
+        }
+    private:
+        JPH::ObjectLayer mLayer;
+    };
+
     JPH::RRayCast ray({ origin.x, origin.y, origin.z },
         JPH::Vec3(direction.x, direction.y, direction.z) * distance);
     JPH::RayCastResult result;
-    // Use default filters to include all bodies
     JPH::BroadPhaseLayerFilter broadPhaseFilter;
-    JPH::ObjectLayerFilter objectLayerFilter;
+    RaycastLayerFilter objectLayerFilter(rayLayer);
     JPH::BodyFilter bodyFilter;
     if (!phys.GetNarrowPhaseQuery().CastRay(
         ray, result, broadPhaseFilter, objectLayerFilter, bodyFilter))

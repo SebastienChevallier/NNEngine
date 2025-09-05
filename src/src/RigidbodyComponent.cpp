@@ -93,7 +93,7 @@ void RigidbodyComponent::Awake() {
         JPH::RVec3(transform->position.x, transform->position.y, transform->position.z),
         JPH::Quat::sIdentity(),
         motionType,
-        0);
+        collider->GetLayer());
     bodySettings.mIsSensor = collider->IsTrigger();
 
     JPH::EAllowedDOFs allowed = JPH::EAllowedDOFs::All;
@@ -175,6 +175,15 @@ void RigidbodyComponent::ApplyForce(glm::vec3 force, float deltaTime) {
         // Jolt expects a force vector; scale by the duration to apply the impulse
         JPH::Vec3 joltForce(force.x, force.y, force.z);
         bodyInterface.AddForce(bodyID, joltForce);
+    }
+}
+
+void RigidbodyComponent::ApplyImpulse(glm::vec3 impulse) {
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        JPH::Vec3 joltImpulse(impulse.x, impulse.y, impulse.z);
+        bodyInterface.AddImpulse(bodyID, joltImpulse);        
     }
 }
 

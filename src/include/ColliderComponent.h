@@ -1,6 +1,7 @@
 #pragma once
 #include "AComponent.h"
 #include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 
 namespace NNE::Component::Physics
@@ -10,6 +11,7 @@ namespace NNE::Component::Physics
     protected:
         JPH::ShapeRefC shape;
         bool isTrigger = false;
+        JPH::ObjectLayer layer = 0;
 
     public:
         JPH::BodyID bodyID;
@@ -54,6 +56,20 @@ namespace NNE::Component::Physics
          * </summary>
          */
         void SetTrigger(bool trigger) { isTrigger = trigger; }
+
+        /**
+         * <summary>
+         * Définit la couche de collision de ce collider.
+         * </summary>
+         */
+        void SetLayer(JPH::ObjectLayer objectLayer) { layer = objectLayer; }
+
+        /**
+         * <summary>
+         * Retourne la couche de collision actuelle.
+         * </summary>
+         */
+        JPH::ObjectLayer GetLayer() const { return layer; }
 
         /**
          * <summary>
