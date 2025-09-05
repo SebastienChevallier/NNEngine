@@ -174,7 +174,7 @@ void RigidbodyComponent::ApplyForce(glm::vec3 force, float deltaTime) {
     if (!bodyID.IsInvalid()) {
         // Jolt expects a force vector; scale by the duration to apply the impulse
         JPH::Vec3 joltForce(force.x, force.y, force.z);
-        bodyInterface.AddForce(bodyID, joltForce * deltaTime);
+        bodyInterface.AddForce(bodyID, joltForce);
     }
 }
 

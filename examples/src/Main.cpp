@@ -40,7 +40,7 @@ int main() {
     NNE::Component::Render::MeshComponent* MC = entity->AddComponent<NNE::Component::Render::MeshComponent>();
     NNE::Component::TransformComponent* TC = entity->GetComponent<NNE::Component::TransformComponent>();
     TC->position = glm::vec3(0.0f, 0.0f, 5.0f);
-    NNE::Component::Physics::SphereCollider const* BCC = entity->AddComponent<NNE::Component::Physics::SphereCollider>(1.0f);
+    NNE::Component::Physics::BoxColliderComponent const* BCC = entity->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
     NNE::Component::Physics::RigidbodyComponent const* RBC = entity->AddComponent<NNE::Component::Physics::RigidbodyComponent>( 0.1f, false);
 	
     //MC->SetModelPath("../assets/models/viking_room.obj");
@@ -51,7 +51,7 @@ int main() {
     NNE::Component::Render::MeshComponent* MCs = Sphere->AddComponent<NNE::Component::Render::MeshComponent>();
     NNE::Component::TransformComponent* TCs = Sphere->GetComponent<NNE::Component::TransformComponent>();
     TCs->position = glm::vec3(0.0f, 2.0f, 0.0f);
-    NNE::Component::Physics::BoxColliderComponent const* SCC = Sphere->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    NNE::Component::Physics::SphereCollider const* SCC = Sphere->AddComponent<NNE::Component::Physics::SphereCollider>(1.0f);
     NNE::Component::Physics::RigidbodyComponent const* RBS = Sphere->AddComponent<NNE::Component::Physics::RigidbodyComponent>(0.1f, false);
 
     
@@ -60,6 +60,7 @@ int main() {
         
 
     NNE::AEntity* player = app.CreateEntity();
+	player->SetName("Player");
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
     NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
     NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(0, 0, 0), glm::bvec3(1, 1, 1));
