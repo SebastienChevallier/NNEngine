@@ -5,6 +5,7 @@
 #include "RigidbodyComponent.h"
 #include "MeshComponent.h"
 #include "CameraComponent.h"
+#include "PhysicsSystem.h"
 
 #include "VulkanManager.h"
 
@@ -13,6 +14,8 @@
 
 int main() {
     NNE::Systems::Application app;
+    app.physicsSystem->SetLayerCollision(NNE::Systems::Layers::RAYCAST,
+                                         NNE::Systems::Layers::PLAYER, false);
 
 
 	NNE::AEntity* Skybox = app.CreateEntity();
@@ -62,7 +65,8 @@ int main() {
     NNE::AEntity* player = app.CreateEntity();
 	player->SetName("Player");
     NNE::Component::TransformComponent* TCplayer = player->GetComponent<NNE::Component::TransformComponent>();
-    NNE::Component::Physics::BoxColliderComponent const* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    auto* BCCplayer = player->AddComponent<NNE::Component::Physics::BoxColliderComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+    BCCplayer->SetLayer(NNE::Systems::Layers::PLAYER);
     NNE::Component::Physics::RigidbodyComponent const* RBCplayer = player->AddComponent<NNE::Component::Physics::RigidbodyComponent>(1.0f, false, glm::bvec3(0, 0, 0), glm::bvec3(1, 1, 1));
     PlayerController const* PlayerC = player->AddComponent<PlayerController>();
 

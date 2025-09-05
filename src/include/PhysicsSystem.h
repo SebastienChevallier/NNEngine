@@ -16,6 +16,12 @@ namespace NNE { namespace Component { namespace Physics { class RigidbodyCompone
 
 namespace NNE::Systems {
 
+    namespace Layers {
+        constexpr JPH::ObjectLayer DEFAULT = 0;
+        constexpr JPH::ObjectLayer PLAYER = 1;
+        constexpr JPH::ObjectLayer RAYCAST = 2;
+    }
+
     class PhysicsSystem : public ISystem {
     private:
         JPH::PhysicsSystem physicsSystem;
@@ -107,7 +113,9 @@ namespace NNE::Systems {
 			NNE::AEntity* entity;
         };
 
-        static bool Raycast(glm::vec3 origin, glm::vec3 direction, float distance, RaycastHit& outHit);
+        static bool Raycast(glm::vec3 origin, glm::vec3 direction, float distance,
+                            RaycastHit& outHit,
+                            JPH::ObjectLayer rayLayer = Layers::RAYCAST);
 
         class ContactListenerImpl : public JPH::ContactListener
         {
