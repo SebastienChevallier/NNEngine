@@ -178,6 +178,15 @@ void RigidbodyComponent::ApplyForce(glm::vec3 force, float deltaTime) {
     }
 }
 
+void RigidbodyComponent::ApplyImpulse(glm::vec3 impulse) {
+    auto physicsSystem = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem();
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        JPH::Vec3 joltImpulse(impulse.x, impulse.y, impulse.z);
+        bodyInterface.AddImpulse(bodyID, joltImpulse);        
+    }
+}
+
 /**
  * <summary>
  * Déplace un corps cinématique vers une nouvelle position.

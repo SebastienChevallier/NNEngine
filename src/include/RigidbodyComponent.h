@@ -70,6 +70,8 @@ namespace NNE::Component::Physics {
          */
         void ApplyForce(glm::vec3 force, float deltaTime);
 
+		void ApplyImpulse(glm::vec3 impulse);
+
         /**
          * <summary>
          * Déplace un corps cinématique vers une nouvelle position.

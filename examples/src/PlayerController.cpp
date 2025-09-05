@@ -57,7 +57,9 @@ void PlayerController::Update(float deltaTime)
 	
 
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
-        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyForce(_entity->transform->GetUp() * 50.0f, deltaTime);
+		if (!isGrounded) return;
+        _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyImpulse(_entity->transform->GetUp() * jumpHeight);
+        //_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->ApplyForce(_entity->transform->GetUp() * jumpHeight, deltaTime);
     }
 
     if(NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
@@ -86,6 +88,14 @@ void PlayerController::Update(float deltaTime)
 	
 
 	_entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>()->SetLinearVelocity(direction);
+
+	//Check if the player is grounded
+    
+    
+    NNE::Systems::PhysicsSystem::RaycastHit hitInfo;
+    isGrounded = NNE::Systems::PhysicsSystem::Raycast(_entity->transform->position, -_entity->transform->GetUp(), 1.5f, hitInfo, NNE::Systems::Layers::RAYCAST);
+    std::cout << isGrounded << std::endl;
+	
 
 	//std::cout << "X : " << direction.x << "|Y : " << direction.y << "|Z : " << direction.z << std::endl;
 }
