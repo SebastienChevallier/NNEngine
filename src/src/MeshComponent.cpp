@@ -43,8 +43,9 @@ void NNE::Component::Render::MeshComponent::DrawImGui()
 	ImGui::Text("Texture Path: %s", material.texturePath.c_str());
 
     //Modify Material Offset and tilling
-	ImGui::DragFloat2("Offset", &material.offset.x, 0.01f);
-	ImGui::DragFloat2("Tiling", &material.tiling.x, 0.01f, 0.01f, 10.0f);
+	ImGui::DragFloat("Tiling X", &material.tiling.x, 0.01f);
+	ImGui::DragFloat("Tiling Y", &material.tiling.y, 0.01f);
+    
 }
 
 /**

@@ -18,13 +18,20 @@ layout(push_constant) uniform PushConstants {
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec2 inTexCoord;
+layout(location = 3) in vec3 inNormal;
 
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
+layout(location = 2) out vec3 fragNormal;
 
-void main() {    
-    vec4 transformed = globalUBO.proj * globalUBO.view * pushConstants.model * vec4(inPosition, 1.0);
+void main() { 
+    mat4 M = pushConstants.model;
+
+    vec4 transformed = globalUBO.proj * globalUBO.view * M * vec4(inPosition, 1.0);
     gl_Position = transformed;
+
+    mat3 N = transpose(inverse(mat3(M)));
+    fragNormal = normalize(N * inNormal);
 
     fragColor = inColor;
     fragTexCoord = inTexCoord;

@@ -28,8 +28,8 @@ const bool enableValidationLayers = true;
 
 struct PushConstantObject {
     glm::mat4 model;
-    glm::vec2 tiling;
-    glm::vec2 offset;
+    alignas(16)glm::vec2 tiling;
+    alignas(16)glm::vec2 offset;
 };
 
 NNE::Systems::VulkanManager::VulkanManager()
@@ -992,6 +992,26 @@ void NNE::Systems::VulkanManager::createUniformBuffers()
             objectUniformBuffers[i], objectUniformBuffersMemory[i]);
         vkMapMemory(device, objectUniformBuffersMemory[i], 0, objectBufferSize, 0, &objectUniformBuffersMapped[i]);
     }
+
+    VkDeviceSize lightSize = sizeof(LightUBO);
+    lightBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    lightBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    lightBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        createBuffer(lightSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            lightBuffers[i], lightBuffersMemory[i]);
+        vkMapMemory(device, lightBuffersMemory[i], 0, lightSize, 0, &lightBuffersMapped[i]);
+
+        // valeur par défaut visible (pour éviter l’écran noir)
+        LightUBO l{};
+        l.dir = glm::normalize(glm::vec3(-1.f, -1.f, -1.f));
+        l.intensity = 1.0f;
+        l.color = glm::vec3(1.f);
+        l.ambient = 0.25f;
+        memcpy(lightBuffersMapped[i], &l, sizeof(LightUBO));
+    }
 }
 
 void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
@@ -1143,7 +1163,66 @@ void NNE::Systems::VulkanManager::loadModel(const std::string& modelPath)
 
 void NNE::Systems::VulkanManager::generateCube(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData)
 {
-    vertexData = {
+    vertexData.clear();
+    indexData.clear();
+    vertexData.reserve(24);
+    indexData.reserve(36);
+
+    const glm::vec3 W = { 1.f, 1.f, 1.f };
+
+    // UV par face (même ordre pour les 4 sommets)
+    const glm::vec2 uvs[4] = {
+        {0.f, 0.f}, {1.f, 0.f}, {1.f, 1.f}, {0.f, 1.f}
+    };
+
+    // 6 faces, 4 sommets chacune, ordonnés CCW vus de l'extérieur
+    struct Face { glm::vec3 v[4]; };
+
+    const Face faces[6] = {
+        // +Z (front)
+        Face{ glm::vec3(-1,-1,+1), glm::vec3(+1,-1,+1), glm::vec3(+1,+1,+1), glm::vec3(-1,+1,+1) },
+        // -Z (back)
+        Face{ glm::vec3(+1,-1,-1), glm::vec3(-1,-1,-1), glm::vec3(-1,+1,-1), glm::vec3(+1,+1,-1) },
+        // +X (right)
+        Face{ glm::vec3(+1,-1,+1), glm::vec3(+1,-1,-1), glm::vec3(+1,+1,-1), glm::vec3(+1,+1,+1) },
+        // -X (left)
+        Face{ glm::vec3(-1,-1,-1), glm::vec3(-1,-1,+1), glm::vec3(-1,+1,+1), glm::vec3(-1,+1,-1) },
+        // +Y (top)
+        Face{ glm::vec3(-1,+1,+1), glm::vec3(+1,+1,+1), glm::vec3(+1,+1,-1), glm::vec3(-1,+1,-1) },
+        // -Y (bottom)
+        Face{ glm::vec3(-1,-1,-1), glm::vec3(+1,-1,-1), glm::vec3(+1,-1,+1), glm::vec3(-1,-1,+1) },
+    };
+
+    // Remplissage sommets (couleur blanche, UV [0..1])
+    for (int f = 0; f < 6; ++f) {
+        for (int i = 0; i < 4; ++i) {
+            vertexData.push_back({ faces[f].v[i], W, uvs[i] });
+        }
+    }
+
+	//Calcul Normales
+    for (size_t i = 0; i < vertexData.size(); i += 4) {
+        glm::vec3 edge1 = vertexData[i + 1].pos - vertexData[i].pos;
+        glm::vec3 edge2 = vertexData[i + 2].pos - vertexData[i].pos;
+        glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+        vertexData[i].normal = normal;
+        vertexData[i + 1].normal = normal;
+        vertexData[i + 2].normal = normal;
+        vertexData[i + 3].normal = normal;
+	}
+
+    // Indices : 2 triangles par face (0,1,2) (2,3,0) avec offset de 4
+    for (uint32_t f = 0; f < 6; ++f) {
+        uint32_t base = f * 4;
+        indexData.push_back(base + 0);
+        indexData.push_back(base + 1);
+        indexData.push_back(base + 2);
+        indexData.push_back(base + 2);
+        indexData.push_back(base + 3);
+        indexData.push_back(base + 0);
+    }
+
+    /*vertexData = {
         {{-1.f, -1.f,  1.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}},
         {{ 1.f, -1.f,  1.f}, {1.f, 1.f, 1.f}, {1.f, 0.f}},
         {{ 1.f,  1.f,  1.f}, {1.f, 1.f, 1.f}, {1.f, 1.f}},
@@ -1161,7 +1240,7 @@ void NNE::Systems::VulkanManager::generateCube(std::vector<Vertex>& vertexData, 
         4, 0, 3, 3, 7, 4,
         3, 2, 6, 6, 7, 3,
         4, 5, 1, 1, 0, 4
-    };
+    };*/
 }
 
 void NNE::Systems::VulkanManager::generateSphere(std::vector<Vertex>& vertexData, std::vector<uint32_t>& indexData)
@@ -1218,9 +1297,18 @@ void NNE::Systems::VulkanManager::createDescriptorSetLayout()
     samplerLayoutBinding.pImmutableSamplers = nullptr;
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 2> bindings = {
+    //Bindings 2 : LightUBO
+	VkDescriptorSetLayoutBinding lightUboLayoutBinding{};
+	lightUboLayoutBinding.binding = 2;
+	lightUboLayoutBinding.descriptorCount = 1;
+	lightUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	lightUboLayoutBinding.pImmutableSamplers = nullptr;
+	lightUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
         globalUboLayoutBinding,
-        samplerLayoutBinding
+        samplerLayoutBinding,
+        lightUboLayoutBinding
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -1241,7 +1329,7 @@ void NNE::Systems::VulkanManager::createDescriptorPool()
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-    poolSizes[0].descriptorCount = descriptorCount;
+    poolSizes[0].descriptorCount = 2 * descriptorCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1287,7 +1375,12 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             imageInfo.imageView = mesh->GetMaterial().textureImageView;
             imageInfo.sampler = mesh->GetMaterial().textureSampler;
 
-            std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+            VkDescriptorBufferInfo lightBufferInfo{};
+            lightBufferInfo.buffer = lightBuffers[i];   // <- buffer UBO de la lumière (voir §3)
+            lightBufferInfo.offset = 0;
+            lightBufferInfo.range = sizeof(LightUBO);
+
+            std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
 
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet = mesh->descriptorSets[i];
@@ -1295,12 +1388,23 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             descriptorWrites[0].descriptorCount = 1;
             descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWrites[0].pBufferInfo = &globalBufferInfo;
+
             descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[1].dstSet = mesh->descriptorSets[i];
             descriptorWrites[1].dstBinding = 1;
             descriptorWrites[1].descriptorCount = 1;
             descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             descriptorWrites[1].pImageInfo = &imageInfo;
+
+            descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[2].dstSet = mesh->descriptorSets[i];
+            descriptorWrites[2].dstBinding = 2;
+            descriptorWrites[2].dstArrayElement = 0;
+            descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrites[2].descriptorCount = 1;
+            descriptorWrites[2].pBufferInfo = &lightBufferInfo;
+            descriptorWrites[2].pImageInfo = nullptr;
+            descriptorWrites[2].pTexelBufferView = nullptr;
 
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
