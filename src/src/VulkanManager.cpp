@@ -26,6 +26,11 @@ const std::vector<const char*> deviceExtensions = {
 
 const bool enableValidationLayers = true;
 
+struct PushConstantObject {
+    glm::mat4 model;
+    glm::vec2 tiling;
+    glm::vec2 offset;
+};
 
 NNE::Systems::VulkanManager::VulkanManager()
 {
@@ -699,9 +704,9 @@ void NNE::Systems::VulkanManager::createGraphicsPipeline()
     dynamicState.pDynamicStates = dynamicStates.data();
 
     VkPushConstantRange pushConstantRange{};
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT; // Le vertex shader utilisera la matrice modèle
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(glm::mat4);
+    pushConstantRange.size = sizeof(PushConstantObject);
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1042,10 +1047,14 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
                         NNE::Component::TransformComponent* transform) {
         if (!mesh || mesh->getIndexCount() == 0) return;
 
-        if (transform) {
-            glm::mat4 modelMatrix = transform->getModelMatrix();
-            vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &modelMatrix);
-        }
+        PushConstantObject pc{};
+        pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
+        pc.tiling = mesh->GetMaterial().tiling;
+        pc.offset = mesh->GetMaterial().offset;
+
+        vkCmdPushConstants(commandBuffer, pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            0, sizeof(PushConstantObject), &pc);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
@@ -1275,8 +1284,8 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            imageInfo.imageView = mesh->textureImageView;
-            imageInfo.sampler = mesh->textureSampler;
+            imageInfo.imageView = mesh->GetMaterial().textureImageView;
+            imageInfo.sampler = mesh->GetMaterial().textureSampler;
 
             std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
@@ -1555,9 +1564,9 @@ void NNE::Systems::VulkanManager::LoadMeshes(const std::vector<std::pair<NNE::Co
         }
 
         VkFormat textureFormat;
-        createTextureImage(mesh->GetTexturePath(), mesh->textureImage, mesh->textureImageMemory, textureFormat);
-        createTextureImageView(mesh->textureImage, mesh->textureImageView, textureFormat);
-        createTextureSampler(mesh->textureSampler);
+        createTextureImage(mesh->GetTexturePath(), mesh->GetMaterial().textureImage, mesh->GetMaterial().textureImageMemory, textureFormat);
+        createTextureImageView(mesh->GetMaterial().textureImage, mesh->GetMaterial().textureImageView, textureFormat);
+        createTextureSampler(mesh->GetMaterial().textureSampler);
 
         uint32_t count = static_cast<uint32_t>(indices.size()) - startOffset;
         mesh->setIndexOffset(startOffset);
@@ -1978,21 +1987,22 @@ void NNE::Systems::VulkanManager::CleanUp()
 
     for (NNE::Component::Render::MeshComponent* mesh : loadedMeshes) {
         if (mesh) {
-            if (mesh->textureSampler != VK_NULL_HANDLE) {
-                vkDestroySampler(device, mesh->textureSampler, nullptr);
-                mesh->textureSampler = VK_NULL_HANDLE;
+            auto& mat = mesh->GetMaterial();
+            if (mat.textureSampler != VK_NULL_HANDLE) {
+                vkDestroySampler(device, mat.textureSampler, nullptr);
+                mat.textureSampler = VK_NULL_HANDLE;
             }
-            if (mesh->textureImageView != VK_NULL_HANDLE) {
-                vkDestroyImageView(device, mesh->textureImageView, nullptr);
-                mesh->textureImageView = VK_NULL_HANDLE;
+            if (mat.textureImageView != VK_NULL_HANDLE) {
+                vkDestroyImageView(device, mat.textureImageView, nullptr);
+                mat.textureImageView = VK_NULL_HANDLE;
             }
-            if (mesh->textureImage != VK_NULL_HANDLE) {
-                vkDestroyImage(device, mesh->textureImage, nullptr);
-                mesh->textureImage = VK_NULL_HANDLE;
+            if (mat.textureImage != VK_NULL_HANDLE) {
+                vkDestroyImage(device, mat.textureImage, nullptr);
+                mat.textureImage = VK_NULL_HANDLE;
             }
-            if (mesh->textureImageMemory != VK_NULL_HANDLE) {
-                vkFreeMemory(device, mesh->textureImageMemory, nullptr);
-                mesh->textureImageMemory = VK_NULL_HANDLE;
+            if (mat.textureImageMemory != VK_NULL_HANDLE) {
+                vkFreeMemory(device, mat.textureImageMemory, nullptr);
+                mat.textureImageMemory = VK_NULL_HANDLE;
             }
         }
     }

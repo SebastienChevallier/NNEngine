@@ -11,6 +11,8 @@ layout(set = 0, binding = 0) uniform GlobalUBO {
 
 layout(push_constant) uniform PushConstants {
     mat4 model;
+    vec2 tiling;
+    vec2 offset;
 } pushConstants;
 
 layout(location = 0) in vec3 inPosition;

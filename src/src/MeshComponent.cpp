@@ -8,10 +8,7 @@
  */
 NNE::Component::Render::MeshComponent::MeshComponent()
 {
-    textureImage = VK_NULL_HANDLE;
-    textureImageMemory = VK_NULL_HANDLE;
-    textureImageView = VK_NULL_HANDLE;
-    textureSampler = VK_NULL_HANDLE;
+    
 }
 
 NNE::Component::Render::MeshComponent::~MeshComponent()
@@ -36,7 +33,7 @@ void NNE::Component::Render::MeshComponent::SetModelPath(std::string path)
  */
 void NNE::Component::Render::MeshComponent::SetTexturePath(std::string path)
 {
-        texturePath = std::move(path);
+    material.texturePath = std::move(path);
 }
 
 /**
@@ -54,5 +51,5 @@ std::string NNE::Component::Render::MeshComponent::GetModelPath() const {
  * </summary>
  */
 std::string NNE::Component::Render::MeshComponent::GetTexturePath() const {
-    return texturePath;
+    return material.texturePath;
 }

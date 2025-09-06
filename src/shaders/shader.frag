@@ -6,10 +6,14 @@ layout(location = 1) in vec2 fragTexCoord;
 layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 1) uniform sampler2D texSampler;
 
-void main() {
-    // Appliquer la texture
-    vec4 texColor = texture(texSampler, fragTexCoord);
+layout(push_constant) uniform PushConstants {
+    mat4 model;
+    vec2 tiling;
+    vec2 offset;
+} pushConstants;
 
-    // Mélanger la texture avec la couleur du vertex
+void main() {
+    vec2 uv = fragTexCoord * pushConstants.tiling + pushConstants.offset;
+    vec4 texColor = texture(texSampler, uv);
     outColor = texColor * vec4(fragColor, 1.0);
 }

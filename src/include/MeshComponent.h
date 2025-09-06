@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
+#include "Material.h"
 
 namespace NNE::Component::Render {
     enum class PrimitiveType {
@@ -15,11 +16,11 @@ namespace NNE::Component::Render {
     {
     private:
         std::string modelPath;
-        std::string texturePath;
         uint32_t indexOffset = 0;
         uint32_t indexCount = 0;
         PrimitiveType primitive = PrimitiveType::NONE;
         bool skybox = false;
+        Material material;
 
     public:
         /**
@@ -30,10 +31,6 @@ namespace NNE::Component::Render {
         MeshComponent();
         ~MeshComponent();
 
-        VkImage textureImage = VK_NULL_HANDLE;
-        VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-        VkImageView textureImageView = VK_NULL_HANDLE;
-        VkSampler textureSampler = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> descriptorSets;
 
         /**
@@ -60,6 +57,9 @@ namespace NNE::Component::Render {
          * </summary>
          */
         void SetTexturePath(std::string path);
+
+        Material& GetMaterial() { return material; }
+        const Material& GetMaterial() const { return material; }
 
         /**
          * <summary>
