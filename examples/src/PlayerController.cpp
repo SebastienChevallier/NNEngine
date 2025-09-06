@@ -1,6 +1,8 @@
 #include "PlayerController.h"
 #include <RigidbodyComponent.h>
 #include <algorithm>
+#include <Application.h>
+#include <UISystem.h>
 
 PlayerController::PlayerController()
 {
@@ -23,6 +25,8 @@ void PlayerController::Awake()
 
 void PlayerController::Update(float deltaTime)
 {
+	if (NNE::Systems::Application::GetInstance()->uiSystem->showPerf) return;
+
     direction = glm::vec3(0.0f);
 
     glm::vec2 mousePos = NNE::Systems::InputManager::GetMousePosition();

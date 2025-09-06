@@ -42,7 +42,7 @@ void UISystem::Update(float deltaTime) {
         ImGui::DockBuilderFinish(dockspace_id);
     }
 
-    static bool showPerf = false;
+    //showPerf = false;
     
     if (ImGui::IsKeyPressed(ImGuiKey_F11)) showPerf = !showPerf;
 

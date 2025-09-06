@@ -18,6 +18,7 @@ public:
     void Update(float deltaTime) override;
     void LateUpdate(float deltaTime) override;
     void RegisterComponent(NNE::Component::AComponent* component) override {}
+    bool showPerf = 0;
 };
 }
 

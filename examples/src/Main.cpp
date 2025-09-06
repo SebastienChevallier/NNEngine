@@ -36,8 +36,9 @@ int main() {
     NNE::Component::Render::MeshComponent* MFC = floor->AddComponent<NNE::Component::Render::MeshComponent>();
 	MFC->SetPrimitive(NNE::Component::Render::PrimitiveType::CUBE);
 	MFC->SetTexturePath("../assets/textures/checker.png");
-        TCfloor->position = glm::vec3(0.0f, 0.0f, 0.0f);
-        TCfloor->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	MFC->GetMaterial().tiling = glm::vec2(0.1f, 0.1f);
+    TCfloor->position = glm::vec3(0.0f, 0.0f, 0.0f);
+    TCfloor->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 	TCfloor->scale = glm::vec3(100.0f, 0.5f, 100.0f);
 
     NNE::AEntity* entity = app.CreateEntity();
