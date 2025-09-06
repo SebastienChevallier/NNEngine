@@ -1,5 +1,6 @@
 #include "MeshComponent.h"
 #include <iostream>
+#include <imgui_widgets.cpp>
 
 /**
  * <summary>
@@ -34,6 +35,16 @@ void NNE::Component::Render::MeshComponent::SetModelPath(std::string path)
 void NNE::Component::Render::MeshComponent::SetTexturePath(std::string path)
 {
     material.texturePath = std::move(path);
+}
+
+void NNE::Component::Render::MeshComponent::DrawImGui()
+{
+    ImGui::Text("Model Path: %s", modelPath.c_str());
+	ImGui::Text("Texture Path: %s", material.texturePath.c_str());
+
+    //Modify Material Offset and tilling
+	ImGui::DragFloat2("Offset", &material.offset.x, 0.01f);
+	ImGui::DragFloat2("Tiling", &material.tiling.x, 0.01f, 0.01f, 10.0f);
 }
 
 /**

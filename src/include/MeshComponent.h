@@ -4,6 +4,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include "Material.h"
+#include "IDebugUI.h"
 
 namespace NNE::Component::Render {
     enum class PrimitiveType {
@@ -12,7 +13,7 @@ namespace NNE::Component::Render {
         SPHERE
     };
 
-    class MeshComponent : public NNE::Component::AComponent
+    class MeshComponent : public NNE::Component::AComponent, public NNE::IDebugUI
     {
     private:
         std::string modelPath;
@@ -91,5 +92,8 @@ namespace NNE::Component::Render {
 
         bool IsSkybox() const { return skybox; }
         void SetSkybox(bool value) { skybox = value; }
-        };
+
+        // Hérité via IDebugUI
+        void DrawImGui() override;
+    };
 }
