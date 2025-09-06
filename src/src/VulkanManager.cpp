@@ -1109,9 +1109,18 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     GlobalUniformBufferObject globalUBO{};
     globalUBO.view = activeCamera->GetViewMatrix();
-    globalUBO.proj = activeCamera->GetProjectionMatrix();    
+    globalUBO.proj = activeCamera->GetProjectionMatrix();
 
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
+
+    if (activeLight) {
+        LightUBO l{};
+        l.dir = activeLight->GetDirection();
+        l.intensity = activeLight->GetIntensity();
+        l.color = activeLight->GetColor();
+        l.ambient = activeLight->GetAmbient();
+        memcpy(lightBuffersMapped[currentImage], &l, sizeof(LightUBO));
+    }
         
 }
 
@@ -2170,6 +2179,15 @@ void NNE::Systems::VulkanManager::CleanUp()
             vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
             objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
         }
+
+        if (lightBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, lightBuffers[i], nullptr);
+            lightBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (lightBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, lightBuffersMemory[i], nullptr);
+            lightBuffersMemory[i] = VK_NULL_HANDLE;
+        }
     }
 
     
@@ -2321,6 +2339,18 @@ void NNE::Systems::VulkanManager::cleanupSwapChain()
         if (objectUniformBuffersMemory[i] != VK_NULL_HANDLE) {
             vkFreeMemory(device, objectUniformBuffersMemory[i], nullptr);
             objectUniformBuffersMemory[i] = VK_NULL_HANDLE;
+        }
+    }
+
+    // Idem pour lightBuffers
+    for (size_t i = 0; i < lightBuffers.size(); i++) {
+        if (lightBuffers[i] != VK_NULL_HANDLE) {
+            vkDestroyBuffer(device, lightBuffers[i], nullptr);
+            lightBuffers[i] = VK_NULL_HANDLE;
+        }
+        if (lightBuffersMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, lightBuffersMemory[i], nullptr);
+            lightBuffersMemory[i] = VK_NULL_HANDLE;
         }
     }
 

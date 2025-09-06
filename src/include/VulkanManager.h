@@ -18,6 +18,7 @@
 #include "CameraComponent.h"
 #include "MeshComponent.h"
 #include "TransformComponent.h"
+#include "LightComponent.h"
 
 #define NOMINMAX //Necessary for ::Max()
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -193,9 +194,10 @@ namespace NNE::Systems {
                 VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
                 bool supportsRenderToSingleSampled = false;
 
-	public :
+        public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
-		VkInstance instance = VK_NULL_HANDLE;
+            NNE::Component::Render::LightComponent* activeLight = nullptr;
+                VkInstance instance = VK_NULL_HANDLE;
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 		GLFWwindow* window;

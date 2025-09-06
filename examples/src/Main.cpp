@@ -5,6 +5,7 @@
 #include "RigidbodyComponent.h"
 #include "MeshComponent.h"
 #include "CameraComponent.h"
+#include "LightComponent.h"
 #include "PhysicsSystem.h"
 
 #include "VulkanManager.h"
@@ -85,6 +86,10 @@ int main() {
     TC2->position = glm::vec3(0.0f, 1.0f, 0.0f);
     TC2->rotation = glm::vec3(0.0f, 0.0f, 0.0f);
     app.VKManager->activeCamera = CC;
+
+    NNE::AEntity* light = app.CreateEntity();
+    auto* LC = light->AddComponent<NNE::Component::Render::LightComponent>();
+    app.VKManager->activeLight = LC;
 
     app.Init();
     app.Update();
