@@ -1,5 +1,8 @@
 #include "LightComponent.h"
 #include "TransformComponent.h"
+#include "AEntity.h"
+#include <imgui_widgets.cpp>
+
 
 /**
  * <summary>
@@ -17,7 +20,7 @@ NNE::Component::Render::LightComponent::LightComponent(const glm::vec3& dir, con
 void NNE::Component::Render::LightComponent::Update(float deltaTime)
 {
     (void)deltaTime;
-    if (auto* transform = _entity->GetComponent<NNE::Component::TransformComponent>()) {
+    if (NNE::Component::TransformComponent* transform = _entity->GetComponent<NNE::Component::TransformComponent>()) {
         direction = -transform->GetForward();
     }
 }
@@ -60,5 +63,15 @@ void NNE::Component::Render::LightComponent::SetAmbient(float a)
 float NNE::Component::Render::LightComponent::GetAmbient() const
 {
     return ambient;
+}
+
+void NNE::Component::Render::LightComponent::DrawImGui()
+{
+    /*ImGui::Text("Light Component");
+    ImGui::Separator();
+    ImGui::ColorEdit3("Color", &color[0]);
+    ImGui::SliderFloat("Intensity", &intensity, 0.0f, 10.0f);
+    ImGui::SliderFloat("Ambient", &ambient, 0.0f, 1.0f);
+	ImGui::DragFloat3("Direction", &direction[0], 0.1f, -1.0f, 1.0f);*/
 }
 

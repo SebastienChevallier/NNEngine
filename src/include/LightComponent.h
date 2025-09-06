@@ -1,9 +1,10 @@
 #pragma once
 #include "AComponent.h"
 #include <glm/glm.hpp>
+#include "IDebugUI.h"
 
 namespace NNE::Component::Render {
-    class LightComponent : public NNE::Component::AComponent {
+    class LightComponent : public NNE::Component::AComponent, public NNE::IDebugUI {
     private:
         glm::vec3 direction;
         glm::vec3 color;
@@ -75,5 +76,8 @@ namespace NNE::Component::Render {
          * </summary>
          */
         float GetAmbient() const;
+
+        // Hérité via IDebugUI
+        void DrawImGui() override;
     };
 }
