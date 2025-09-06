@@ -1,5 +1,6 @@
 #include "MeshComponent.h"
 #include <iostream>
+#include <imgui_widgets.cpp>
 
 /**
  * <summary>
@@ -8,10 +9,7 @@
  */
 NNE::Component::Render::MeshComponent::MeshComponent()
 {
-    textureImage = VK_NULL_HANDLE;
-    textureImageMemory = VK_NULL_HANDLE;
-    textureImageView = VK_NULL_HANDLE;
-    textureSampler = VK_NULL_HANDLE;
+    
 }
 
 NNE::Component::Render::MeshComponent::~MeshComponent()
@@ -36,7 +34,18 @@ void NNE::Component::Render::MeshComponent::SetModelPath(std::string path)
  */
 void NNE::Component::Render::MeshComponent::SetTexturePath(std::string path)
 {
-        texturePath = std::move(path);
+    material.texturePath = std::move(path);
+}
+
+void NNE::Component::Render::MeshComponent::DrawImGui()
+{
+    ImGui::Text("Model Path: %s", modelPath.c_str());
+	ImGui::Text("Texture Path: %s", material.texturePath.c_str());
+
+    //Modify Material Offset and tilling
+	ImGui::DragFloat("Tiling X", &material.tiling.x, 0.01f);
+	ImGui::DragFloat("Tiling Y", &material.tiling.y, 0.01f);
+    
 }
 
 /**
@@ -54,5 +63,5 @@ std::string NNE::Component::Render::MeshComponent::GetModelPath() const {
  * </summary>
  */
 std::string NNE::Component::Render::MeshComponent::GetTexturePath() const {
-    return texturePath;
+    return material.texturePath;
 }
