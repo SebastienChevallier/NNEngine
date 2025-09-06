@@ -1,7 +1,7 @@
 #include "LightComponent.h"
 #include "TransformComponent.h"
 #include "AEntity.h"
-#include <imgui_widgets.cpp>
+#include <imgui.h>
 
 
 /**
@@ -67,11 +67,11 @@ float NNE::Component::Render::LightComponent::GetAmbient() const
 
 void NNE::Component::Render::LightComponent::DrawImGui()
 {
-    /*ImGui::Text("Light Component");
+    ImGui::Text("Light Component");
     ImGui::Separator();
     ImGui::ColorEdit3("Color", &color[0]);
     ImGui::SliderFloat("Intensity", &intensity, 0.0f, 10.0f);
     ImGui::SliderFloat("Ambient", &ambient, 0.0f, 1.0f);
-	ImGui::DragFloat3("Direction", &direction[0], 0.1f, -1.0f, 1.0f);*/
+	ImGui::DragFloat3("Direction", &direction[0], 0.1f, -1.0f, 1.0f);
 }
 
