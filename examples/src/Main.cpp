@@ -89,6 +89,10 @@ int main() {
 
     NNE::AEntity* light = app.CreateEntity();
     auto* LC = light->AddComponent<NNE::Component::Render::LightComponent>();
+	NNE::Component::TransformComponent* TC3 = light->GetComponent<NNE::Component::TransformComponent>();
+	light->SetName("Light");
+	TC3->position = glm::vec3(0.0f, 10.0f, 0.0f);
+	TC3->rotation = glm::vec3(-90.0f, 0.0f, 0.0f);
     app.VKManager->activeLight = LC;
 
     app.Init();

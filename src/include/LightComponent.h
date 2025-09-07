@@ -18,7 +18,7 @@ namespace NNE::Component::Render {
          * </summary>
          */
 
-        LightComponent(const glm::vec3& dir = glm::vec3(-0.2f, -1.5f, -0.3f),
+        LightComponent(const glm::vec3& dir = glm::vec3(0.0f, -1.0f, 0.0f),
 
                        const glm::vec3& color = glm::vec3(1.f),
                        float intensity = 1.f,

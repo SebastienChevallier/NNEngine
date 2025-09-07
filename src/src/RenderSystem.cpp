@@ -30,6 +30,7 @@ void RenderSystem::Start()
         _vkManager->createUniformBuffers();
         _vkManager->createDescriptorPool();
         _vkManager->createDescriptorSets();
+        _vkManager->createShadowDescriptorSets();
         _vkManager->createCommandBuffers();
         _vkManager->createSyncObjects();
     }
