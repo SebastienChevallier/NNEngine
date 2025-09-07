@@ -886,7 +886,10 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizer.depthBiasEnable = VK_FALSE;
+    rasterizer.depthBiasEnable = VK_TRUE;
+    rasterizer.depthBiasConstantFactor = 0.0f; // Set dynamically
+    rasterizer.depthBiasClamp = 0.0f;
+    rasterizer.depthBiasSlopeFactor = 0.0f;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -902,7 +905,8 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
 
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
-        VK_DYNAMIC_STATE_SCISSOR
+        VK_DYNAMIC_STATE_SCISSOR,
+        VK_DYNAMIC_STATE_DEPTH_BIAS
     };
     VkPipelineDynamicStateCreateInfo dynamic{};
     dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -1259,6 +1263,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowScissor.offset = {0,0};
     shadowScissor.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     vkCmdSetScissor(commandBuffer, 0, 1, &shadowScissor);
+    // Apply depth bias to reduce self-shadowing artifacts on large flat surfaces
+    vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     VkBuffer shadowVBs[] = {vertexBuffer};
     VkDeviceSize shadowOffsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer,0,1,shadowVBs,shadowOffsets);
@@ -1376,17 +1382,16 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
 
-        glm::vec3 target = glm::vec3(0.0f);
-        if (auto lTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            target = lTr->GetWorldPosition();
-        } else if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            target = camTr->GetWorldPosition();
+        glm::vec3 camPos{0.0f};
+        if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
+            camPos = camTr->GetWorldPosition();
         }
 
-        glm::vec3 lightPos = target - activeLight->GetDirection() * 100.0f;
-        glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.f, 1.f, 0.f));
+        float range = activeCamera->GetFarPlane();
+        glm::vec3 lightPos = camPos - activeLight->GetDirection() * range;
+        glm::mat4 lightView = glm::lookAt(lightPos, camPos, glm::vec3(0.f, 1.f, 0.f));
 
-        glm::mat4 lightProj = glm::ortho(-40.f, 40.f, -40.f, 40.f, 0.1f, 200.f);
+        glm::mat4 lightProj = glm::ortho(-range, range, -range, range, 0.1f, range * 2.f);
         globalUBO.lightSpace = lightProj * lightView;
     }
 
