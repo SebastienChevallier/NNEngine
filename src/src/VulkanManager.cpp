@@ -1222,7 +1222,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         pc.tiling = mesh->GetMaterial().tiling;
         pc.offset = mesh->GetMaterial().offset;
         vkCmdPushConstants(commandBuffer, pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstantObject), &pc);
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            0, sizeof(PushConstantObject), &pc);
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(),0,0);
