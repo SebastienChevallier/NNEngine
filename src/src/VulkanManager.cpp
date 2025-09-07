@@ -1382,6 +1382,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
 
+
         glm::vec3 camPos{0.0f};
         if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
             camPos = camTr->GetWorldPosition();
@@ -1390,6 +1391,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         float range = activeCamera->GetFarPlane();
         glm::vec3 lightPos = camPos - activeLight->GetDirection() * range;
         glm::mat4 lightView = glm::lookAt(lightPos, camPos, glm::vec3(0.f, 1.f, 0.f));
+
 
         glm::mat4 lightProj = glm::ortho(-range, range, -range, range, 0.1f, range * 2.f);
         globalUBO.lightSpace = lightProj * lightView;
