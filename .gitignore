@@ -442,3 +442,6 @@ FodyWeavers.xsd
 build/
 *.sln
 *.vcxproj*
+
+# Shader binaries
+*.spv
