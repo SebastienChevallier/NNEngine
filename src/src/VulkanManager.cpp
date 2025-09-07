@@ -51,6 +51,13 @@ NNE::Systems::VulkanManager::VulkanManager()
     colorImage = VK_NULL_HANDLE;
     colorImageMemory = VK_NULL_HANDLE;
     colorImageView = VK_NULL_HANDLE;
+    shadowRenderPass = VK_NULL_HANDLE;
+    shadowFramebuffer = VK_NULL_HANDLE;
+    shadowImage = VK_NULL_HANDLE;
+    shadowImageMemory = VK_NULL_HANDLE;
+    shadowImageView = VK_NULL_HANDLE;
+    shadowSampler = VK_NULL_HANDLE;
+    shadowPipeline = VK_NULL_HANDLE;
     vertexBuffer = VK_NULL_HANDLE;
     vertexBufferMemory = VK_NULL_HANDLE;
     indexBuffer = VK_NULL_HANDLE;
@@ -86,12 +93,15 @@ void NNE::Systems::VulkanManager::initVulkan()
     createImageViews();             // 6️⃣ Créer les vues d’image pour le swapchain
 
     createRenderPass();             // 7️⃣ Définir le pipeline de rendu
+    createShadowRenderPass();       // 7b️⃣ Render pass pour la shadow map
     createDescriptorSetLayout();    // 8️⃣ Configurer les descripteurs de shaders
     createGraphicsPipeline();       // 9️⃣ Charger les shaders et construire le pipeline
+    createShadowPipeline();         // 9b️⃣ Pipeline pour la shadow map
 
     createCommandPool();            // 🔟 Pool pour gérer les commandes GPU
     createColorResources();         // 🎨 Créer une image pour le multisampling (si activé)
     createDepthResources();         // 📏 Créer une image de profondeur
+    createShadowResources();        // 🕶️ Préparer la texture de shadow map
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
     initImGui();
@@ -605,6 +615,38 @@ void NNE::Systems::VulkanManager::createRenderPass()
     }
 }
 
+void NNE::Systems::VulkanManager::createShadowRenderPass()
+{
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = findDepthFormat();
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
+    VkAttachmentReference depthRef{};
+    depthRef.attachment = 0;
+    depthRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.pDepthStencilAttachment = &depthRef;
+
+    VkRenderPassCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    info.attachmentCount = 1;
+    info.pAttachments = &depthAttachment;
+    info.subpassCount = 1;
+    info.pSubpasses = &subpass;
+
+    if (vkCreateRenderPass(device, &info, nullptr, &shadowRenderPass) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow render pass!");
+    }
+}
+
 void NNE::Systems::VulkanManager::createGraphicsPipeline()
 {
     auto vertShaderCode = readFile("vert.spv");
@@ -661,6 +703,18 @@ void NNE::Systems::VulkanManager::createGraphicsPipeline()
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(swapChainExtent.width);
+    viewport.height = static_cast<float>(swapChainExtent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = swapChainExtent;
+    viewportState.pViewports = &viewport;
+    viewportState.pScissors = &scissor;
 
     VkPipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -742,6 +796,113 @@ void NNE::Systems::VulkanManager::createGraphicsPipeline()
 
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
+}
+
+void NNE::Systems::VulkanManager::createShadowPipeline()
+{
+    auto vertShaderCode = readFile("shadow_vert.spv");
+    auto fragShaderCode = readFile("shadow_frag.spv");
+    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+    VkPipelineShaderStageCreateInfo vertStage{};
+    vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertStage.module = vertShaderModule;
+    vertStage.pName = "main";
+
+    VkPipelineShaderStageCreateInfo fragStage{};
+    fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragStage.module = fragShaderModule;
+    fragStage.pName = "main";
+
+    VkPipelineShaderStageCreateInfo stages[] = {vertStage, fragStage};
+
+    auto bindingDescription = Vertex::getBindingDescription();
+    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+    VkPipelineVertexInputStateCreateInfo vertexInput{};
+    vertexInput.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInput.vertexBindingDescriptionCount = 1;
+    vertexInput.pVertexBindingDescriptions = &bindingDescription;
+    vertexInput.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInput.pVertexAttributeDescriptions = attributeDescriptions.data();
+
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+    VkPipelineViewportStateCreateInfo viewportState{};
+    viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewportState.viewportCount = 1;
+    viewportState.scissorCount = 1;
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(SHADOW_MAP_DIM);
+    viewport.height = static_cast<float>(SHADOW_MAP_DIM);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    viewportState.pViewports = &viewport;
+    viewportState.pScissors = &scissor;
+
+    VkPipelineRasterizationStateCreateInfo rasterizer{};
+    rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterizer.depthClampEnable = VK_FALSE;
+    rasterizer.rasterizerDiscardEnable = VK_FALSE;
+    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizer.lineWidth = 1.0f;
+    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizer.depthBiasEnable = VK_FALSE;
+
+    VkPipelineMultisampleStateCreateInfo multisampling{};
+    multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+    VkPipelineDepthStencilStateCreateInfo depthStencil{};
+    depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencil.depthTestEnable = VK_TRUE;
+    depthStencil.depthWriteEnable = VK_TRUE;
+    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    depthStencil.depthBoundsTestEnable = VK_FALSE;
+    depthStencil.stencilTestEnable = VK_FALSE;
+
+    std::vector<VkDynamicState> dynamicStates = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+    VkPipelineDynamicStateCreateInfo dynamic{};
+    dynamic.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+    dynamic.pDynamicStates = dynamicStates.data();
+
+    VkGraphicsPipelineCreateInfo pipelineInfo{};
+    pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipelineInfo.stageCount = 2;
+    pipelineInfo.pStages = stages;
+    pipelineInfo.pVertexInputState = &vertexInput;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pDepthStencilState = &depthStencil;
+    pipelineInfo.pDynamicState = &dynamic;
+    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.renderPass = shadowRenderPass;
+    pipelineInfo.subpass = 0;
+
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &shadowPipeline) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow pipeline!");
+    }
+
+    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+    vkDestroyShaderModule(device, fragShaderModule, nullptr);
 }
 
 void NNE::Systems::VulkanManager::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
@@ -1024,6 +1185,54 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         throw std::runtime_error("❌ Erreur : Échec de l'enregistrement de la commande buffer !");
     }
 
+    // ----- Shadow map pass -----
+    VkRenderPassBeginInfo shadowPassInfo{};
+    shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    shadowPassInfo.renderPass = shadowRenderPass;
+    shadowPassInfo.framebuffer = shadowFramebuffer;
+    shadowPassInfo.renderArea.offset = {0,0};
+    shadowPassInfo.renderArea.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    VkClearValue shadowClear{};
+    shadowClear.depthStencil = {1.0f,0};
+    shadowPassInfo.clearValueCount = 1;
+    shadowPassInfo.pClearValues = &shadowClear;
+    vkCmdBeginRenderPass(commandBuffer, &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
+    VkViewport shadowViewport{};
+    shadowViewport.x = 0.0f;
+    shadowViewport.y = 0.0f;
+    shadowViewport.width = static_cast<float>(SHADOW_MAP_DIM);
+    shadowViewport.height = static_cast<float>(SHADOW_MAP_DIM);
+    shadowViewport.minDepth = 0.0f;
+    shadowViewport.maxDepth = 1.0f;
+    vkCmdSetViewport(commandBuffer, 0, 1, &shadowViewport);
+    VkRect2D shadowScissor{};
+    shadowScissor.offset = {0,0};
+    shadowScissor.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    vkCmdSetScissor(commandBuffer, 0, 1, &shadowScissor);
+    VkBuffer shadowVBs[] = {vertexBuffer};
+    VkDeviceSize shadowOffsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer,0,1,shadowVBs,shadowOffsets);
+    vkCmdBindIndexBuffer(commandBuffer,indexBuffer,0,VK_INDEX_TYPE_UINT32);
+    auto drawShadow = [&](NNE::Component::Render::MeshComponent* mesh,
+                          NNE::Component::TransformComponent* transform){
+        if (!mesh || mesh->getIndexCount() == 0 || mesh->IsSkybox()) return;
+        PushConstantObject pc{};
+        pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
+        pc.tiling = mesh->GetMaterial().tiling;
+        pc.offset = mesh->GetMaterial().offset;
+        vkCmdPushConstants(commandBuffer, pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            0, sizeof(PushConstantObject), &pc);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
+        vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(),0,0);
+    };
+    for (auto& pair : objects) {
+        drawShadow(pair.first, pair.second);
+    }
+    vkCmdEndRenderPass(commandBuffer);
+
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
@@ -1110,6 +1319,19 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     GlobalUniformBufferObject globalUBO{};
     globalUBO.view = activeCamera->GetViewMatrix();
     globalUBO.proj = activeCamera->GetProjectionMatrix();
+
+    globalUBO.lightSpace = glm::mat4(1.0f);
+    if (activeLight) {
+        glm::vec3 center = glm::vec3(0.0f);
+        if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
+            center = camTr->GetWorldPosition();
+        }
+
+        glm::vec3 lightPos = center - activeLight->GetDirection() * 50.0f;
+        glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.f, 1.f, 0.f));
+        glm::mat4 lightProj = glm::ortho(-40.f, 40.f, -40.f, 40.f, 0.1f, 200.f);
+        globalUBO.lightSpace = lightProj * lightView;
+    }
 
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
@@ -1268,6 +1490,7 @@ void NNE::Systems::VulkanManager::generateSphere(std::vector<Vertex>& vertexData
             vertex.pos = { xPos, yPos, zPos };
             vertex.color = { 1.f, 1.f, 1.f };
             vertex.texCoord = { xSegment, 1.0f - ySegment };
+            vertex.normal = glm::normalize(glm::vec3(xPos, yPos, zPos));
             vertexData.push_back(vertex);
         }
     }
@@ -1307,17 +1530,26 @@ void NNE::Systems::VulkanManager::createDescriptorSetLayout()
     samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
     //Bindings 2 : LightUBO
-	VkDescriptorSetLayoutBinding lightUboLayoutBinding{};
-	lightUboLayoutBinding.binding = 2;
-	lightUboLayoutBinding.descriptorCount = 1;
-	lightUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	lightUboLayoutBinding.pImmutableSamplers = nullptr;
-	lightUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        VkDescriptorSetLayoutBinding lightUboLayoutBinding{};
+        lightUboLayoutBinding.binding = 2;
+        lightUboLayoutBinding.descriptorCount = 1;
+        lightUboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        lightUboLayoutBinding.pImmutableSamplers = nullptr;
+        lightUboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<VkDescriptorSetLayoutBinding, 3> bindings = {
+    // Binding 3 : shadow map sampler
+    VkDescriptorSetLayoutBinding shadowSamplerBinding{};
+    shadowSamplerBinding.binding = 3;
+    shadowSamplerBinding.descriptorCount = 1;
+    shadowSamplerBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    shadowSamplerBinding.pImmutableSamplers = nullptr;
+    shadowSamplerBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 4> bindings = {
         globalUboLayoutBinding,
         samplerLayoutBinding,
-        lightUboLayoutBinding
+        lightUboLayoutBinding,
+        shadowSamplerBinding
     };
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -1343,7 +1575,7 @@ void NNE::Systems::VulkanManager::createDescriptorPool()
     poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-    poolSizes[2].descriptorCount = descriptorCount;
+    poolSizes[2].descriptorCount = 2 * descriptorCount;
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1389,7 +1621,12 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             lightBufferInfo.offset = 0;
             lightBufferInfo.range = sizeof(LightUBO);
 
-            std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
+            VkDescriptorImageInfo shadowInfo{};
+            shadowInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+            shadowInfo.imageView = shadowImageView;
+            shadowInfo.sampler = shadowSampler;
+
+            std::array<VkWriteDescriptorSet, 4> descriptorWrites{};
 
             descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             descriptorWrites[0].dstSet = mesh->descriptorSets[i];
@@ -1414,6 +1651,13 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
             descriptorWrites[2].pBufferInfo = &lightBufferInfo;
             descriptorWrites[2].pImageInfo = nullptr;
             descriptorWrites[2].pTexelBufferView = nullptr;
+
+            descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites[3].dstSet = mesh->descriptorSets[i];
+            descriptorWrites[3].dstBinding = 3;
+            descriptorWrites[3].descriptorCount = 1;
+            descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites[3].pImageInfo = &shadowInfo;
 
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
@@ -1855,6 +2099,45 @@ void NNE::Systems::VulkanManager::createDepthResources()
 
 }
 
+void NNE::Systems::VulkanManager::createShadowResources()
+{
+    VkFormat depthFormat = findDepthFormat();
+    createImage(SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1, VK_SAMPLE_COUNT_1_BIT, depthFormat,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        shadowImage, shadowImageMemory);
+
+    shadowImageView = createImageView(shadowImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    if (vkCreateSampler(device, &samplerInfo, nullptr, &shadowSampler) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow sampler!");
+    }
+
+    VkFramebufferCreateInfo fbInfo{};
+    fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    fbInfo.renderPass = shadowRenderPass;
+    fbInfo.attachmentCount = 1;
+    fbInfo.pAttachments = &shadowImageView;
+    fbInfo.width = SHADOW_MAP_DIM;
+    fbInfo.height = SHADOW_MAP_DIM;
+    fbInfo.layers = 1;
+    if (vkCreateFramebuffer(device, &fbInfo, nullptr, &shadowFramebuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow framebuffer!");
+    }
+}
+
 VkFormat NNE::Systems::VulkanManager::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates) {
@@ -2199,6 +2482,35 @@ void NNE::Systems::VulkanManager::CleanUp()
     if (stagingBufferMemory != VK_NULL_HANDLE) {
         vkFreeMemory(device, stagingBufferMemory, nullptr);
         stagingBufferMemory = VK_NULL_HANDLE;
+    }
+
+    if (shadowSampler != VK_NULL_HANDLE) {
+        vkDestroySampler(device, shadowSampler, nullptr);
+        shadowSampler = VK_NULL_HANDLE;
+    }
+    if (shadowImageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(device, shadowImageView, nullptr);
+        shadowImageView = VK_NULL_HANDLE;
+    }
+    if (shadowImage != VK_NULL_HANDLE) {
+        vkDestroyImage(device, shadowImage, nullptr);
+        shadowImage = VK_NULL_HANDLE;
+    }
+    if (shadowImageMemory != VK_NULL_HANDLE) {
+        vkFreeMemory(device, shadowImageMemory, nullptr);
+        shadowImageMemory = VK_NULL_HANDLE;
+    }
+    if (shadowFramebuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(device, shadowFramebuffer, nullptr);
+        shadowFramebuffer = VK_NULL_HANDLE;
+    }
+    if (shadowPipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(device, shadowPipeline, nullptr);
+        shadowPipeline = VK_NULL_HANDLE;
+    }
+    if (shadowRenderPass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device, shadowRenderPass, nullptr);
+        shadowRenderPass = VK_NULL_HANDLE;
     }
 
     // Nettoyage complet du swapchain
