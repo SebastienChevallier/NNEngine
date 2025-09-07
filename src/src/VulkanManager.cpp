@@ -1334,6 +1334,10 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0, sizeof(PushConstantObject), &pc);
 
+        if (mesh->descriptorSets[currentFrame] == VK_NULL_HANDLE) {
+            return; // Descriptor set not initialized; skip drawing to avoid validation errors
+        }
+
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
             pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
 
