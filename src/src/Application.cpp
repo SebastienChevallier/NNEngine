@@ -9,6 +9,7 @@
 #include "UISystem.h"
 #include "InputSystem.h"
 #include "ScriptSystem.h"
+#include "LightSystem.h"
 #include "InputManager.h"
 
 std::clock_t lastFrameTime;
@@ -29,11 +30,13 @@ NNE::Systems::Application::Application()
     physicsSystem->Awake();
     uiSystem = new UISystem(VKManager);
     renderSystem = new RenderSystem(VKManager);
+    lightSystem = new LightSystem(VKManager);
     inputSystem = new InputSystem();
     scriptSystem = new ScriptSystem();
     NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(uiSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
+    NNE::Systems::SystemManager::GetInstance()->AddSystem(lightSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(inputSystem);
     NNE::Systems::SystemManager::GetInstance()->AddSystem(scriptSystem);
     delta = 0;
@@ -74,6 +77,12 @@ NNE::Systems::Application::~Application()
     {
         delete scriptSystem;
         scriptSystem = nullptr;
+    }
+
+    if (lightSystem)
+    {
+        delete lightSystem;
+        lightSystem = nullptr;
     }
 
     for (NNE::AEntity* entity : _entities) {

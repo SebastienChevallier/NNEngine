@@ -21,7 +21,7 @@ void NNE::Component::Render::LightComponent::Update(float deltaTime)
 {
     (void)deltaTime;
     if (NNE::Component::TransformComponent* transform = _entity->GetComponent<NNE::Component::TransformComponent>()) {
-        direction = -transform->GetForward();
+        direction = transform->GetForward();
     }
 }
 

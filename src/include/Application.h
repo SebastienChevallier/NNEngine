@@ -19,6 +19,7 @@ class RenderSystem;
 class UISystem;
 class InputSystem;
 class ScriptSystem;
+class LightSystem;
 class ISystem;
 
 class Application
@@ -74,6 +75,7 @@ class Application
                 NNE::Systems::RenderSystem* renderSystem;
                 NNE::Systems::InputSystem* inputSystem;
                 NNE::Systems::ScriptSystem* scriptSystem;
+                NNE::Systems::LightSystem* lightSystem;
                 std::vector<NNE::AEntity*> _entities;
                 std::vector<NNE::Systems::ISystem*>& _systems;
 
