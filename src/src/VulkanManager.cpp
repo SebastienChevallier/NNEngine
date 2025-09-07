@@ -703,6 +703,18 @@ void NNE::Systems::VulkanManager::createGraphicsPipeline()
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(swapChainExtent.width);
+    viewport.height = static_cast<float>(swapChainExtent.height);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = swapChainExtent;
+    viewportState.pViewports = &viewport;
+    viewportState.pScissors = &scissor;
 
     VkPipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -826,6 +838,18 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = static_cast<float>(SHADOW_MAP_DIM);
+    viewport.height = static_cast<float>(SHADOW_MAP_DIM);
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+    viewportState.pViewports = &viewport;
+    viewportState.pScissors = &scissor;
 
     VkPipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -868,6 +892,7 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     pipelineInfo.pRasterizationState = &rasterizer;
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
+    pipelineInfo.pDynamicState = &dynamic;
     pipelineInfo.layout = pipelineLayout;
     pipelineInfo.renderPass = shadowRenderPass;
     pipelineInfo.subpass = 0;
