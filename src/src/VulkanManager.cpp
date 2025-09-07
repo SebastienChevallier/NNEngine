@@ -58,6 +58,11 @@ NNE::Systems::VulkanManager::VulkanManager()
     shadowImageView = VK_NULL_HANDLE;
     shadowSampler = VK_NULL_HANDLE;
     shadowPipeline = VK_NULL_HANDLE;
+
+    shadowPipelineLayout = VK_NULL_HANDLE;
+    shadowDescriptorSetLayout = VK_NULL_HANDLE;
+    shadowDescriptorSets.fill(VK_NULL_HANDLE);
+
     vertexBuffer = VK_NULL_HANDLE;
     vertexBufferMemory = VK_NULL_HANDLE;
     indexBuffer = VK_NULL_HANDLE;
@@ -95,6 +100,7 @@ void NNE::Systems::VulkanManager::initVulkan()
     createRenderPass();             // 7️⃣ Définir le pipeline de rendu
     createShadowRenderPass();       // 7b️⃣ Render pass pour la shadow map
     createDescriptorSetLayout();    // 8️⃣ Configurer les descripteurs de shaders
+    createShadowDescriptorSetLayout();
     createGraphicsPipeline();       // 9️⃣ Charger les shaders et construire le pipeline
     createShadowPipeline();         // 9b️⃣ Pipeline pour la shadow map
 
@@ -635,12 +641,33 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.pDepthStencilAttachment = &depthRef;
 
+
+    VkSubpassDependency deps[2]{};
+    deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+    deps[0].dstSubpass = 0;
+    deps[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    deps[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    deps[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    deps[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    deps[1].srcSubpass = 0;
+    deps[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+    deps[1].srcStageMask = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    deps[1].srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    deps[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    deps[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+
     VkRenderPassCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     info.attachmentCount = 1;
     info.pAttachments = &depthAttachment;
     info.subpassCount = 1;
     info.pSubpasses = &subpass;
+
+    info.dependencyCount = 2;
+    info.pDependencies = deps;
+
 
     if (vkCreateRenderPass(device, &info, nullptr, &shadowRenderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shadow render pass!");
@@ -882,6 +909,24 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamic.pDynamicStates = dynamicStates.data();
 
+
+    VkPushConstantRange pushConstantRange{};
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstantRange.offset = 0;
+    pushConstantRange.size = sizeof(PushConstantObject);
+
+    VkPipelineLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    layoutInfo.setLayoutCount = 1;
+    layoutInfo.pSetLayouts = &shadowDescriptorSetLayout;
+    layoutInfo.pushConstantRangeCount = 1;
+    layoutInfo.pPushConstantRanges = &pushConstantRange;
+
+    if (vkCreatePipelineLayout(device, &layoutInfo, nullptr, &shadowPipelineLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow pipeline layout!");
+    }
+
+
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
@@ -893,7 +938,7 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     pipelineInfo.pMultisampleState = &multisampling;
     pipelineInfo.pDepthStencilState = &depthStencil;
     pipelineInfo.pDynamicState = &dynamic;
-    pipelineInfo.layout = pipelineLayout;
+    pipelineInfo.layout = shadowPipelineLayout;
     pipelineInfo.renderPass = shadowRenderPass;
     pipelineInfo.subpass = 0;
 
@@ -1198,6 +1243,10 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowPassInfo.pClearValues = &shadowClear;
     vkCmdBeginRenderPass(commandBuffer, &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    shadowPipelineLayout, 0, 1, &shadowDescriptorSets[currentFrame], 0, nullptr);
+
     VkViewport shadowViewport{};
     shadowViewport.x = 0.0f;
     shadowViewport.y = 0.0f;
@@ -1221,11 +1270,11 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
         pc.tiling = mesh->GetMaterial().tiling;
         pc.offset = mesh->GetMaterial().offset;
-        vkCmdPushConstants(commandBuffer, pipelineLayout,
+
+        vkCmdPushConstants(commandBuffer, shadowPipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0, sizeof(PushConstantObject), &pc);
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout, 0, 1, &mesh->descriptorSets[currentFrame], 0, nullptr);
+
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(),0,0);
     };
     for (auto& pair : objects) {
@@ -1322,13 +1371,17 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
-        glm::vec3 center = glm::vec3(0.0f);
-        if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            center = camTr->GetWorldPosition();
+
+        glm::vec3 target = glm::vec3(0.0f);
+        if (auto lTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
+            target = lTr->GetWorldPosition();
+        } else if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
+            target = camTr->GetWorldPosition();
         }
 
-        glm::vec3 lightPos = center - activeLight->GetDirection() * 50.0f;
-        glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.f, 1.f, 0.f));
+        glm::vec3 lightPos = target - activeLight->GetDirection() * 100.0f;
+        glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.f, 1.f, 0.f));
+
         glm::mat4 lightProj = glm::ortho(-40.f, 40.f, -40.f, 40.f, 0.1f, 200.f);
         globalUBO.lightSpace = lightProj * lightView;
     }
@@ -1562,15 +1615,35 @@ void NNE::Systems::VulkanManager::createDescriptorSetLayout()
     }
 }
 
+void NNE::Systems::VulkanManager::createShadowDescriptorSetLayout()
+{
+    VkDescriptorSetLayoutBinding globalBinding{};
+    globalBinding.binding = 0;
+    globalBinding.descriptorCount = 1;
+    globalBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    globalBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    globalBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    info.bindingCount = 1;
+    info.pBindings = &globalBinding;
+
+    if (vkCreateDescriptorSetLayout(device, &info, nullptr, &shadowDescriptorSetLayout) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shadow descriptor set layout!");
+    }
+}
+
 void NNE::Systems::VulkanManager::createDescriptorPool()
 {
     uint32_t meshCount = static_cast<uint32_t>(loadedMeshes.size());
     uint32_t descriptorCount = meshCount * MAX_FRAMES_IN_FLIGHT;
+    uint32_t shadowDescriptorCount = MAX_FRAMES_IN_FLIGHT;
 
     std::array<VkDescriptorPoolSize, 3> poolSizes{};
     poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
-    poolSizes[0].descriptorCount = 2 * descriptorCount;
+    poolSizes[0].descriptorCount = 2 * descriptorCount + shadowDescriptorCount;
     poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     poolSizes[1].descriptorCount = descriptorCount;
     poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1581,7 +1654,7 @@ void NNE::Systems::VulkanManager::createDescriptorPool()
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
     poolInfo.pPoolSizes = poolSizes.data();
-    poolInfo.maxSets = descriptorCount;
+    poolInfo.maxSets = descriptorCount + shadowDescriptorCount;
 
     if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
@@ -1661,6 +1734,36 @@ void NNE::Systems::VulkanManager::createDescriptorSets()
 
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
+    }
+}
+
+void NNE::Systems::VulkanManager::createShadowDescriptorSets()
+{
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool = descriptorPool;
+        allocInfo.descriptorSetCount = 1;
+        allocInfo.pSetLayouts = &shadowDescriptorSetLayout;
+
+        if (vkAllocateDescriptorSets(device, &allocInfo, &shadowDescriptorSets[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate shadow descriptor set!");
+        }
+
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = uniformBuffers[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(GlobalUniformBufferObject);
+
+        VkWriteDescriptorSet write{};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.dstSet = shadowDescriptorSets[i];
+        write.dstBinding = 0;
+        write.descriptorCount = 1;
+        write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        write.pBufferInfo = &bufferInfo;
+
+        vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
     }
 }
 
@@ -1796,6 +1899,7 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
     createUniformBuffers();
     createDescriptorPool();
     createDescriptorSets();
+    createShadowDescriptorSets();
     createCommandBuffers();
 
     // Recréer les ressources ImGui avec le nouveau render pass / swapchain
@@ -2508,6 +2612,16 @@ void NNE::Systems::VulkanManager::CleanUp()
         vkDestroyPipeline(device, shadowPipeline, nullptr);
         shadowPipeline = VK_NULL_HANDLE;
     }
+
+    if (shadowPipelineLayout != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(device, shadowPipelineLayout, nullptr);
+        shadowPipelineLayout = VK_NULL_HANDLE;
+    }
+    if (shadowDescriptorSetLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, shadowDescriptorSetLayout, nullptr);
+        shadowDescriptorSetLayout = VK_NULL_HANDLE;
+    }
+
     if (shadowRenderPass != VK_NULL_HANDLE) {
         vkDestroyRenderPass(device, shadowRenderPass, nullptr);
         shadowRenderPass = VK_NULL_HANDLE;

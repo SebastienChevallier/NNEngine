@@ -205,6 +205,11 @@ namespace NNE::Systems {
                 VkSampler shadowSampler;
                 VkPipeline shadowPipeline;
 
+                VkPipelineLayout shadowPipelineLayout;
+                VkDescriptorSetLayout shadowDescriptorSetLayout;
+                std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> shadowDescriptorSets;
+
+
         public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
             NNE::Component::Render::LightComponent* activeLight = nullptr;
@@ -372,6 +377,7 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void createDescriptorSetLayout();
+            void createShadowDescriptorSetLayout();
             /**
                 * <summary>
                 * Crée le pool de descripteurs.
@@ -384,6 +390,7 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void createDescriptorSets();
+            void createShadowDescriptorSets();
             /**
                 * <summary>
                 * Dessine une frame complète.
