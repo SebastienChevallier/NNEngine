@@ -1322,9 +1322,14 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
-        glm::vec3 lightPos = -activeLight->GetDirection() * 10.f;
-        glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.f), glm::vec3(0.f,1.f,0.f));
-        glm::mat4 lightProj = glm::ortho(-20.f,20.f,-20.f,20.f,0.1f,50.f);
+        glm::vec3 center = glm::vec3(0.0f);
+        if (auto camTr = activeCamera->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
+            center = camTr->GetWorldPosition();
+        }
+
+        glm::vec3 lightPos = center - activeLight->GetDirection() * 50.0f;
+        glm::mat4 lightView = glm::lookAt(lightPos, center, glm::vec3(0.f, 1.f, 0.f));
+        glm::mat4 lightProj = glm::ortho(-40.f, 40.f, -40.f, 40.f, 0.1f, 200.f);
         globalUBO.lightSpace = lightProj * lightView;
     }
 
@@ -1485,6 +1490,7 @@ void NNE::Systems::VulkanManager::generateSphere(std::vector<Vertex>& vertexData
             vertex.pos = { xPos, yPos, zPos };
             vertex.color = { 1.f, 1.f, 1.f };
             vertex.texCoord = { xSegment, 1.0f - ySegment };
+            vertex.normal = glm::normalize(glm::vec3(xPos, yPos, zPos));
             vertexData.push_back(vertex);
         }
     }
