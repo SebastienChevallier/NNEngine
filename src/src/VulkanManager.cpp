@@ -885,7 +885,10 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    // Our meshes use clockwise winding, so keep the same orientation as the
+    // main pipeline to ensure geometry isn't fully culled when rendering the
+    // shadow map.
+    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_TRUE;
     rasterizer.depthBiasConstantFactor = 0.0f; // Set dynamically
     rasterizer.depthBiasClamp = 0.0f;
