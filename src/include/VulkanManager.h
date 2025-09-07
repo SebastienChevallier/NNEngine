@@ -36,7 +36,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/hash.hpp>
 #include <chrono>
 
 
@@ -124,7 +123,7 @@ namespace NNE::Systems {
 	protected:
                 size_t dynamicAlignment;
                 const size_t MAX_OBJECTS = 100;
-                const int MAX_FRAMES_IN_FLIGHT = 2;
+                static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
                 const uint32_t SHADOW_MAP_DIM = 2048;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		//VkDevice device = VK_NULL_HANDLE;
@@ -618,6 +617,19 @@ namespace NNE::Systems {
 }
 
 namespace std {
+        template<> struct hash<glm::vec2> {
+                size_t operator()(glm::vec2 const& v) const noexcept {
+                        return hash<float>()(v.x) ^ (hash<float>()(v.y) << 1);
+                }
+        };
+        template<> struct hash<glm::vec3> {
+                size_t operator()(glm::vec3 const& v) const noexcept {
+                        size_t h1 = hash<float>()(v.x);
+                        size_t h2 = hash<float>()(v.y);
+                        size_t h3 = hash<float>()(v.z);
+                        return ((h1 ^ (h2 << 1)) >> 1) ^ (h3 << 1);
+                }
+        };
         template<> struct hash<NNE::Systems::Vertex> {
                 size_t operator()(NNE::Systems::Vertex const& vertex) const {
                         return ((hash<glm::vec3>()(vertex.pos) ^
