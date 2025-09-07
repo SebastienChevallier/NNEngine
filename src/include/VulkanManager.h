@@ -204,9 +204,11 @@ namespace NNE::Systems {
                 VkImageView shadowImageView;
                 VkSampler shadowSampler;
                 VkPipeline shadowPipeline;
+
                 VkPipelineLayout shadowPipelineLayout;
                 VkDescriptorSetLayout shadowDescriptorSetLayout;
                 std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> shadowDescriptorSets;
+
 
         public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;

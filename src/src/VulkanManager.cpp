@@ -58,9 +58,11 @@ NNE::Systems::VulkanManager::VulkanManager()
     shadowImageView = VK_NULL_HANDLE;
     shadowSampler = VK_NULL_HANDLE;
     shadowPipeline = VK_NULL_HANDLE;
+
     shadowPipelineLayout = VK_NULL_HANDLE;
     shadowDescriptorSetLayout = VK_NULL_HANDLE;
     shadowDescriptorSets.fill(VK_NULL_HANDLE);
+
     vertexBuffer = VK_NULL_HANDLE;
     vertexBufferMemory = VK_NULL_HANDLE;
     indexBuffer = VK_NULL_HANDLE;
@@ -639,6 +641,7 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.pDepthStencilAttachment = &depthRef;
 
+
     VkSubpassDependency deps[2]{};
     deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
     deps[0].dstSubpass = 0;
@@ -654,14 +657,17 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     deps[1].dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     deps[1].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
+
     VkRenderPassCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     info.attachmentCount = 1;
     info.pAttachments = &depthAttachment;
     info.subpassCount = 1;
     info.pSubpasses = &subpass;
+
     info.dependencyCount = 2;
     info.pDependencies = deps;
+
 
     if (vkCreateRenderPass(device, &info, nullptr, &shadowRenderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shadow render pass!");
@@ -903,6 +909,7 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     dynamic.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamic.pDynamicStates = dynamicStates.data();
 
+
     VkPushConstantRange pushConstantRange{};
     pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pushConstantRange.offset = 0;
@@ -918,6 +925,7 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     if (vkCreatePipelineLayout(device, &layoutInfo, nullptr, &shadowPipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shadow pipeline layout!");
     }
+
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -1235,8 +1243,10 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowPassInfo.pClearValues = &shadowClear;
     vkCmdBeginRenderPass(commandBuffer, &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
+
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-        shadowPipelineLayout, 0, 1, &shadowDescriptorSets[currentFrame], 0, nullptr);
+    shadowPipelineLayout, 0, 1, &shadowDescriptorSets[currentFrame], 0, nullptr);
+
     VkViewport shadowViewport{};
     shadowViewport.x = 0.0f;
     shadowViewport.y = 0.0f;
@@ -1260,9 +1270,11 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
         pc.tiling = mesh->GetMaterial().tiling;
         pc.offset = mesh->GetMaterial().offset;
+
         vkCmdPushConstants(commandBuffer, shadowPipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
             0, sizeof(PushConstantObject), &pc);
+
         vkCmdDrawIndexed(commandBuffer, mesh->getIndexCount(), 1, mesh->getIndexOffset(),0,0);
     };
     for (auto& pair : objects) {
@@ -1359,6 +1371,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
+
         glm::vec3 target = glm::vec3(0.0f);
         if (auto lTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
             target = lTr->GetWorldPosition();
@@ -1368,6 +1381,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
         glm::vec3 lightPos = target - activeLight->GetDirection() * 100.0f;
         glm::mat4 lightView = glm::lookAt(lightPos, target, glm::vec3(0.f, 1.f, 0.f));
+
         glm::mat4 lightProj = glm::ortho(-40.f, 40.f, -40.f, 40.f, 0.1f, 200.f);
         globalUBO.lightSpace = lightProj * lightView;
     }
@@ -2598,6 +2612,7 @@ void NNE::Systems::VulkanManager::CleanUp()
         vkDestroyPipeline(device, shadowPipeline, nullptr);
         shadowPipeline = VK_NULL_HANDLE;
     }
+
     if (shadowPipelineLayout != VK_NULL_HANDLE) {
         vkDestroyPipelineLayout(device, shadowPipelineLayout, nullptr);
         shadowPipelineLayout = VK_NULL_HANDLE;
@@ -2606,6 +2621,7 @@ void NNE::Systems::VulkanManager::CleanUp()
         vkDestroyDescriptorSetLayout(device, shadowDescriptorSetLayout, nullptr);
         shadowDescriptorSetLayout = VK_NULL_HANDLE;
     }
+
     if (shadowRenderPass != VK_NULL_HANDLE) {
         vkDestroyRenderPass(device, shadowRenderPass, nullptr);
         shadowRenderPass = VK_NULL_HANDLE;

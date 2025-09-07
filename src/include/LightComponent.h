@@ -17,7 +17,9 @@ namespace NNE::Component::Render {
          * Crée un composant de lumière directionnelle.
          * </summary>
          */
+
         LightComponent(const glm::vec3& dir = glm::vec3(-0.2f, -1.5f, -0.3f),
+
                        const glm::vec3& color = glm::vec3(1.f),
                        float intensity = 1.f,
                        float ambient = 0.25f);
