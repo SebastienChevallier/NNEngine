@@ -111,6 +111,7 @@ namespace NNE::Systems {
     struct GlobalUniformBufferObject {
             alignas(16)glm::mat4 view;
             alignas(16)glm::mat4 proj;
+            alignas(16)glm::mat4 lightSpace;
     };
 
     struct alignas(16) LightUBO {
@@ -121,9 +122,10 @@ namespace NNE::Systems {
     class VulkanManager
 	{
 	protected:
-		size_t dynamicAlignment;
-		const size_t MAX_OBJECTS = 100;
-		const int MAX_FRAMES_IN_FLIGHT = 2;
+                size_t dynamicAlignment;
+                const size_t MAX_OBJECTS = 100;
+                const int MAX_FRAMES_IN_FLIGHT = 2;
+                const uint32_t SHADOW_MAP_DIM = 2048;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		//VkDevice device = VK_NULL_HANDLE;
 		VkQueue graphicsQueue = VK_NULL_HANDLE;
@@ -193,6 +195,15 @@ namespace NNE::Systems {
                 VkImageView depthImageView;
                 VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_8_BIT;
                 bool supportsRenderToSingleSampled = false;
+
+                // Shadow mapping resources
+                VkRenderPass shadowRenderPass;
+                VkFramebuffer shadowFramebuffer;
+                VkImage shadowImage;
+                VkDeviceMemory shadowImageMemory;
+                VkImageView shadowImageView;
+                VkSampler shadowSampler;
+                VkPipeline shadowPipeline;
 
         public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
@@ -287,12 +298,14 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void createRenderPass();
+            void createShadowRenderPass();
             /**
                 * <summary>
                 * Génère le pipeline graphique.
                 * </summary>
                 */
             void createGraphicsPipeline();
+            void createShadowPipeline();
             /**
                 * <summary>
                 * Crée un buffer Vulkan générique.
@@ -420,6 +433,7 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void createDepthResources();
+            void createShadowResources();
             /**
                 * <summary>
                 * Génère les mipmaps d'une image.
