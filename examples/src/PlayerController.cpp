@@ -98,7 +98,7 @@ void PlayerController::Update(float deltaTime)
     
     NNE::Systems::PhysicsSystem::RaycastHit hitInfo;
     isGrounded = NNE::Systems::PhysicsSystem::Raycast(_entity->transform->position, -_entity->transform->GetUp(), 1.5f, hitInfo, NNE::Systems::Layers::RAYCAST);
-    std::cout << isGrounded << std::endl;
+    //std::cout << isGrounded << std::endl;
 	
 
 	//std::cout << "X : " << direction.x << "|Y : " << direction.y << "|Z : " << direction.z << std::endl;
