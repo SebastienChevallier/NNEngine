@@ -58,6 +58,8 @@ void PlayerController::Update(float deltaTime)
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_D)) {
             direction.x = -1;
     }
+
+    
 	
 
     if (NNE::Systems::InputManager::IsKeyPressed(GLFW_KEY_SPACE)) {
