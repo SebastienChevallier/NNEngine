@@ -496,6 +496,12 @@ namespace NNE::Systems {
             VkFormat findDepthFormat();
             /**
                 * <summary>
+                * Vérifie si le format possède un composant profondeur.
+                * </summary>
+                */
+            bool hasDepthComponent(VkFormat format);
+            /**
+                * <summary>
                 * Vérifie si le format possède un composant stencil.
                 * </summary>
                 */
