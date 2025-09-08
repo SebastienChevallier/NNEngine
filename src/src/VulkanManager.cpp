@@ -63,6 +63,8 @@ NNE::Systems::VulkanManager::VulkanManager()
     shadowDescriptorSetLayout = VK_NULL_HANDLE;
     shadowDescriptorSets.fill(VK_NULL_HANDLE);
 
+    shadowDebugRequested = false;
+
     vertexBuffer = VK_NULL_HANDLE;
     vertexBufferMemory = VK_NULL_HANDLE;
     indexBuffer = VK_NULL_HANDLE;
@@ -1864,7 +1866,10 @@ void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Com
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
-        debugShadowMap();
+        if (shadowDebugRequested) {
+            debugShadowMap();
+            shadowDebugRequested = false;
+        }
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2584,6 +2589,11 @@ void NNE::Systems::VulkanManager::debugShadowMap()
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void NNE::Systems::VulkanManager::requestShadowDebug()
+{
+    shadowDebugRequested = true;
 }
 
 VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)

@@ -208,6 +208,8 @@ namespace NNE::Systems {
                 VkDescriptorSetLayout shadowDescriptorSetLayout;
                 std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> shadowDescriptorSets;
 
+        private:
+                bool shadowDebugRequested;
 
         public :
             NNE::Component::Render::CameraComponent* activeCamera = nullptr;
@@ -546,6 +548,7 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void debugShadowMap();
+            void requestShadowDebug();
             /**
                 * <summary>
                 * Crée un module de shader à partir de code binaire.

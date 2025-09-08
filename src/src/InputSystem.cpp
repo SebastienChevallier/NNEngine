@@ -1,4 +1,6 @@
 #include "InputSystem.h"
+#include "Application.h"
+#include "VulkanManager.h"
 
 namespace NNE::Systems {
 
@@ -11,6 +13,10 @@ void InputSystem::Update(float deltaTime)
 {
     (void)deltaTime;
     InputManager::Update();
+    if (InputManager::IsKeyJustPressed(GLFW_KEY_F3))
+    {
+        Application::GetInstance()->VKManager->requestShadowDebug();
+    }
     for (auto* input : _inputs)
     {
         for (auto& pair : input->buttons)
