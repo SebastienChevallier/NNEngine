@@ -632,7 +632,7 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkAttachmentReference depthRef{};
     depthRef.attachment = 0;
@@ -1241,9 +1241,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowBeginBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
     shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
     shadowBeginBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    shadowBeginBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    shadowBeginBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;    
     shadowBeginBarrier.image = shadowImage;
     shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
@@ -1254,7 +1252,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     vkCmdPipelineBarrier(
         commandBuffer,
         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
         0,
         0, nullptr,
         0, nullptr,
@@ -1267,10 +1265,12 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowPassInfo.framebuffer = shadowFramebuffer;
     shadowPassInfo.renderArea.offset = {0,0};
     shadowPassInfo.renderArea.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
+
     VkClearValue shadowClear{};
     shadowClear.depthStencil = {1.0f,0};
     shadowPassInfo.clearValueCount = 1;
     shadowPassInfo.pClearValues = &shadowClear;
+
     vkCmdBeginRenderPass(commandBuffer, &shadowPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shadowPipeline);
 
@@ -1285,10 +1285,12 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowViewport.minDepth = 0.0f;
     shadowViewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &shadowViewport);
+
     VkRect2D shadowScissor{};
     shadowScissor.offset = {0,0};
     shadowScissor.extent = {SHADOW_MAP_DIM, SHADOW_MAP_DIM};
     vkCmdSetScissor(commandBuffer, 0, 1, &shadowScissor);
+
     // Apply depth bias to reduce self-shadowing artifacts on large flat surfaces
     vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
     VkBuffer shadowVBs[] = {vertexBuffer};
@@ -1313,30 +1315,6 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         drawShadow(pair.first, pair.second);
     }
     vkCmdEndRenderPass(commandBuffer);
-
-    VkImageMemoryBarrier shadowBarrier{};
-    shadowBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    shadowBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    shadowBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    shadowBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    shadowBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    shadowBarrier.image = shadowImage;
-    shadowBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    shadowBarrier.subresourceRange.baseMipLevel = 0;
-    shadowBarrier.subresourceRange.levelCount = 1;
-    shadowBarrier.subresourceRange.baseArrayLayer = 0;
-    shadowBarrier.subresourceRange.layerCount = 1;
-
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &shadowBarrier);
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1432,12 +1410,29 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
         glm::vec3 lightPos{0.0f};
+
         if (auto lightTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            lightPos = lightTr->GetWorldPosition();
+            lightPos = lightTr->GetWorldPosition();            
         }
+		glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
+        glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
+            ? glm::vec3(0.0f, 0.0f, 1.0f) // up alternatif
+            : glm::vec3(0.0f, 1.0f, 0.0f);
+        
+        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);
+
         float range = activeCamera->GetFarPlane();
-        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + activeLight->GetDirection(), glm::vec3(0.f, 1.f, 0.f));
-        glm::mat4 lightProj = glm::ortho(-range, range, -range, range, 0.1f, range * 2.f);
+
+   //     //lightPos = activeCamera->GetEntity()->transform->position;
+   //     glm::mat4 lightView = glm::lookAt(
+   //         lightPos,
+   //         activeCamera->GetEntity()->transform->position + activeCamera->GetEntity()->transform->GetForward(),
+			//activeCamera->GetEntity()->transform->GetUp()
+   //     );
+
+
+        //glm::mat4 lightProj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.1f, 200.0f);
+        glm::mat4 lightProj = glm::perspective(glm::radians(activeCamera->GetFOV()), activeCamera->GetAspectRatio(), 0.10f, range); 
 
         if(shadowDebugRequested) {
             static int frameCount = 0;

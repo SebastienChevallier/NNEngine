@@ -13,12 +13,6 @@ void InputSystem::Update(float deltaTime)
 {
     (void)deltaTime;
     InputManager::Update();
-
-    if (InputManager::IsKeyJustPressed(GLFW_KEY_F3))
-    {
-        Application::GetInstance()->VKManager->requestShadowDebug();
-    }
-
     for (auto* input : _inputs)
     {
         for (auto& pair : input->buttons)
@@ -39,6 +33,11 @@ void InputSystem::Update(float deltaTime)
                 value -= 1.0f;
             axis.value = value;
         }
+    }
+
+    if (InputManager::IsKeyJustPressed(GLFW_KEY_F3))
+    {
+        Application::GetInstance()->VKManager->requestShadowDebug();
     }
 }
 
