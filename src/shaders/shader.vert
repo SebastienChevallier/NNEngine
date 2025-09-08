@@ -14,6 +14,7 @@ layout(push_constant) uniform PushConstants {
     mat4 model;
     vec2 tiling;
     vec2 offset;
+    int debug;
 } pushConstants;
 
 layout(location = 0) in vec3 inPosition;

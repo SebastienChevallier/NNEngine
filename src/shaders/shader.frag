@@ -19,6 +19,7 @@ layout(push_constant) uniform PushConstants {
     mat4 model;
     vec2 tiling;
     vec2 offset;
+    int debug;
 } pushConstants;
 
 void main() {
@@ -35,6 +36,15 @@ void main() {
 
     vec3 projCoords = fragPosLight.xyz / fragPosLight.w;
     projCoords = projCoords * 0.5 + 0.5;
+    if (pushConstants.debug != 0) {
+        if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+            projCoords.y < 0.0 || projCoords.y > 1.0) {
+            outColor = vec4(1.0, 0.0, 0.0, 1.0);
+        } else {
+            outColor = vec4(projCoords, 1.0);
+        }
+        return;
+    }
     float shadow = 0.0;
     if (projCoords.z <= 1.0) {
         float closest = texture(shadowMap, projCoords.xy).r;

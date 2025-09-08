@@ -30,6 +30,7 @@ struct PushConstantObject {
     glm::mat4 model;
     alignas(16)glm::vec2 tiling;
     alignas(16)glm::vec2 offset;
+    alignas(4)int debug;
 };
 
 NNE::Systems::VulkanManager::VulkanManager()
@@ -1279,6 +1280,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
         pc.tiling = mesh->GetMaterial().tiling;
         pc.offset = mesh->GetMaterial().offset;
+        pc.debug = 0; // set to 1 to visualize projCoords
 
         vkCmdPushConstants(commandBuffer, shadowPipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -1338,6 +1340,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
         pc.tiling = mesh->GetMaterial().tiling;
         pc.offset = mesh->GetMaterial().offset;
+        pc.debug = 0; // set to 1 to visualize projCoords
 
         vkCmdPushConstants(commandBuffer, pipelineLayout,
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -1390,7 +1393,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         }
         float range = activeCamera->GetFarPlane();
         glm::mat4 lightView = glm::lookAt(lightPos, lightPos + activeLight->GetDirection(), glm::vec3(0.f, 1.f, 0.f));
-        glm::mat4 lightProj = glm::ortho(-range, range, -range, range, 0.1f, range * 2.f);
+        glm::mat4 lightProj = glm::ortho(-range, range, -range, range, -range, range);
         globalUBO.lightSpace = lightProj * lightView;
     }
 
