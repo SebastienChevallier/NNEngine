@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cstring>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <cmath>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -899,7 +900,7 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depthStencil.depthTestEnable = VK_TRUE;
     depthStencil.depthWriteEnable = VK_TRUE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.stencilTestEnable = VK_FALSE;
 
@@ -1437,6 +1438,17 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         float range = activeCamera->GetFarPlane();
         glm::mat4 lightView = glm::lookAt(lightPos, lightPos + activeLight->GetDirection(), glm::vec3(0.f, 1.f, 0.f));
         glm::mat4 lightProj = glm::ortho(-range, range, -range, range, 0.1f, range * 2.f);
+
+        if(shadowDebugRequested) {
+            static int frameCount = 0;
+            if (frameCount % 60 == 0) { // Print every 60 frames
+                std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;                
+                std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
+                std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
+                std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
+            }
+            frameCount++;
+		}
         globalUBO.lightSpace = lightProj * lightView;
     }
 
@@ -1864,7 +1876,10 @@ void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Com
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
-        debugShadowMap();
+        if (shadowDebugRequested) {
+            debugShadowMap();
+            shadowDebugRequested = false;
+        }
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2584,6 +2599,11 @@ void NNE::Systems::VulkanManager::debugShadowMap()
 
     vkDestroyBuffer(device, stagingBuffer, nullptr);
     vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void NNE::Systems::VulkanManager::requestShadowDebug()
+{
+    shadowDebugRequested = true;
 }
 
 VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)
