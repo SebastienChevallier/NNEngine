@@ -884,11 +884,8 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    // Our meshes use clockwise winding, so keep the same orientation as the
-    // main pipeline to ensure geometry isn't fully culled when rendering the
-    // shadow map.
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.cullMode = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT;    
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_TRUE;
     rasterizer.depthBiasConstantFactor = 0.0f; // Set dynamically
     rasterizer.depthBiasClamp = 0.0f;
@@ -1217,13 +1214,13 @@ void NNE::Systems::VulkanManager::createUniformBuffers()
             lightBuffers[i], lightBuffersMemory[i]);
         vkMapMemory(device, lightBuffersMemory[i], 0, lightSize, 0, &lightBuffersMapped[i]);
 
-        // valeur par défaut visible (pour éviter l’écran noir)
-        LightUBO l{};
-        l.dir = glm::normalize(glm::vec3(-1.f, -1.f, -1.f));
-        l.intensity = 1.0f;
-        l.color = glm::vec3(1.f);
-        l.ambient = 0.25f;
-        memcpy(lightBuffersMapped[i], &l, sizeof(LightUBO));
+        //// valeur par défaut visible (pour éviter l’écran noir)
+        //LightUBO l{};
+        //l.dir = glm::normalize(glm::vec3(-1.f, -1.f, -1.f));
+        //l.intensity = 1.0f;
+        //l.color = glm::vec3(1.f);
+        //l.ambient = 0.25f;
+        //memcpy(lightBuffersMapped[i], &l, sizeof(LightUBO));
     }
 }
 
@@ -1272,8 +1269,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     VkDeviceSize shadowOffsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer,0,1,shadowVBs,shadowOffsets);
     vkCmdBindIndexBuffer(commandBuffer,indexBuffer,0,VK_INDEX_TYPE_UINT32);
-    auto drawShadow = [&](NNE::Component::Render::MeshComponent* mesh,
-                          NNE::Component::TransformComponent* transform){
+
+    auto drawShadow = [&](NNE::Component::Render::MeshComponent* mesh, NNE::Component::TransformComponent* transform){
         if (!mesh || mesh->getIndexCount() == 0 || mesh->IsSkybox()) return;
         PushConstantObject pc{};
         pc.model = transform ? transform->getModelMatrix() : glm::mat4(1.0f);
