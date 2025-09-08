@@ -36,7 +36,9 @@ void main() {
     vec3 projCoords = fragPosLight.xyz / fragPosLight.w;
     projCoords = projCoords * 0.5 + 0.5;
     float shadow = 0.0;
-    if (projCoords.z <= 1.0) {
+    if (projCoords.z >= 0.0 && projCoords.z <= 1.0 &&
+        projCoords.x >= 0.0 && projCoords.x <= 1.0 &&
+        projCoords.y >= 0.0 && projCoords.y <= 1.0) {
         float closest = texture(shadowMap, projCoords.xy).r;
         float bias = max(0.05 * (1.0 - dot(N, L)), 0.005);
         shadow = projCoords.z - bias > closest ? 1.0 : 0.0;

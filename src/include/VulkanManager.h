@@ -496,6 +496,12 @@ namespace NNE::Systems {
             VkFormat findDepthFormat();
             /**
                 * <summary>
+                * Vérifie si le format possède un composant profondeur.
+                * </summary>
+                */
+            bool hasDepthComponent(VkFormat format);
+            /**
+                * <summary>
                 * Vérifie si le format possède un composant stencil.
                 * </summary>
                 */
@@ -528,6 +534,18 @@ namespace NNE::Systems {
                 * </summary>
                 */
             void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+            /**
+                * <summary>
+                * Copie les données d'une image vers un buffer.
+                * </summary>
+                */
+            void copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height);
+            /**
+                * <summary>
+                * Affiche des statistiques sur la shadow map pour vérifier son contenu.
+                * </summary>
+                */
+            void debugShadowMap();
             /**
                 * <summary>
                 * Crée un module de shader à partir de code binaire.

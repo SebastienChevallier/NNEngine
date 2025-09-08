@@ -1864,6 +1864,8 @@ void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Com
             throw std::runtime_error("failed to submit draw command buffer!");
         }
 
+        debugShadowMap();
+
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
@@ -2262,7 +2264,7 @@ void NNE::Systems::VulkanManager::createShadowResources()
     VkFormat depthFormat = findDepthFormat();
     createImage(SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1, VK_SAMPLE_COUNT_1_BIT, depthFormat,
         VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         shadowImage, shadowImageMemory);
     transitionImageLayout(shadowImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
@@ -2321,6 +2323,13 @@ VkFormat NNE::Systems::VulkanManager::findDepthFormat()
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
     );
+}
+
+bool NNE::Systems::VulkanManager::hasDepthComponent(VkFormat format)
+{
+    return format == VK_FORMAT_D32_SFLOAT ||
+           format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+           format == VK_FORMAT_D24_UNORM_S8_UINT;
 }
 
 bool NNE::Systems::VulkanManager::hasStencilComponent(VkFormat format)
@@ -2391,10 +2400,8 @@ void NNE::Systems::VulkanManager::transitionImageLayout(VkImage image, VkFormat 
     barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     barrier.image = image;
 
-    if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL ||
-        newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL) {
+    if (hasDepthComponent(format)) {
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-
         if (hasStencilComponent(format)) {
             barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
         }
@@ -2433,6 +2440,22 @@ void NNE::Systems::VulkanManager::transitionImageLayout(VkImage image, VkFormat 
     }
     else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL &&
+             newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+             newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
@@ -2492,7 +2515,75 @@ void NNE::Systems::VulkanManager::copyBufferToImage(VkBuffer buffer, VkImage ima
         &region
     );
 
-    endSingleTimeCommands(commandBuffer);   
+    endSingleTimeCommands(commandBuffer);
+}
+
+void NNE::Systems::VulkanManager::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height)
+{
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset = {0, 0, 0};
+    region.imageExtent = {width, height, 1};
+
+    vkCmdCopyImageToBuffer(
+        commandBuffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        buffer,
+        1,
+        &region
+    );
+
+    endSingleTimeCommands(commandBuffer);
+}
+
+void NNE::Systems::VulkanManager::debugShadowMap()
+{
+    VkFormat depthFormat = findDepthFormat();
+    VkDeviceSize imageSize = SHADOW_MAP_DIM * SHADOW_MAP_DIM * sizeof(float);
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer, stagingBufferMemory);
+
+    transitionImageLayout(shadowImage, depthFormat,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1);
+    copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
+    transitionImageLayout(shadowImage, depthFormat,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+
+    void* data;
+    vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
+    float* depthValues = static_cast<float*>(data);
+    float minDepth = 1.0f;
+    float maxDepth = 0.0f;
+    uint32_t pixelCount = SHADOW_MAP_DIM * SHADOW_MAP_DIM;
+    for (uint32_t i = 0; i < pixelCount; ++i) {
+        float v = depthValues[i];
+        if (v < minDepth) minDepth = v;
+        if (v > maxDepth) maxDepth = v;
+    }
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    std::cout << "[ShadowMap] min depth: " << minDepth
+              << ", max depth: " << maxDepth << std::endl;
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
 VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)
