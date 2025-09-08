@@ -1,6 +1,8 @@
 # NoNameEngine
 ![Build Status](https://github.com/SebastienChevallier/NNEngine/actions/workflows/c-cpp.yml/badge.svg)
 
+Discord : https://discord.gg/k28RzxDcKg
+
 # NoNameEngine
 
 NoNameEngine est un moteur de jeu basé sur un système Entity Component System (ECS) utilisant Vulkan pour le rendu.
