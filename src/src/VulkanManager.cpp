@@ -5,8 +5,6 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
-#include <array>
-#include <limits>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -1414,56 +1412,38 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         glm::vec3 lightPos{0.0f};
 
         if (auto lightTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            lightPos = lightTr->GetWorldPosition();
+            lightPos = lightTr->GetWorldPosition();            
         }
-        glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
+		glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
-            ? glm::vec3(0.0f, 0.0f, 1.0f)
+            ? glm::vec3(0.0f, 0.0f, 1.0f) // up alternatif
             : glm::vec3(0.0f, 1.0f, 0.0f);
-
+        
         glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);
 
-        glm::mat4 camProj = activeCamera->GetProjectionMatrix();
-        glm::mat4 camView = activeCamera->GetViewMatrix();
-        glm::mat4 invCam = glm::inverse(camProj * camView);
+        float range = activeCamera->GetFarPlane();
 
-        std::array<glm::vec4, 8> corners{};
-        int i = 0;
-        for (int x = 0; x < 2; ++x) {
-            for (int y = 0; y < 2; ++y) {
-                for (int z = 0; z < 2; ++z) {
-                    glm::vec4 ndc(
-                        2.0f * x - 1.0f,
-                        2.0f * y - 1.0f,
-                        static_cast<float>(z),
-                        1.0f);
-                    glm::vec4 world = invCam * ndc;
-                    world /= world.w;
-                    corners[i++] = world;
-                }
-            }
-        }
+   //     //lightPos = activeCamera->GetEntity()->transform->position;
+   //     glm::mat4 lightView = glm::lookAt(
+   //         lightPos,
+   //         activeCamera->GetEntity()->transform->position + activeCamera->GetEntity()->transform->GetForward(),
+			//activeCamera->GetEntity()->transform->GetUp()
+   //     );
 
-        glm::vec3 minAABB(std::numeric_limits<float>::max());
-        glm::vec3 maxAABB(-std::numeric_limits<float>::max());
-        for (const auto& corner : corners) {
-            glm::vec4 tr = lightView * corner;
-            minAABB = glm::min(minAABB, glm::vec3(tr));
-            maxAABB = glm::max(maxAABB, glm::vec3(tr));
-        }
 
-        glm::mat4 lightProj = glm::ortho(minAABB.x, maxAABB.x, minAABB.y, maxAABB.y, minAABB.z, maxAABB.z);
+        //glm::mat4 lightProj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.1f, 200.0f);
+        glm::mat4 lightProj = glm::perspective(glm::radians(activeCamera->GetFOV()), activeCamera->GetAspectRatio(), 0.10f, range); 
 
         if(shadowDebugRequested) {
             static int frameCount = 0;
-            if (frameCount % 60 == 0) {
-                std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;
+            if (frameCount % 60 == 0) { // Print every 60 frames
+                std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;                
                 std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
                 std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
                 std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
             }
             frameCount++;
-        }
+		}
         globalUBO.lightSpace = lightProj * lightView;
     }
 
