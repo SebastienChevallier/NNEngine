@@ -5,6 +5,8 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <cmath>
+#include <array>
+#include <limits>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_vulkan.h>
@@ -1313,7 +1315,11 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     };
     for (auto& pair : objects) {
         drawShadow(pair.first, pair.second);
+        
     }
+    std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
+    
+
     vkCmdEndRenderPass(commandBuffer);
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -1409,42 +1415,77 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
 
     globalUBO.lightSpace = glm::mat4(1.0f);
     if (activeLight) {
-        glm::vec3 lightPos{0.0f};
+        /*glm::vec3 lightPos{0.0f};
 
         if (auto lightTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            lightPos = lightTr->GetWorldPosition();            
+            lightPos = lightTr->GetWorldPosition();
         }
-		glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
+        glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
-            ? glm::vec3(0.0f, 0.0f, 1.0f) // up alternatif
+            ? glm::vec3(0.0f, 0.0f, 1.0f)
             : glm::vec3(0.0f, 1.0f, 0.0f);
-        
-        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);
 
-        float range = activeCamera->GetFarPlane();
+        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);*/
 
-   //     //lightPos = activeCamera->GetEntity()->transform->position;
-   //     glm::mat4 lightView = glm::lookAt(
-   //         lightPos,
-   //         activeCamera->GetEntity()->transform->position + activeCamera->GetEntity()->transform->GetForward(),
-			//activeCamera->GetEntity()->transform->GetUp()
-   //     );
+        // 0) Données caméra
+        const glm::vec3 camPos = activeCamera->GetEntity()->transform->position;
+        const glm::vec3 camFwd = glm::normalize(activeCamera->GetEntity()->transform->GetForward());
+        const glm::vec3 camUp = activeCamera->GetEntity()->transform->GetUp();     // ou recalcule Right/Up si besoin
+        const float     fovY_deg = activeCamera->GetFOV();    // en degrés
+        const float     aspect = activeCamera->GetAspectRatio(); // assure-toi d'avoir ça (sinon passe ton ratio écran)
+        const float     zNear = std::max(0.01f, activeCamera->GetNearPlane()); // near > 0 en Vulkan
+        const float     zFar = std::max(zNear + 0.1f, activeCamera->GetFarPlane());
 
+        const float fovY = glm::radians(fovY_deg);
+        const float tanY = tanf(fovY * 0.5f);
+        const float tanX = tanY * aspect;
 
-        //glm::mat4 lightProj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 0.1f, 200.0f);
-        glm::mat4 lightProj = glm::perspective(glm::radians(activeCamera->GetFOV()), activeCamera->GetAspectRatio(), 0.10f, range); 
+        // 1) Sphère englobante du frustum (voir paper “Practical Cascaded Shadow Maps”)
+        const float zCenter = 0.5f * (zNear + zFar);
+        const float halfLen = 0.5f * (zFar - zNear);
+
+        // rayon transversal max au plan à distance d: r(d) = d * sqrt(tanX^2 + tanY^2)
+        const float diagTan = sqrtf(tanX * tanX + tanY * tanY);
+        const float rMid = zCenter * diagTan;
+        const float radius = rMid + halfLen;   // sphère qui couvre tout le frustum
+
+        // 2) Centre monde de la sphère (sur l’axe de la caméra)
+        const glm::vec3 frustumCenter = camPos + camFwd * zCenter;
+
+        // 3) Vue de la light: place l’œil derrière la sphère, dans la direction opposée à la lumière
+        glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
+        if (glm::length(L) < 1e-8f) L = glm::vec3(0, -1, 0);      // garde-fou
+
+        const float zMargin = 10.0f; // marge en profondeur pour éviter le clipping
+        const glm::vec3 eye = frustumCenter - L * (radius + zMargin);
+
+        glm::vec3 up = (glm::abs(L.y) > 0.99f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
+        glm::mat4 lightView = glm::lookAt(eye, frustumCenter, up);
+
+        // 4) Ortho qui couvre la sphère: ±radius sur X/Y, et profondeur suffisante
+        const float nearPlane = 0.1f;                 // > 0 en Vulkan
+        const float farPlane = 2.0f * radius + 2.0f * zMargin;
+
+        glm::mat4 lightProj = glm::ortho(
+            -radius, +radius,
+            -radius, +radius,
+            nearPlane, farPlane
+        );
+
+        // 5) UBO
+        globalUBO.lightSpace = lightProj * lightView;
 
         if(shadowDebugRequested) {
-            static int frameCount = 0;
-            if (frameCount % 60 == 0) { // Print every 60 frames
-                std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;                
-                std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
-                std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
-                std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
-            }
-            frameCount++;
-		}
-        globalUBO.lightSpace = lightProj * lightView;
+            //std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;
+            std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
+            std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
+            std::cout << "[ShadowFit] radius=" << radius
+                << " near=" << nearPlane << " far=" << farPlane << "\n";
+            std::cout << "[Shadow Debug] Near/Far: " << nearPlane
+                << "/" << farPlane << std::endl;
+            std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
+            //std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
+        }        
     }
 
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
