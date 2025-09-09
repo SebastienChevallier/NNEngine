@@ -1318,9 +1318,32 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         
     }
     std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
-    
+
 
     vkCmdEndRenderPass(commandBuffer);
+
+    // Transition shadow map back to a readable layout for the main pass
+    VkImageMemoryBarrier shadowEndBarrier{};
+    shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    shadowEndBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    shadowEndBarrier.image = shadowImage;
+    shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    shadowEndBarrier.subresourceRange.baseMipLevel = 0;
+    shadowEndBarrier.subresourceRange.levelCount = 1;
+    shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
+    shadowEndBarrier.subresourceRange.layerCount = 1;
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &shadowEndBarrier);
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1471,6 +1494,8 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
             -radius, +radius,
             nearPlane, farPlane
         );
+        // Vulkan has inverted Y in clip space compared to OpenGL
+        lightProj[1][1] *= -1;
 
         // 5) UBO
         globalUBO.lightSpace = lightProj * lightView;
