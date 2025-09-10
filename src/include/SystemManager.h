@@ -39,5 +39,49 @@ public:
      * </summary>
      */
     void RegisterComponent(NNE::Component::AComponent* component);
+
+    /**
+     * <summary>
+     * Réveille tous les systèmes enregistrés.
+     * </summary>
+     */
+    void AwakeAll();
+    /**
+     * <summary>
+     * Démarre tous les systèmes enregistrés.
+     * </summary>
+     */
+    void StartAll();
+    /**
+     * <summary>
+     * Met à jour tous les systèmes enregistrés.
+     * </summary>
+     */
+    void UpdateAll(float deltaTime);
+    /**
+     * <summary>
+     * Applique les mises à jour tardives de tous les systèmes.
+     * </summary>
+     */
+    void LateUpdateAll(float deltaTime);
+    /**
+     * <summary>
+     * Supprime et nettoie tous les systèmes.
+     * </summary>
+     */
+    void Clear();
+
+    ~SystemManager();
+
+    template <typename T>
+    T* GetSystem()
+    {
+        for (ISystem* system : _systems)
+        {
+            if (auto casted = dynamic_cast<T*>(system))
+                return casted;
+        }
+        return nullptr;
+    }
 };
 }

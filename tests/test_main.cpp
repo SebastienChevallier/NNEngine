@@ -1,4 +1,5 @@
 #include "AComponent.h"
+#include "AComponent.h"
 #include "AEntity.h"
 #include "AScene.h"
 #include "Application.h"
@@ -94,10 +95,16 @@ static void test_get_components_multiple() {
   }
 }
 
-static void test_application_id_increment() {
-  int id1 = NNE::Systems::Application::GetInstance()->GenerateID();
-  int id2 = NNE::Systems::Application::GetInstance()->GenerateID();
-  EXPECT_TRUE(id2 == id1 + 1);
+static void test_entity_id_increment() {
+  NNE::AEntity e1;
+  NNE::AEntity e2;
+  EXPECT_TRUE(e2.GetID() == e1.GetID() + 1);
+}
+
+static void test_component_id_increment() {
+  NNE::Component::AComponent c1;
+  NNE::Component::AComponent c2;
+  EXPECT_TRUE(c2.GetID() == c1.GetID() + 1);
 }
 
 static void test_model_matrix_translation() {
@@ -127,7 +134,7 @@ static void test_rigidbody_awake_initializes_collider() {
 }
 
 static void test_collision_layers_matrix() {
-  auto *phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+  auto *phys = NNE::Systems::PhysicsSystem::GetInstance();
   NNE::AEntity e;
   auto *pc = e.AddComponent<NNE::Component::Physics::PlaneCollider>(
       glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
@@ -148,7 +155,8 @@ int main() {
     void (*func)();
   };
   std::vector<TestCase> tests = {
-      {"application_id_increment", test_application_id_increment},
+      {"entity_id_increment", test_entity_id_increment},
+      {"component_id_increment", test_component_id_increment},
       {"default_transform", test_default_transform},
       {"parent_relationship", test_parent_relationship},
       {"transform_directions", test_transform_directions},

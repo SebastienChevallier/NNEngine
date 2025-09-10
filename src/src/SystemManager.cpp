@@ -51,4 +51,50 @@ void SystemManager::RegisterComponent(NNE::Component::AComponent* component)
     }
 }
 
+void SystemManager::AwakeAll()
+{
+    for (ISystem* system : _systems)
+    {
+        system->Awake();
+    }
+}
+
+void SystemManager::StartAll()
+{
+    for (ISystem* system : _systems)
+    {
+        system->Start();
+    }
+}
+
+void SystemManager::UpdateAll(float deltaTime)
+{
+    for (ISystem* system : _systems)
+    {
+        system->Update(deltaTime);
+    }
+}
+
+void SystemManager::LateUpdateAll(float deltaTime)
+{
+    for (ISystem* system : _systems)
+    {
+        system->LateUpdate(deltaTime);
+    }
+}
+
+void SystemManager::Clear()
+{
+    for (ISystem* system : _systems)
+    {
+        delete system;
+    }
+    _systems.clear();
+}
+
+SystemManager::~SystemManager()
+{
+    Clear();
+}
+
 } // namespace NNE::Systems

@@ -48,7 +48,7 @@ namespace NNE::Component {
                  * Retourne l'identifiant du composant.
                  * </summary>
                  */
-                int GetID();
+                int GetID() const;
                 /**
                  * <summary>
                  * Obtient l'entité propriétaire.

@@ -2,18 +2,17 @@
 #include "MonoComponent.h"
 #include "AEntity.h"
 #include "PhysicsSystem.h"
-#include "Application.h"
 #include <vector>
 #include <Jolt/Physics/Body/BodyInterface.h>
 
 NNE::Component::Physics::ColliderComponent::~ColliderComponent() {
-        auto app = NNE::Systems::Application::GetInstance();
+        auto* system = NNE::Systems::PhysicsSystem::GetInstance();
         if (!bodyID.IsInvalid()) {
-                app->physicsSystem->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
-                app->UnregisterCollider(bodyID);
+                system->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
+                system->UnregisterCollider(bodyID);
                 bodyID = JPH::BodyID();
         }
-        app->physicsSystem->UnregisterComponent(this);
+        system->UnregisterComponent(this);
 }
 
 

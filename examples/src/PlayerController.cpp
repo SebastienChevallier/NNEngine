@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <Application.h>
 #include <UISystem.h>
+#include <SystemManager.h>
 
 PlayerController::PlayerController()
 {
@@ -25,7 +26,8 @@ void PlayerController::Awake()
 
 void PlayerController::Update(float deltaTime)
 {
-	if (NNE::Systems::Application::GetInstance()->uiSystem->showPerf) return;
+        auto* ui = NNE::Systems::SystemManager::GetInstance()->GetSystem<NNE::Systems::UISystem>();
+        if (ui && ui->showPerf) return;
 
     direction = glm::vec3(0.0f);
 

@@ -1,15 +1,16 @@
 #include "AComponent.h"
-#include "Application.h"
+#include <atomic>
 
 /**
  * <summary>
  * Assigne un identifiant unique au composant.
  * </summary>
  */
-NNE::Component::AComponent::AComponent()
-{
-        _id = NNE::Systems::Application::GetInstance()->GenerateID();
+namespace {
+std::atomic<int> g_nextComponentId{0};
 }
+
+NNE::Component::AComponent::AComponent() : _id(g_nextComponentId++) {}
 
 /**
  * <summary>
@@ -52,10 +53,7 @@ void NNE::Component::AComponent::LateUpdate(float deltaTime)
  * Renvoie l'identifiant du composant.
  * </summary>
  */
-int NNE::Component::AComponent::GetID()
-{
-        return _id;
-}
+int NNE::Component::AComponent::GetID() const { return _id; }
 
 /**
  * <summary>

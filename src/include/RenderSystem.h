@@ -11,7 +11,7 @@ class VulkanManager;
 
 class RenderSystem : public ISystem {
 private:
-    VulkanManager* _vkManager;
+    VulkanManager* _renderer;
     std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>> _renderObjects;
 
 public:

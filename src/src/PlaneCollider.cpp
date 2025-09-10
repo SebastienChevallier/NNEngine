@@ -6,7 +6,6 @@
 #include <Jolt/Physics/Body/MassProperties.h>
 
 #include "PhysicsSystem.h"
-#include "Application.h"
 #include "TransformComponent.h"
 #include "RigidbodyComponent.h"
 #include "AEntity.h"
@@ -59,9 +58,9 @@ void NNE::Component::Physics::PlaneCollider::CreateShape()
                 bodySettings.mMassPropertiesOverride.mInertia =
                     JPH::Mat44::sIdentity();
 
-                auto& bodyInterface = NNE::Systems::Application::GetInstance()->physicsSystem->GetPhysicsSystem()->GetBodyInterface();
+                auto& bodyInterface = NNE::Systems::PhysicsSystem::GetInstance()->GetPhysicsSystem()->GetBodyInterface();
                 bodyID = bodyInterface.CreateAndAddBody(bodySettings, JPH::EActivation::Activate);
 
-                NNE::Systems::Application::GetInstance()->RegisterCollider(bodyID, this);
+                NNE::Systems::PhysicsSystem::GetInstance()->RegisterCollider(bodyID, this);
         }
 }
