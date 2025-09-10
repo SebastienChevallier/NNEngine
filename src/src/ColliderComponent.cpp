@@ -2,18 +2,23 @@
 #include "MonoComponent.h"
 #include "AEntity.h"
 #include "PhysicsSystem.h"
+#include "RigidbodyComponent.h"
 #include <vector>
 #include <Jolt/Physics/Body/BodyInterface.h>
 
 NNE::Component::Physics::ColliderComponent::~ColliderComponent() {
-        if (auto* system = NNE::Systems::PhysicsSystem::GetInstance()) {
-                if (!bodyID.IsInvalid()) {
-                        system->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
-                        system->UnregisterCollider(bodyID);
-                        bodyID = JPH::BodyID();
-                }
-                system->UnregisterComponent(this);
+    if (auto* system = NNE::Systems::PhysicsSystem::GetInstance()) {
+        // If a rigidbody owns this collider's body, let it handle teardown to
+        // avoid removing the same body twice.
+        bool hasRigidbody = _entity &&
+            _entity->GetComponent<NNE::Component::Physics::RigidbodyComponent>();
+        if (!hasRigidbody && !bodyID.IsInvalid()) {
+            system->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
+            system->UnregisterCollider(bodyID);
+            bodyID = JPH::BodyID();
         }
+        system->UnregisterComponent(this);
+    }
 }
 
 
