@@ -117,7 +117,13 @@ PhysicsSystem::~PhysicsSystem() {
  * Fournit un accès au système physique Jolt.
  * </summary>
  */
-JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() { return &physicsSystem; }
+JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() {
+  if (!initialized) {
+    Initialize();
+    initialized = true;
+  }
+  return &physicsSystem;
+}
 
 PhysicsSystem* PhysicsSystem::GetInstance() { return instance; }
 
