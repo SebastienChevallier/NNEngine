@@ -2652,11 +2652,13 @@ void NNE::Systems::VulkanManager::debugShadowMap()
     }
     vkUnmapMemory(device, stagingBufferMemory);
 
+
     if (stbi_write_png("shadowmap.png", SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1,
         image.data(), SHADOW_MAP_DIM) != 0) {
         std::cout << "[ShadowMap] saved to shadowmap.png" << std::endl;
     } else {
         std::cerr << "[ShadowMap] failed to write shadowmap.png" << std::endl;
+
     }
 
     std::cout << "[ShadowMap] min depth: " << minDepth
