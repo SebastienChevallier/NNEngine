@@ -1323,10 +1323,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     for (auto& pair : objects) {
         drawShadow(pair.first, pair.second);
     }
-<<<<<<< Updated upstream
-=======
-        
->>>>>>> Stashed changes
+
 
     vkCmdEndRenderPass(commandBuffer);
 
