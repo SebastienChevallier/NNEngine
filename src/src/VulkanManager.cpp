@@ -2679,14 +2679,22 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         stagingBuffer, stagingBufferMemory);
 
-    transitionImageLayout(shadowImage, depthFormat,
-        shadowImageLayout,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1);
+    transitionImageLayout(
+        shadowImage,
+        depthFormat,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        1);
     shadowImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
     copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
-    transitionImageLayout(shadowImage, depthFormat,
-        shadowImageLayout,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+
+    transitionImageLayout(
+        shadowImage,
+        depthFormat,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        1);
     shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     void* data;
