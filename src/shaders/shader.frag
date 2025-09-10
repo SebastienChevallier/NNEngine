@@ -25,7 +25,8 @@ layout(set = 0, binding = 3) uniform sampler2D shadowMap;
 
 float shadowFactor(vec3 N, vec3 L, vec4 lightClip) {
     vec3 proj = lightClip.xyz / lightClip.w;
-    proj = proj * 0.5 + 0.5;            // [-1,1] -> [0,1]
+    // En Vulkan la profondeur est déjà dans [0,1]
+    proj.xy = proj.xy * 0.5 + 0.5;      // [-1,1] -> [0,1] seulement pour x/y
 
     // Hors shadowmap = éclairé (ton sampler est CLAMP_TO_BORDER + WHITE, ça colle aussi)
     if (proj.x < 0.0 || proj.x > 1.0 || proj.y < 0.0 || proj.y > 1.0 || proj.z > 1.0)

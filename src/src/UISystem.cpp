@@ -78,6 +78,16 @@ void UISystem::Update(float deltaTime) {
                     ImGui::EndTabItem();
                 }
 
+                if (ImGui::BeginTabItem("Shadow Map")) {
+                    VkDescriptorSet desc = _vkManager->getShadowMapDebugDescriptor();
+                    if (desc != VK_NULL_HANDLE) {
+                        ImGui::Image((ImTextureID)desc, ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
+                    } else {
+                        ImGui::TextUnformatted("Shadow map unavailable");
+                    }
+                    ImGui::EndTabItem();
+                }
+
                 if (ImGui::BeginTabItem("Entities")) {
                     static std::unordered_map<NNE::AEntity*, std::array<char, 128>> nameBuffers;
                     for (NNE::AEntity* e : _app->_entities) {
