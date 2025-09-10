@@ -2628,7 +2628,26 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         if (v < minDepth) minDepth = v;
         if (v > maxDepth) maxDepth = v;
     }
+
+    std::vector<uint8_t> image(pixelCount);
+    for (uint32_t i = 0; i < pixelCount; ++i) {
+        float normalized = 0.0f;
+        if (maxDepth > minDepth) {
+            normalized = (depthValues[i] - minDepth) / (maxDepth - minDepth);
+        }
+        normalized = std::clamp(normalized, 0.0f, 1.0f);
+        image[i] = static_cast<uint8_t>(normalized * 255.0f);
+    }
     vkUnmapMemory(device, stagingBufferMemory);
+
+    std::ofstream file("shadowmap.pgm", std::ios::binary);
+    if (file) {
+        file << "P5\n" << SHADOW_MAP_DIM << " " << SHADOW_MAP_DIM << "\n255\n";
+        file.write(reinterpret_cast<char*>(image.data()), image.size());
+        std::cout << "[ShadowMap] saved to shadowmap.pgm" << std::endl;
+    } else {
+        std::cerr << "[ShadowMap] failed to write shadowmap.pgm" << std::endl;
+    }
 
     std::cout << "[ShadowMap] min depth: " << minDepth
               << ", max depth: " << maxDepth << std::endl;
