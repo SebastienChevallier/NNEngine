@@ -85,6 +85,11 @@ void UISystem::Update(float deltaTime) {
                     } else {
                         ImGui::TextUnformatted("Shadow map unavailable");
                     }
+                    auto& cfg = _vkManager->shadowConfig;
+                    ImGui::Separator();
+                    ImGui::DragFloat("Margin", &cfg.margin, 0.1f, 0.0f, 1000.0f);
+                    ImGui::DragFloat("Near Plane", &cfg.nearPlane, 0.01f, 0.001f, 100.0f);
+                    ImGui::DragFloat("Radius Scale", &cfg.radiusFactor, 0.01f, 0.1f, 10.0f);
                     ImGui::EndTabItem();
                 }
 

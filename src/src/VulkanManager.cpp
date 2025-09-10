@@ -1475,7 +1475,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         // rayon transversal max au plan à distance d: r(d) = d * sqrt(tanX^2 + tanY^2)
         const float diagTan = sqrtf(tanX * tanX + tanY * tanY);
         const float rMid = zCenter * diagTan;
-        const float radius = rMid + halfLen;   // sphère qui couvre tout le frustum
+        const float radius = shadowConfig.radiusFactor * (rMid + halfLen);
 
         // 2) Centre monde de la sphère (on ignore l'inclinaison verticale de la caméra)
         //    Cela évite que le volume d'ombre ne "suive" la caméra vers le ciel
@@ -1489,14 +1489,14 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
         if (glm::length(L) < 1e-8f) L = glm::vec3(0, -1, 0);      // garde-fou
 
-        const float zMargin = 10.0f; // marge en profondeur pour éviter le clipping
+        const float zMargin = shadowConfig.margin; // marge en profondeur ajustable
         const glm::vec3 eye = frustumCenter - L * (radius + zMargin);
 
         glm::vec3 up = (glm::abs(L.y) > 0.99f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
         glm::mat4 lightView = glm::lookAt(eye, frustumCenter, up);
 
         // 4) Ortho qui couvre la sphère: ±radius sur X/Y, et profondeur suffisante
-        const float nearPlane = 0.1f;                 // > 0 en Vulkan
+        const float nearPlane = std::max(0.001f, shadowConfig.nearPlane); // > 0 en Vulkan
         const float farPlane = 2.0f * radius + 2.0f * zMargin;
 
         glm::mat4 lightProj = glm::ortho(
