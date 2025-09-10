@@ -202,11 +202,13 @@ namespace NNE::Systems {
         VkDeviceMemory shadowImageMemory;
         VkImageView shadowImageView;
         VkSampler shadowSampler;
+        VkImageLayout shadowImageLayout;
         VkPipeline shadowPipeline;
 
         VkPipelineLayout shadowPipelineLayout;
         VkDescriptorSetLayout shadowDescriptorSetLayout;
         std::array<VkDescriptorSet, MAX_FRAMES_IN_FLIGHT> shadowDescriptorSets;
+        VkDescriptorSet shadowDebugDescriptor;
 
     private:
         bool shadowDebugRequested;
@@ -549,6 +551,7 @@ namespace NNE::Systems {
             */
         void debugShadowMap();
         void requestShadowDebug();
+        VkDescriptorSet getShadowMapDebugDescriptor();
         /**
             * <summary>
             * Crée un module de shader à partir de code binaire.
