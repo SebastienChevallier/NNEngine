@@ -1,5 +1,7 @@
 #include "VulkanManager.h"
 #include <stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 #include <filesystem>
 #include <cstring>
 #include <glm/gtc/constants.hpp>
@@ -60,11 +62,13 @@ NNE::Systems::VulkanManager::VulkanManager()
     shadowImageMemory = VK_NULL_HANDLE;
     shadowImageView = VK_NULL_HANDLE;
     shadowSampler = VK_NULL_HANDLE;
+    shadowImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     shadowPipeline = VK_NULL_HANDLE;
 
     shadowPipelineLayout = VK_NULL_HANDLE;
     shadowDescriptorSetLayout = VK_NULL_HANDLE;
     shadowDescriptorSets.fill(VK_NULL_HANDLE);
+    shadowDebugDescriptor = VK_NULL_HANDLE;
 
     vertexBuffer = VK_NULL_HANDLE;
     vertexBufferMemory = VK_NULL_HANDLE;
@@ -1139,6 +1143,10 @@ void NNE::Systems::VulkanManager::renderImGui(VkCommandBuffer commandBuffer)
 
 void NNE::Systems::VulkanManager::cleanupImGui()
 {
+    if (shadowDebugDescriptor != VK_NULL_HANDLE) {
+        ImGui_ImplVulkan_RemoveTexture(shadowDebugDescriptor);
+        shadowDebugDescriptor = VK_NULL_HANDLE;
+    }
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -1242,8 +1250,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     shadowBeginBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     shadowBeginBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
     shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowBeginBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;    
+    shadowBeginBarrier.oldLayout = shadowImageLayout;
+    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     shadowBeginBarrier.image = shadowImage;
     shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
@@ -1259,6 +1267,7 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         0, nullptr,
         0, nullptr,
         1, &shadowBeginBarrier);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     // ----- Shadow map pass -----
     VkRenderPassBeginInfo shadowPassInfo{};
@@ -1315,12 +1324,12 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     };
     for (auto& pair : objects) {
         drawShadow(pair.first, pair.second);
-        
     }
-    std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
-    
 
     vkCmdEndRenderPass(commandBuffer);
+
+    // Render pass finalLayout already transitions shadow map to shader-read
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1449,8 +1458,13 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         const float rMid = zCenter * diagTan;
         const float radius = rMid + halfLen;   // sphère qui couvre tout le frustum
 
-        // 2) Centre monde de la sphère (sur l’axe de la caméra)
-        const glm::vec3 frustumCenter = camPos + camFwd * zCenter;
+        // 2) Centre monde de la sphère (on ignore l'inclinaison verticale de la caméra)
+        //    Cela évite que le volume d'ombre ne "suive" la caméra vers le ciel
+        //    lorsque l'utilisateur regarde vers le haut, ce qui laissait la scène
+        //    hors de la shadow map et donc entièrement éclairée.
+        glm::vec3 camDirXZ = glm::normalize(glm::vec3(camFwd.x, 0.0f, camFwd.z));
+        if (glm::length(camDirXZ) < 1e-6f) camDirXZ = glm::vec3(0.0f, 0.0f, -1.0f);
+        const glm::vec3 frustumCenter = camPos + camDirXZ * zCenter;
 
         // 3) Vue de la light: place l’œil derrière la sphère, dans la direction opposée à la lumière
         glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
@@ -2319,6 +2333,7 @@ void NNE::Systems::VulkanManager::createShadowResources()
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         shadowImage, shadowImageMemory);
     transitionImageLayout(shadowImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     shadowImageView = createImageView(shadowImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
@@ -2610,12 +2625,14 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         stagingBuffer, stagingBufferMemory);
 
     transitionImageLayout(shadowImage, depthFormat,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        shadowImageLayout,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
     transitionImageLayout(shadowImage, depthFormat,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        shadowImageLayout,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
@@ -2628,7 +2645,24 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         if (v < minDepth) minDepth = v;
         if (v > maxDepth) maxDepth = v;
     }
+
+    std::vector<uint8_t> image(pixelCount);
+    for (uint32_t i = 0; i < pixelCount; ++i) {
+        float normalized = 0.0f;
+        if (maxDepth > minDepth) {
+            normalized = (depthValues[i] - minDepth) / (maxDepth - minDepth);
+        }
+        normalized = std::clamp(normalized, 0.0f, 1.0f);
+        image[i] = static_cast<uint8_t>(normalized * 255.0f);
+    }
     vkUnmapMemory(device, stagingBufferMemory);
+
+    if (stbi_write_png("shadowmap.png", SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1,
+        image.data(), SHADOW_MAP_DIM) != 0) {
+        std::cout << "[ShadowMap] saved to shadowmap.png" << std::endl;
+    } else {
+        std::cerr << "[ShadowMap] failed to write shadowmap.png" << std::endl;
+    }
 
     std::cout << "[ShadowMap] min depth: " << minDepth
               << ", max depth: " << maxDepth << std::endl;
@@ -2640,6 +2674,16 @@ void NNE::Systems::VulkanManager::debugShadowMap()
 void NNE::Systems::VulkanManager::requestShadowDebug()
 {
     shadowDebugRequested = true;
+}
+
+VkDescriptorSet NNE::Systems::VulkanManager::getShadowMapDebugDescriptor()
+{
+    if (shadowDebugDescriptor == VK_NULL_HANDLE) {
+        shadowDebugDescriptor = ImGui_ImplVulkan_AddTexture(
+            shadowSampler, shadowImageView,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+    }
+    return shadowDebugDescriptor;
 }
 
 VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)
