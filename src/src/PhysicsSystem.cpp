@@ -1,5 +1,4 @@
 #include "PhysicsSystem.h"
-#include "Application.h"
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
 #include "TransformComponent.h"
@@ -53,12 +52,14 @@ public:
 class SimpleObjectLayerPairFilter final : public JPH::ObjectLayerPairFilter {
 public:
   bool ShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const override {
-    auto* phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+    auto* phys = NNE::Systems::PhysicsSystem::GetInstance();
     return phys->LayersShouldCollide(layer1, layer2);
   }
 };
 
 namespace NNE::Systems {
+
+PhysicsSystem* PhysicsSystem::instance = nullptr;
 
 /**
  * <summary>
@@ -66,6 +67,7 @@ namespace NNE::Systems {
  * </summary>
  */
 PhysicsSystem::PhysicsSystem() : tempAllocator(nullptr), jobSystem(nullptr), layerMasks(), initialized(false) {
+  instance = this;
   JPH::RegisterDefaultAllocator();
   JPH::Factory::sInstance = new JPH::Factory();
   JPH::RegisterTypes();
@@ -99,8 +101,15 @@ void PhysicsSystem::Initialize() {
  * </summary>
  */
 PhysicsSystem::~PhysicsSystem() {
+  delete tempAllocator;
+  tempAllocator = nullptr;
+  delete jobSystem;
+  jobSystem = nullptr;
+  JPH::UnregisterTypes();
   delete JPH::Factory::sInstance;
   JPH::Factory::sInstance = nullptr;
+  if (instance == this)
+    instance = nullptr;
 }
 
 /**
@@ -108,7 +117,15 @@ PhysicsSystem::~PhysicsSystem() {
  * Fournit un accès au système physique Jolt.
  * </summary>
  */
-JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() { return &physicsSystem; }
+JPH::PhysicsSystem *PhysicsSystem::GetPhysicsSystem() {
+  if (!initialized) {
+    Initialize();
+    initialized = true;
+  }
+  return &physicsSystem;
+}
+
+PhysicsSystem* PhysicsSystem::GetInstance() { return instance; }
 
 void PhysicsSystem::SetLayerCollision(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2, bool shouldCollide) {
   if (shouldCollide) {
@@ -122,6 +139,19 @@ void PhysicsSystem::SetLayerCollision(JPH::ObjectLayer layer1, JPH::ObjectLayer 
 
 bool PhysicsSystem::LayersShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const {
   return (layerMasks[layer1] & (1u << layer2)) != 0;
+}
+
+void PhysicsSystem::RegisterCollider(JPH::BodyID id, NNE::Component::Physics::ColliderComponent* collider) {
+  colliderMap[id] = collider;
+}
+
+NNE::Component::Physics::ColliderComponent* PhysicsSystem::GetCollider(JPH::BodyID id) {
+  auto it = colliderMap.find(id);
+  return it != colliderMap.end() ? it->second : nullptr;
+}
+
+void PhysicsSystem::UnregisterCollider(JPH::BodyID id) {
+  colliderMap.erase(id);
 }
 
 /**
@@ -223,7 +253,7 @@ void PhysicsSystem::UnregisterComponent(NNE::Component::AComponent *component) {
 
 bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distance,
                             RaycastHit &outHit, JPH::ObjectLayer rayLayer) {
-    auto* system = NNE::Systems::Application::GetInstance()->physicsSystem;
+    auto* system = NNE::Systems::PhysicsSystem::GetInstance();
     if (!system)
         return false;
     JPH::PhysicsSystem& phys = system->physicsSystem;
@@ -232,7 +262,7 @@ bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distanc
     public:
         explicit RaycastLayerFilter(JPH::ObjectLayer layer) : mLayer(layer) {}
         bool ShouldCollide(JPH::ObjectLayer other) const override {
-            auto* phys = NNE::Systems::Application::GetInstance()->physicsSystem;
+            auto* phys = NNE::Systems::PhysicsSystem::GetInstance();
             return phys->LayersShouldCollide(mLayer, other);
         }
     private:
@@ -252,7 +282,10 @@ bool PhysicsSystem::Raycast(glm::vec3 origin, glm::vec3 direction, float distanc
     outHit.bodyID = result.mBodyID;
     outHit.subShapeID = result.mSubShapeID2;
     outHit.fraction = result.mFraction;
-	outHit.entity = NNE::Systems::Application::GetInstance()->GetCollider(result.mBodyID)->GetEntity();
+    if (auto* col = system->GetCollider(result.mBodyID))
+        outHit.entity = col->GetEntity();
+    else
+        outHit.entity = nullptr;
 
     JPH::RVec3 point = ray.GetPointOnRay(result.mFraction);
     outHit.position = glm::vec3(point.GetX(), point.GetY(), point.GetZ());
@@ -275,9 +308,9 @@ void PhysicsSystem::ContactListenerImpl::OnContactAdded(
     const JPH::Body &body1, const JPH::Body &body2,
     const JPH::ContactManifold &manifold, JPH::ContactSettings &) {
   auto *colliderA =
-      NNE::Systems::Application::GetInstance()->GetCollider(body1.GetID());
+      NNE::Systems::PhysicsSystem::GetInstance()->GetCollider(body1.GetID());
   auto *colliderB =
-      NNE::Systems::Application::GetInstance()->GetCollider(body2.GetID());
+      NNE::Systems::PhysicsSystem::GetInstance()->GetCollider(body2.GetID());
 
   if (colliderA && colliderB) {
     if (colliderA->IsTrigger() || colliderB->IsTrigger()) {

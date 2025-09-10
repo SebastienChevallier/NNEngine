@@ -15,9 +15,9 @@
 
 int main() {
     NNE::Systems::Application app;
-    app.physicsSystem->SetLayerCollision(NNE::Systems::Layers::RAYCAST, NNE::Systems::Layers::PLAYER, false);
-    
-    app.physicsSystem->SetLayerCollision(NNE::Systems::Layers::RAYCAST, NNE::Systems::Layers::DEFAULT, true);
+    NNE::Systems::PhysicsSystem::GetInstance()->SetLayerCollision(NNE::Systems::Layers::RAYCAST, NNE::Systems::Layers::PLAYER, false);
+
+    NNE::Systems::PhysicsSystem::GetInstance()->SetLayerCollision(NNE::Systems::Layers::RAYCAST, NNE::Systems::Layers::DEFAULT, true);
 
 
 	NNE::AEntity* Skybox = app.CreateEntity();

@@ -1902,6 +1902,29 @@ void NNE::Systems::VulkanManager::createShadowDescriptorSets()
     }
 }
 
+void NNE::Systems::VulkanManager::initializeRenderer(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
+{
+    LoadMeshes(objects);
+
+    if (!vertices.empty() && !indices.empty())
+    {
+        createVertexBuffer();
+        createIndexBuffer();
+    }
+
+    createUniformBuffers();
+    createDescriptorPool();
+    createDescriptorSets();
+    createShadowDescriptorSets();
+    createCommandBuffers();
+    createSyncObjects();
+}
+
+void NNE::Systems::VulkanManager::renderFrame(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
+{
+    drawFrame(objects);
+}
+
 void NNE::Systems::VulkanManager::drawFrame(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects)
 {
     try {

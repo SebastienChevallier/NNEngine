@@ -4,10 +4,12 @@
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
+#include <Jolt/Physics/Body/BodyID.h>
 #include <Jolt/RegisterTypes.h>
 #include "ISystem.h"
 #include <vector>
 #include <array>
+#include <unordered_map>
 #include <glm/glm.hpp>
 #include "AEntity.h"
 
@@ -24,11 +26,13 @@ namespace NNE::Systems {
 
     class PhysicsSystem : public ISystem {
     private:
+        static PhysicsSystem* instance;
         JPH::PhysicsSystem physicsSystem;
         JPH::TempAllocatorImpl* tempAllocator;
         JPH::JobSystemThreadPool* jobSystem;
         std::vector<NNE::Component::Physics::RigidbodyComponent*> rigidbodies;
         std::vector<NNE::Component::Physics::ColliderComponent*> colliders;
+        std::unordered_map<JPH::BodyID, NNE::Component::Physics::ColliderComponent*> colliderMap;
         std::array<uint32_t, 32> layerMasks;
         bool initialized;
 
@@ -89,6 +93,12 @@ namespace NNE::Systems {
          * </summary>
          */
         JPH::PhysicsSystem* GetPhysicsSystem();
+        /**
+         * <summary>
+         * Retourne l'instance unique du système physique.
+         * </summary>
+         */
+        static PhysicsSystem* GetInstance();
 
         /**
          * <summary>
@@ -103,6 +113,27 @@ namespace NNE::Systems {
          * </summary>
          */
         bool LayersShouldCollide(JPH::ObjectLayer layer1, JPH::ObjectLayer layer2) const;
+
+        /**
+         * <summary>
+         * Associe un collider à son identifiant physique.
+         * </summary>
+         */
+        void RegisterCollider(JPH::BodyID id, NNE::Component::Physics::ColliderComponent* collider);
+
+        /**
+         * <summary>
+         * Récupère le collider lié à un identifiant physique.
+         * </summary>
+         */
+        NNE::Component::Physics::ColliderComponent* GetCollider(JPH::BodyID id);
+
+        /**
+         * <summary>
+         * Retire un collider du suivi par identifiant.
+         * </summary>
+         */
+        void UnregisterCollider(JPH::BodyID id);
 
         struct RaycastHit {
             JPH::BodyID bodyID;

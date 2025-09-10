@@ -1,6 +1,6 @@
 #include "AEntity.h"
-#include "Application.h"
 #include "MonoComponent.h"
+#include <atomic>
 
 
 /**
@@ -8,11 +8,13 @@
  * Initialise l'entité avec un identifiant et un transform.
  * </summary>
  */
-NNE::AEntity::AEntity()
-{
-        _ID = NNE::Systems::Application::GetInstance()->GenerateID();
+namespace {
+std::atomic<int> g_nextEntityId{0};
+}
+
+NNE::AEntity::AEntity() : _ID(g_nextEntityId++) {
         transform = this->AddComponent<NNE::Component::TransformComponent>();
-		_Name = "Entity_" + std::to_string(_ID);
+        _Name = "Entity_" + std::to_string(_ID);
 }
 
 /**

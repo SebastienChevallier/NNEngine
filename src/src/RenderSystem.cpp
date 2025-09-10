@@ -9,7 +9,7 @@ namespace NNE::Systems {
  * Initialise le système de rendu avec un gestionnaire Vulkan.
  * </summary>
  */
-RenderSystem::RenderSystem(VulkanManager* manager) : _vkManager(manager) {}
+RenderSystem::RenderSystem(VulkanManager* manager) : _renderer(manager) {}
 
 /**
  * <summary>
@@ -18,21 +18,9 @@ RenderSystem::RenderSystem(VulkanManager* manager) : _vkManager(manager) {}
  */
 void RenderSystem::Start()
 {
-    if (_vkManager)
+    if (_renderer)
     {
-        _vkManager->LoadMeshes(_renderObjects);
-
-        if (!_vkManager->vertices.empty() && !_vkManager->indices.empty())
-        {
-            _vkManager->createVertexBuffer();
-            _vkManager->createIndexBuffer();
-        }
-        _vkManager->createUniformBuffers();
-        _vkManager->createDescriptorPool();
-        _vkManager->createDescriptorSets();
-        _vkManager->createShadowDescriptorSets();
-        _vkManager->createCommandBuffers();
-        _vkManager->createSyncObjects();
+        _renderer->initializeRenderer(_renderObjects);
     }
 }
 
@@ -44,9 +32,9 @@ void RenderSystem::Start()
 void RenderSystem::Update(float deltaTime)
 {
     (void)deltaTime;
-    if (_vkManager)
+    if (_renderer)
     {
-        _vkManager->drawFrame(_renderObjects);
+        _renderer->renderFrame(_renderObjects);
     }
 }
 

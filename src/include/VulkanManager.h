@@ -395,6 +395,18 @@ namespace NNE::Systems {
         void createShadowDescriptorSets();
         /**
             * <summary>
+            * Initialise les ressources de rendu.
+            * </summary>
+            */
+        void initializeRenderer(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects);
+        /**
+            * <summary>
+            * Rend une frame.
+            * </summary>
+            */
+        void renderFrame(const std::vector<std::pair<NNE::Component::Render::MeshComponent*, NNE::Component::TransformComponent*>>& objects);
+        /**
+            * <summary>
             * Dessine une frame complète.
             * </summary>
             */

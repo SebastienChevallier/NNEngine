@@ -14,7 +14,6 @@
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
-int NNE::Systems::Application::_genericID = 0;
 
 /**
  * <summary>
@@ -22,23 +21,16 @@ int NNE::Systems::Application::_genericID = 0;
  * </summary>
  */
 NNE::Systems::Application::Application()
-    : _systems(NNE::Systems::SystemManager::GetInstance()->GetSystems())
 {
     Instance = this;
     VKManager = new VulkanManager();
-    physicsSystem = new PhysicsSystem();
-    physicsSystem->Awake();
-    uiSystem = new UISystem(VKManager);
-    renderSystem = new RenderSystem(VKManager);
-    lightSystem = new LightSystem(VKManager);
-    inputSystem = new InputSystem();
-    scriptSystem = new ScriptSystem();
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(physicsSystem);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(uiSystem);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(renderSystem);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(lightSystem);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(inputSystem);
-    NNE::Systems::SystemManager::GetInstance()->AddSystem(scriptSystem);
+    auto* manager = NNE::Systems::SystemManager::GetInstance();
+    manager->AddSystem(new PhysicsSystem());
+    manager->AddSystem(new UISystem(VKManager));
+    manager->AddSystem(new RenderSystem(VKManager));
+    manager->AddSystem(new LightSystem(VKManager));
+    manager->AddSystem(new InputSystem());
+    manager->AddSystem(new ScriptSystem());
     delta = 0;
 }
 
@@ -55,46 +47,12 @@ NNE::Systems::Application::~Application()
         VKManager = nullptr;
     }
 
-    if (renderSystem)
-    {
-        delete renderSystem;
-        renderSystem = nullptr;
-    }
-
-    if (uiSystem)
-    {
-        delete uiSystem;
-        uiSystem = nullptr;
-    }
-
-    if (inputSystem)
-    {
-        delete inputSystem;
-        inputSystem = nullptr;
-    }
-
-    if (scriptSystem)
-    {
-        delete scriptSystem;
-        scriptSystem = nullptr;
-    }
-
-    if (lightSystem)
-    {
-        delete lightSystem;
-        lightSystem = nullptr;
-    }
-
     for (NNE::AEntity* entity : _entities) {
         delete entity;
     }
     _entities.clear();
 
-    if (physicsSystem)
-    {
-        delete physicsSystem;
-        physicsSystem = nullptr;
-    }
+    NNE::Systems::SystemManager::GetInstance()->Clear();
 }
 
 /**
@@ -106,11 +64,9 @@ void NNE::Systems::Application::Init()
 {
     Open();
     VKManager->initVulkan();
-    for (NNE::Systems::ISystem* system : _systems)
-    {
-        system->Awake();
-        system->Start();
-    }
+    auto* manager = NNE::Systems::SystemManager::GetInstance();
+    manager->AwakeAll();
+    manager->StartAll();
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -129,6 +85,7 @@ void NNE::Systems::Application::Init()
  */
 void NNE::Systems::Application::Update()
 {
+    auto* manager = NNE::Systems::SystemManager::GetInstance();
     while (!glfwWindowShouldClose(VKManager->window)) {
         delta = GetDeltaTime();
         float dtMs = delta * 1000.0f;
@@ -138,23 +95,16 @@ void NNE::Systems::Application::Update()
         g_FPS = 1000.0f / std::max(0.001f, g_FrameTimeMs);
         glfwPollEvents();
 
-		glfwGetWindowSize(VKManager->window, &WIDTH,&HEIGHT);
-		
+        glfwGetWindowSize(VKManager->window, &WIDTH,&HEIGHT);
 
-        for (NNE::Systems::ISystem* system : _systems)
-        {
-            system->Update(delta);
-        }
+        manager->UpdateAll(delta);
 
         for (NNE::AEntity* entity : _entities)
         {
             entity->Update(delta);
         }
 
-        for (NNE::Systems::ISystem* system : _systems)
-        {
-            system->LateUpdate(delta);
-        }
+        manager->LateUpdateAll(delta);
 
         for (NNE::AEntity* entity : _entities)
         {
@@ -183,17 +133,6 @@ void NNE::Systems::Application::Open()
 void NNE::Systems::Application::Quit()
 {
     glfwTerminate();
-}
-
-/**
- * <summary>
- * Fournit un nouvel identifiant unique.
- * </summary>
- */
-int NNE::Systems::Application::GenerateID()
-{
-    _genericID++;
-    return _genericID;
 }
 
 /**
