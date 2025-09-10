@@ -1244,28 +1244,37 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         throw std::runtime_error("❌ Erreur : Échec de l'enregistrement de la commande buffer !");
     }
 
-    // Transition shadow map from read-only to attachment for rendering
-    VkImageMemoryBarrier shadowBeginBarrier{};
-    shadowBeginBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    shadowBeginBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowBeginBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;    
-    shadowBeginBarrier.image = shadowImage;
-    shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
-    shadowBeginBarrier.subresourceRange.levelCount = 1;
-    shadowBeginBarrier.subresourceRange.baseArrayLayer = 0;
-    shadowBeginBarrier.subresourceRange.layerCount = 1;
+    // Transition shadow map from its current layout to attachment for rendering
+    if (shadowImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        VkImageMemoryBarrier shadowBeginBarrier{};
+        shadowBeginBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        shadowBeginBarrier.srcAccessMask =
+            (shadowImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
+                ? VK_ACCESS_SHADER_READ_BIT
+                : VK_ACCESS_TRANSFER_READ_BIT;
+        shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        shadowBeginBarrier.oldLayout = shadowImageLayout;
+        shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        shadowBeginBarrier.image = shadowImage;
+        shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
+        shadowBeginBarrier.subresourceRange.levelCount = 1;
+        shadowBeginBarrier.subresourceRange.baseArrayLayer = 0;
+        shadowBeginBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &shadowBeginBarrier);
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            (shadowImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
+                ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+                : VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &shadowBeginBarrier);
+
+        shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    }
 
     // ----- Shadow map pass -----
     VkRenderPassBeginInfo shadowPassInfo{};
@@ -1328,27 +1337,31 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     vkCmdEndRenderPass(commandBuffer);
 
     // Transition shadow map back to read-only so the main pass can sample it
-    VkImageMemoryBarrier shadowEndBarrier{};
-    shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    shadowEndBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowEndBarrier.image = shadowImage;
-    shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    shadowEndBarrier.subresourceRange.baseMipLevel = 0;
-    shadowEndBarrier.subresourceRange.levelCount = 1;
-    shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
-    shadowEndBarrier.subresourceRange.layerCount = 1;
+    if (shadowImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL) {
+        VkImageMemoryBarrier shadowEndBarrier{};
+        shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        shadowEndBarrier.oldLayout = shadowImageLayout;
+        shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+        shadowEndBarrier.image = shadowImage;
+        shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        shadowEndBarrier.subresourceRange.baseMipLevel = 0;
+        shadowEndBarrier.subresourceRange.levelCount = 1;
+        shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
+        shadowEndBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &shadowEndBarrier);
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &shadowEndBarrier);
+
+        shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    }
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1475,7 +1488,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         // rayon transversal max au plan à distance d: r(d) = d * sqrt(tanX^2 + tanY^2)
         const float diagTan = sqrtf(tanX * tanX + tanY * tanY);
         const float rMid = zCenter * diagTan;
-        const float radius = rMid + halfLen;   // sphère qui couvre tout le frustum
+        const float radius = shadowConfig.radiusFactor * (rMid + halfLen);
 
         // 2) Centre monde de la sphère (on ignore l'inclinaison verticale de la caméra)
         //    Cela évite que le volume d'ombre ne "suive" la caméra vers le ciel
@@ -1489,14 +1502,14 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
         if (glm::length(L) < 1e-8f) L = glm::vec3(0, -1, 0);      // garde-fou
 
-        const float zMargin = 10.0f; // marge en profondeur pour éviter le clipping
+        const float zMargin = shadowConfig.margin; // marge en profondeur ajustable
         const glm::vec3 eye = frustumCenter - L * (radius + zMargin);
 
         glm::vec3 up = (glm::abs(L.y) > 0.99f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
         glm::mat4 lightView = glm::lookAt(eye, frustumCenter, up);
 
         // 4) Ortho qui couvre la sphère: ±radius sur X/Y, et profondeur suffisante
-        const float nearPlane = 0.1f;                 // > 0 en Vulkan
+        const float nearPlane = std::max(0.001f, shadowConfig.nearPlane); // > 0 en Vulkan
         const float farPlane = 2.0f * radius + 2.0f * zMargin;
 
         glm::mat4 lightProj = glm::ortho(
@@ -2375,6 +2388,7 @@ void NNE::Systems::VulkanManager::createShadowResources()
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         shadowImage, shadowImageMemory);
     transitionImageLayout(shadowImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     shadowImageView = createImageView(shadowImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
@@ -2666,12 +2680,14 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         stagingBuffer, stagingBufferMemory);
 
     transitionImageLayout(shadowImage, depthFormat,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        shadowImageLayout,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
     copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
     transitionImageLayout(shadowImage, depthFormat,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        shadowImageLayout,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);

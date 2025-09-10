@@ -116,7 +116,13 @@ namespace NNE::Systems {
     struct alignas(16) LightUBO {
         glm::vec3 dir;      float intensity; // 16B
         glm::vec3 color;    float ambient;   // 16B
-	};
+        };
+
+    struct ShadowConfig {
+        float margin = 10.0f;
+        float nearPlane = 0.1f;
+        float radiusFactor = 1.0f;
+    };
 
     class VulkanManager
 	{
@@ -203,6 +209,8 @@ namespace NNE::Systems {
         VkImageView shadowImageView;
         VkSampler shadowSampler;
         VkPipeline shadowPipeline;
+        // Tracks the current layout of shadowImage to ensure proper barriers
+        VkImageLayout shadowImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
         VkPipelineLayout shadowPipelineLayout;
         VkDescriptorSetLayout shadowDescriptorSetLayout;
@@ -213,6 +221,7 @@ namespace NNE::Systems {
         bool shadowDebugRequested;
 
     public :
+        ShadowConfig shadowConfig{};
         NNE::Component::Render::CameraComponent* activeCamera = nullptr;
         NNE::Component::Render::LightComponent* activeLight = nullptr;
         VkInstance instance = VK_NULL_HANDLE;
