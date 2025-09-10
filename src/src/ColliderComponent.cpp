@@ -6,13 +6,14 @@
 #include <Jolt/Physics/Body/BodyInterface.h>
 
 NNE::Component::Physics::ColliderComponent::~ColliderComponent() {
-        auto* system = NNE::Systems::PhysicsSystem::GetInstance();
-        if (!bodyID.IsInvalid()) {
-                system->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
-                system->UnregisterCollider(bodyID);
-                bodyID = JPH::BodyID();
+        if (auto* system = NNE::Systems::PhysicsSystem::GetInstance()) {
+                if (!bodyID.IsInvalid()) {
+                        system->GetPhysicsSystem()->GetBodyInterface().RemoveBody(bodyID);
+                        system->UnregisterCollider(bodyID);
+                        bodyID = JPH::BodyID();
+                }
+                system->UnregisterComponent(this);
         }
-        system->UnregisterComponent(this);
 }
 
 

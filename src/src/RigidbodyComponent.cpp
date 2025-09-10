@@ -40,14 +40,15 @@ RigidbodyComponent::RigidbodyComponent(float mass,
  * </summary>
  */
 RigidbodyComponent::~RigidbodyComponent() {
-    auto* system = NNE::Systems::PhysicsSystem::GetInstance();
-    auto physicsSystem = system->GetPhysicsSystem();
-    if (!bodyID.IsInvalid()) {
-        physicsSystem->GetBodyInterface().RemoveBody(bodyID);
-        system->UnregisterCollider(bodyID);
-        bodyID = JPH::BodyID();
+    if (auto* system = NNE::Systems::PhysicsSystem::GetInstance()) {
+        if (!bodyID.IsInvalid()) {
+            auto* physicsSystem = system->GetPhysicsSystem();
+            physicsSystem->GetBodyInterface().RemoveBody(bodyID);
+            system->UnregisterCollider(bodyID);
+            bodyID = JPH::BodyID();
+        }
+        system->UnregisterComponent(this);
     }
-    system->UnregisterComponent(this);
 }
 
 /**
