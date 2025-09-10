@@ -2677,6 +2677,7 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         std::cout << "[ShadowMap] saved to shadowmap.png" << std::endl;
     } else {
         std::cerr << "[ShadowMap] failed to write shadowmap.png" << std::endl;
+
     }
 
     std::cout << "[ShadowMap] min depth: " << minDepth
