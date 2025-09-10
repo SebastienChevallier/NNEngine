@@ -101,6 +101,11 @@ void PhysicsSystem::Initialize() {
  * </summary>
  */
 PhysicsSystem::~PhysicsSystem() {
+  delete tempAllocator;
+  tempAllocator = nullptr;
+  delete jobSystem;
+  jobSystem = nullptr;
+  JPH::UnregisterTypes();
   delete JPH::Factory::sInstance;
   JPH::Factory::sInstance = nullptr;
   if (instance == this)
