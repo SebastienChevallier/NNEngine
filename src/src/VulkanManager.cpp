@@ -1322,12 +1322,32 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
     };
     for (auto& pair : objects) {
         drawShadow(pair.first, pair.second);
-        
     }
-    std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
-    
 
     vkCmdEndRenderPass(commandBuffer);
+
+    // Transition shadow map back to read-only so the main pass can sample it
+    VkImageMemoryBarrier shadowEndBarrier{};
+    shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    shadowEndBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+    shadowEndBarrier.image = shadowImage;
+    shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    shadowEndBarrier.subresourceRange.baseMipLevel = 0;
+    shadowEndBarrier.subresourceRange.levelCount = 1;
+    shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
+    shadowEndBarrier.subresourceRange.layerCount = 1;
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &shadowEndBarrier);
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -2651,7 +2671,6 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         image[i] = static_cast<uint8_t>(normalized * 255.0f);
     }
     vkUnmapMemory(device, stagingBufferMemory);
-
 
     if (stbi_write_png("shadowmap.png", SHADOW_MAP_DIM, SHADOW_MAP_DIM, 1,
         image.data(), SHADOW_MAP_DIM) != 0) {
