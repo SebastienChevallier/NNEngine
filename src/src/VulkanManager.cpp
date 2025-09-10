@@ -636,7 +636,7 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkAttachmentReference depthRef{};
@@ -651,8 +651,8 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     VkSubpassDependency deps[2]{};
     deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
     deps[0].dstSubpass = 0;
-    deps[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    deps[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    deps[0].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    deps[0].srcAccessMask = 0;
     deps[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     deps[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
@@ -1244,38 +1244,6 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         throw std::runtime_error("❌ Erreur : Échec de l'enregistrement de la commande buffer !");
     }
 
-    // Transition shadow map from its current layout to attachment for rendering
-    if (shadowImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-        VkImageMemoryBarrier shadowBeginBarrier{};
-        shadowBeginBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        shadowBeginBarrier.srcAccessMask =
-            (shadowImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
-                ? VK_ACCESS_SHADER_READ_BIT
-                : VK_ACCESS_TRANSFER_READ_BIT;
-        shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        shadowBeginBarrier.oldLayout = shadowImageLayout;
-        shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        shadowBeginBarrier.image = shadowImage;
-        shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
-        shadowBeginBarrier.subresourceRange.levelCount = 1;
-        shadowBeginBarrier.subresourceRange.baseArrayLayer = 0;
-        shadowBeginBarrier.subresourceRange.layerCount = 1;
-
-        vkCmdPipelineBarrier(
-            commandBuffer,
-            (shadowImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
-                ? VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
-                : VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-            0,
-            0, nullptr,
-            0, nullptr,
-            1, &shadowBeginBarrier);
-
-        shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    }
-
     // ----- Shadow map pass -----
     VkRenderPassBeginInfo shadowPassInfo{};
     shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1336,32 +1304,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
 
     vkCmdEndRenderPass(commandBuffer);
 
-    // Transition shadow map back to read-only so the main pass can sample it
-    if (shadowImageLayout != VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL) {
-        VkImageMemoryBarrier shadowEndBarrier{};
-        shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        shadowEndBarrier.oldLayout = shadowImageLayout;
-        shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-        shadowEndBarrier.image = shadowImage;
-        shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        shadowEndBarrier.subresourceRange.baseMipLevel = 0;
-        shadowEndBarrier.subresourceRange.levelCount = 1;
-        shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
-        shadowEndBarrier.subresourceRange.layerCount = 1;
-
-        vkCmdPipelineBarrier(
-            commandBuffer,
-            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            0,
-            0, nullptr,
-            0, nullptr,
-            1, &shadowEndBarrier);
-
-        shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    }
+    // Shadow render pass transitions to READ_ONLY via finalLayout
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
