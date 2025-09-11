@@ -1428,12 +1428,8 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
         ); 
 
         globalUBO.lightSpace = proj * lightView * bias;
+
     }
-
-       
-        
-
-
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
     if (activeLight) {
