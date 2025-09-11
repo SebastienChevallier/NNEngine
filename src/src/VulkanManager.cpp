@@ -636,7 +636,7 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkAttachmentReference depthRef{};
@@ -651,8 +651,8 @@ void NNE::Systems::VulkanManager::createShadowRenderPass()
     VkSubpassDependency deps[2]{};
     deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
     deps[0].dstSubpass = 0;
-    deps[0].srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    deps[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    deps[0].srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    deps[0].srcAccessMask = 0;
     deps[0].dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     deps[0].dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
@@ -1244,29 +1244,6 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         throw std::runtime_error("❌ Erreur : Échec de l'enregistrement de la commande buffer !");
     }
 
-    // Transition shadow map from read-only to attachment for rendering
-    VkImageMemoryBarrier shadowBeginBarrier{};
-    shadowBeginBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    shadowBeginBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    shadowBeginBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowBeginBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowBeginBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;    
-    shadowBeginBarrier.image = shadowImage;
-    shadowBeginBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    shadowBeginBarrier.subresourceRange.baseMipLevel = 0;
-    shadowBeginBarrier.subresourceRange.levelCount = 1;
-    shadowBeginBarrier.subresourceRange.baseArrayLayer = 0;
-    shadowBeginBarrier.subresourceRange.layerCount = 1;
-
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &shadowBeginBarrier);
-
     // ----- Shadow map pass -----
     VkRenderPassBeginInfo shadowPassInfo{};
     shadowPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1327,28 +1304,8 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
 
     vkCmdEndRenderPass(commandBuffer);
 
-    // Transition shadow map back to read-only so the main pass can sample it
-    VkImageMemoryBarrier shadowEndBarrier{};
-    shadowEndBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    shadowEndBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    shadowEndBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    shadowEndBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    shadowEndBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-    shadowEndBarrier.image = shadowImage;
-    shadowEndBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    shadowEndBarrier.subresourceRange.baseMipLevel = 0;
-    shadowEndBarrier.subresourceRange.levelCount = 1;
-    shadowEndBarrier.subresourceRange.baseArrayLayer = 0;
-    shadowEndBarrier.subresourceRange.layerCount = 1;
-
-    vkCmdPipelineBarrier(
-        commandBuffer,
-        VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &shadowEndBarrier);
+    // Shadow render pass transitions to READ_ONLY via finalLayout
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -1442,85 +1399,37 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.proj = activeCamera->GetProjectionMatrix();
 
     globalUBO.lightSpace = glm::mat4(1.0f);
-    if (activeLight) {
-        /*glm::vec3 lightPos{0.0f};
 
-        if (auto lightTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            lightPos = lightTr->GetWorldPosition();
-        }
-        glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
+    if (activeLight) {
+        glm::vec3 lightPos{ 0.0f };        
+        
+		lightPos = activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
+		//lightPos = activeCamera->GetEntity()->transform->position;
+
+        glm::vec3 lightDir = activeLight->GetDirection();
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
             ? glm::vec3(0.0f, 0.0f, 1.0f)
             : glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);*/
+        glm::mat4 lightView = glm::lookAt(lightPos, activeCamera->GetEntity()->transform->position, up);
 
-        // 0) Données caméra
-        const glm::vec3 camPos = activeCamera->GetEntity()->transform->position;
-        const glm::vec3 camFwd = glm::normalize(activeCamera->GetEntity()->transform->GetForward());
-        const glm::vec3 camUp = activeCamera->GetEntity()->transform->GetUp();     // ou recalcule Right/Up si besoin
-        const float     fovY_deg = activeCamera->GetFOV();    // en degrés
-        const float     aspect = activeCamera->GetAspectRatio(); // assure-toi d'avoir ça (sinon passe ton ratio écran)
-        const float     zNear = std::max(0.01f, activeCamera->GetNearPlane()); // near > 0 en Vulkan
-        const float     zFar = std::max(zNear + 0.1f, activeCamera->GetFarPlane());
+        // Ortho couvrant une boîte fixe (simple pour démarrer)
+        const float l = -shadowConfig.orthoHalfSize, r = +shadowConfig.orthoHalfSize;
+        const float b = -shadowConfig.orthoHalfSize, t = +shadowConfig.orthoHalfSize;
+        glm::mat4 proj = glm::ortho(l, r, b, t, shadowConfig.nearPlane, shadowConfig.farPlane);
 
-        const float fovY = glm::radians(fovY_deg);
-        const float tanY = tanf(fovY * 0.5f);
-        const float tanX = tanY * aspect;
+        proj[1][1] *= -1.0f;
 
-        // 1) Sphère englobante du frustum (voir paper “Practical Cascaded Shadow Maps”)
-        const float zCenter = 0.5f * (zNear + zFar);
-        const float halfLen = 0.5f * (zFar - zNear);
+        glm::mat4 bias = glm::mat4(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f
+        ); 
 
-        // rayon transversal max au plan à distance d: r(d) = d * sqrt(tanX^2 + tanY^2)
-        const float diagTan = sqrtf(tanX * tanX + tanY * tanY);
-        const float rMid = zCenter * diagTan;
-        const float radius = shadowConfig.radiusFactor * (rMid + halfLen);
+        globalUBO.lightSpace = proj * lightView * bias;
 
-        // 2) Centre monde de la sphère (on ignore l'inclinaison verticale de la caméra)
-        //    Cela évite que le volume d'ombre ne "suive" la caméra vers le ciel
-        //    lorsque l'utilisateur regarde vers le haut, ce qui laissait la scène
-        //    hors de la shadow map et donc entièrement éclairée.
-        glm::vec3 camDirXZ = glm::normalize(glm::vec3(camFwd.x, 0.0f, camFwd.z));
-        if (glm::length(camDirXZ) < 1e-6f) camDirXZ = glm::vec3(0.0f, 0.0f, -1.0f);
-        const glm::vec3 frustumCenter = camPos + camDirXZ * zCenter;
-
-        // 3) Vue de la light: place l’œil derrière la sphère, dans la direction opposée à la lumière
-        glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
-        if (glm::length(L) < 1e-8f) L = glm::vec3(0, -1, 0);      // garde-fou
-
-        const float zMargin = shadowConfig.margin; // marge en profondeur ajustable
-        const glm::vec3 eye = frustumCenter - L * (radius + zMargin);
-
-        glm::vec3 up = (glm::abs(L.y) > 0.99f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
-        glm::mat4 lightView = glm::lookAt(eye, frustumCenter, up);
-
-        // 4) Ortho qui couvre la sphère: ±radius sur X/Y, et profondeur suffisante
-        const float nearPlane = std::max(0.001f, shadowConfig.nearPlane); // > 0 en Vulkan
-        const float farPlane = 2.0f * radius + 2.0f * zMargin;
-
-        glm::mat4 lightProj = glm::ortho(
-            -radius, +radius,
-            -radius, +radius,
-            nearPlane, farPlane
-        );
-
-        // 5) UBO
-        globalUBO.lightSpace = lightProj * lightView;
-
-        if(shadowDebugRequested) {
-            //std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;
-            std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
-            std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
-            std::cout << "[ShadowFit] radius=" << radius
-                << " near=" << nearPlane << " far=" << farPlane << "\n";
-            std::cout << "[Shadow Debug] Near/Far: " << nearPlane
-                << "/" << farPlane << std::endl;
-            std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
-            //std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
-        }        
     }
-
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
     if (activeLight) {
@@ -2375,6 +2284,7 @@ void NNE::Systems::VulkanManager::createShadowResources()
         VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         shadowImage, shadowImageMemory);
     transitionImageLayout(shadowImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     shadowImageView = createImageView(shadowImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
@@ -2665,13 +2575,23 @@ void NNE::Systems::VulkanManager::debugShadowMap()
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         stagingBuffer, stagingBufferMemory);
 
-    transitionImageLayout(shadowImage, depthFormat,
+    transitionImageLayout(
+        shadowImage,
+        depthFormat,
         VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, 1);
-    copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
-    transitionImageLayout(shadowImage, depthFormat,
         VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, 1);
+        1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+    copyImageToBuffer(shadowImage, stagingBuffer, SHADOW_MAP_DIM, SHADOW_MAP_DIM);
+
+    transitionImageLayout(
+        shadowImage,
+        depthFormat,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+        1);
+    shadowImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
     void* data;
     vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
