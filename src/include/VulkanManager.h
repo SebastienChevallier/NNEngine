@@ -119,9 +119,10 @@ namespace NNE::Systems {
         };
 
     struct ShadowConfig {
-        float margin = 10.0f;
-        float nearPlane = 0.1f;
-        float radiusFactor = 1.0f;
+        float orthoHalfSize = 100.0f;
+        float nearPlane = 1.0f;
+        float farPlane = 100.0f;
+        float lightDistance = 75.0f;
     };
 
     class VulkanManager

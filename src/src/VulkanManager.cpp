@@ -1399,84 +1399,40 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.proj = activeCamera->GetProjectionMatrix();
 
     globalUBO.lightSpace = glm::mat4(1.0f);
-    if (activeLight) {
-        /*glm::vec3 lightPos{0.0f};
 
-        if (auto lightTr = activeLight->GetEntity()->GetComponent<NNE::Component::TransformComponent>()) {
-            lightPos = lightTr->GetWorldPosition();
-        }
-        glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
+    if (activeLight) {
+        glm::vec3 lightPos{ 0.0f };        
+        
+		lightPos = activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
+		//lightPos = activeCamera->GetEntity()->transform->position;
+
+        glm::vec3 lightDir = activeLight->GetDirection();
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
             ? glm::vec3(0.0f, 0.0f, 1.0f)
             : glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 lightView = glm::lookAt(lightPos, lightPos + lightDir, up);*/
+        glm::mat4 lightView = glm::lookAt(lightPos, activeCamera->GetEntity()->transform->position, up);
 
-        // 0) Données caméra
-        const glm::vec3 camPos = activeCamera->GetEntity()->transform->position;
-        const glm::vec3 camFwd = glm::normalize(activeCamera->GetEntity()->transform->GetForward());
-        const glm::vec3 camUp = activeCamera->GetEntity()->transform->GetUp();     // ou recalcule Right/Up si besoin
-        const float     fovY_deg = activeCamera->GetFOV();    // en degrés
-        const float     aspect = activeCamera->GetAspectRatio(); // assure-toi d'avoir ça (sinon passe ton ratio écran)
-        const float     zNear = std::max(0.01f, activeCamera->GetNearPlane()); // near > 0 en Vulkan
-        const float     zFar = std::max(zNear + 0.1f, activeCamera->GetFarPlane());
+        // Ortho couvrant une boîte fixe (simple pour démarrer)
+        const float l = -shadowConfig.orthoHalfSize, r = +shadowConfig.orthoHalfSize;
+        const float b = -shadowConfig.orthoHalfSize, t = +shadowConfig.orthoHalfSize;
+        glm::mat4 proj = glm::ortho(l, r, b, t, shadowConfig.nearPlane, shadowConfig.farPlane);
 
-        const float fovY = glm::radians(fovY_deg);
-        const float tanY = tanf(fovY * 0.5f);
-        const float tanX = tanY * aspect;
+        proj[1][1] *= -1.0f;
 
-        // 1) Sphère englobante du frustum (voir paper “Practical Cascaded Shadow Maps”)
-        const float zCenter = 0.5f * (zNear + zFar);
-        const float halfLen = 0.5f * (zFar - zNear);
+        glm::mat4 bias = glm::mat4(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.5f, 0.0f,
+            0.5f, 0.5f, 0.5f, 1.0f
+        ); 
 
-        // rayon transversal max au plan à distance d: r(d) = d * sqrt(tanX^2 + tanY^2)
-        const float diagTan = sqrtf(tanX * tanX + tanY * tanY);
-        const float rMid = zCenter * diagTan;
-        const float radius = shadowConfig.radiusFactor * (rMid + halfLen);
-
-        // 2) Centre monde de la sphère (on ignore l'inclinaison verticale de la caméra)
-        //    Cela évite que le volume d'ombre ne "suive" la caméra vers le ciel
-        //    lorsque l'utilisateur regarde vers le haut, ce qui laissait la scène
-        //    hors de la shadow map et donc entièrement éclairée.
-        glm::vec3 camDirXZ = glm::normalize(glm::vec3(camFwd.x, 0.0f, camFwd.z));
-        if (glm::length(camDirXZ) < 1e-6f) camDirXZ = glm::vec3(0.0f, 0.0f, -1.0f);
-        const glm::vec3 frustumCenter = camPos + camDirXZ * zCenter;
-
-        // 3) Vue de la light: place l’œil derrière la sphère, dans la direction opposée à la lumière
-        glm::vec3 L = glm::normalize(activeLight->GetDirection()); // (0,-1,0) dans ton log
-        if (glm::length(L) < 1e-8f) L = glm::vec3(0, -1, 0);      // garde-fou
-
-        const float zMargin = shadowConfig.margin; // marge en profondeur ajustable
-        const glm::vec3 eye = frustumCenter - L * (radius + zMargin);
-
-        glm::vec3 up = (glm::abs(L.y) > 0.99f) ? glm::vec3(0, 0, 1) : glm::vec3(0, 1, 0);
-        glm::mat4 lightView = glm::lookAt(eye, frustumCenter, up);
-
-        // 4) Ortho qui couvre la sphère: ±radius sur X/Y, et profondeur suffisante
-        const float nearPlane = std::max(0.001f, shadowConfig.nearPlane); // > 0 en Vulkan
-        const float farPlane = 2.0f * radius + 2.0f * zMargin;
-
-        glm::mat4 lightProj = glm::ortho(
-            -radius, +radius,
-            -radius, +radius,
-            nearPlane, farPlane
-        );
-
-        // 5) UBO
-        globalUBO.lightSpace = lightProj * lightView;
-
-        if(shadowDebugRequested) {
-            //std::cout << "[Shadow Debug] Light Position: " << glm::to_string(lightPos) << std::endl;
-            std::cout << "[Shadow Debug] Light Direction: " << glm::to_string(activeLight->GetDirection()) << std::endl;
-            std::cout << "[Shadow Debug] View Matrix: " << glm::to_string(lightView) << std::endl;
-            std::cout << "[ShadowFit] radius=" << radius
-                << " near=" << nearPlane << " far=" << farPlane << "\n";
-            std::cout << "[Shadow Debug] Near/Far: " << nearPlane
-                << "/" << farPlane << std::endl;
-            std::cout << "[Shadow Debug] Projection Matrix: " << glm::to_string(lightProj) << std::endl;
-            //std::cout << "[Shadow] casters count = " << objects.size() << std::endl;
-        }        
+        globalUBO.lightSpace = proj * lightView * bias;
     }
+
+       
+        
+
 
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
 
