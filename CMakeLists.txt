@@ -72,6 +72,21 @@ add_custom_command(TARGET GameTemplate POST_BUILD
             ${CMAKE_SOURCE_DIR}/src/textures
             ${CMAKE_BINARY_DIR}/assets/textures)
 
+# ---------------- Solar System Example ----------------
+file(GLOB SOLAR_SOURCES examples/solarsystem/src/*.cpp)
+file(GLOB SOLAR_HEADERS examples/solarsystem/include/*.h)
+add_executable(SolarSystemExample ${SOLAR_SOURCES} ${SOLAR_HEADERS})
+
+target_include_directories(SolarSystemExample PRIVATE examples/solarsystem/include)
+target_link_libraries(SolarSystemExample PRIVATE NNEngine)
+
+add_custom_command(TARGET SolarSystemExample POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_BINARY_DIR}/assets/textures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/assets/textures
+            ${CMAKE_BINARY_DIR}/assets/textures)
+
 # ---------------- Tests ----------------
 enable_testing()
 file(GLOB TEST_SOURCES tests/*.cpp)
