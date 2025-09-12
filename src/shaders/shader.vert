@@ -1,14 +1,20 @@
 #version 450
 
+layout(location = 0) in vec3 inPos;
+layout(location = 1) in vec3 inNormal;
+layout(location = 2) in vec2 inUV;
+layout(location = 3) in vec3 inColor;
+
+layout(location = 0) out vec3 fragColor;
+layout(location = 1) out vec2 fragTexCoord;
+layout(location = 2) out vec3 fragNormal;
+layout(location = 3) out vec4 fragPosLight;   // position en espace lumière (bias VP)
+
 layout(set = 0, binding = 0) uniform GlobalUBO {
     mat4 view;
     mat4 proj;
-    mat4 lightSpace;
-} globalUBO;
-
-//layout(set = 0, binding = 1) uniform ObjectUBO {
-//    mat4 model;
-//} objectUBO; // Ce buffer est dynamique
+    mat4 lightSpace;   // DOIT être bias * lightVP côté C++
+} ubo;
 
 layout(push_constant) uniform PushConstants {
     mat4 model;
@@ -16,26 +22,18 @@ layout(push_constant) uniform PushConstants {
     vec2 offset;
 } pushConstants;
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec3 inColor;
-layout(location = 2) in vec2 inTexCoord;
-layout(location = 3) in vec3 inNormal;
+void main() {
+    // position monde
+    vec4 worldPos = pushConstants.model * vec4(inPos, 1.0);
 
-layout(location = 0) out vec3 fragColor;
-layout(location = 1) out vec2 fragTexCoord;
-layout(location = 2) out vec3 fragNormal;
-layout(location = 3) out vec4 fragPosLight;
+    // sorties
+    fragColor    = inColor;
+    fragTexCoord = inUV;
+    fragNormal   = mat3(transpose(inverse(pushConstants.model))) * inNormal;
 
-void main() { 
-    mat4 M = pushConstants.model;
+    // coord pour la shadow map
+    fragPosLight = ubo.lightSpace * worldPos;
 
-    vec4 transformed = globalUBO.proj * globalUBO.view * M * vec4(inPosition, 1.0);
-    gl_Position = transformed;
-
-    mat3 N = transpose(inverse(mat3(M)));
-    fragNormal = normalize(N * inNormal);
-
-    fragColor = inColor;
-    fragTexCoord = inTexCoord;
-    fragPosLight = globalUBO.lightSpace * M * vec4(inPosition,1.0);
+    // projection caméra
+    gl_Position  = ubo.proj * ubo.view * worldPos;
 }

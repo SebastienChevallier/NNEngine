@@ -120,7 +120,7 @@ namespace NNE::Systems {
 
     struct ShadowConfig {
 
-        float orthoHalfSize = 100.0f;
+        float orthoHalfSize = 10.0f;
         float nearPlane = 1.0f;
         float farPlane = 100.0f;
         float lightDistance = 75.0f;

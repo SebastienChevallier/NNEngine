@@ -37,6 +37,11 @@ struct PushConstantObject {
     alignas(16)glm::vec2 offset;
 };
 
+static const std::array<glm::vec3, 8> kNdcCorners = { {
+    {-1,-1,0}, {+1,-1,0}, {-1,+1,0}, {+1,+1,0}, // near
+    {-1,-1,1}, {+1,-1,1}, {-1,+1,1}, {+1,+1,1}  // far
+} };
+
 NNE::Systems::VulkanManager::VulkanManager()
 {
     device = VK_NULL_HANDLE;
@@ -893,9 +898,9 @@ void NNE::Systems::VulkanManager::createShadowPipeline()
     rasterizer.cullMode = VK_CULL_MODE_NONE; //VK_CULL_MODE_BACK_BIT;    
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_TRUE;
-    rasterizer.depthBiasConstantFactor = 0.0f; // Set dynamically
+    rasterizer.depthBiasConstantFactor = 0.0001f; // Set dynamically
     rasterizer.depthBiasClamp = 0.0f;
-    rasterizer.depthBiasSlopeFactor = 0.0f;
+    rasterizer.depthBiasSlopeFactor = 1.0f;
 
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -1223,14 +1228,6 @@ void NNE::Systems::VulkanManager::createUniformBuffers()
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             lightBuffers[i], lightBuffersMemory[i]);
         vkMapMemory(device, lightBuffersMemory[i], 0, lightSize, 0, &lightBuffersMapped[i]);
-
-        //// valeur par défaut visible (pour éviter l’écran noir)
-        //LightUBO l{};
-        //l.dir = glm::normalize(glm::vec3(-1.f, -1.f, -1.f));
-        //l.intensity = 1.0f;
-        //l.color = glm::vec3(1.f);
-        //l.ambient = 0.25f;
-        //memcpy(lightBuffersMapped[i], &l, sizeof(LightUBO));
     }
 }
 
@@ -1401,24 +1398,59 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     globalUBO.lightSpace = glm::mat4(1.0f);
 
     if (activeLight) {
-        glm::vec3 lightPos{ 0.0f };        
-        
-		lightPos = activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
-		//lightPos = activeCamera->GetEntity()->transform->position;
+        glm::vec3 lightPos{ 0.0f };  
 
-        glm::vec3 lightDir = activeLight->GetDirection();
+        glm::vec3 lightDir = glm::normalize(activeLight->GetDirection());
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
             ? glm::vec3(0.0f, 0.0f, 1.0f)
             : glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 lightView = glm::lookAt(lightPos, activeCamera->GetEntity()->transform->position, up);
+        glm::mat4 invVP = glm::inverse(activeCamera->GetProjectionMatrix() * activeCamera->GetViewMatrix());
+        std::array<glm::vec3, 8> out{};
+        for (int i = 0; i < 8; i++) {
+            glm::vec4 p = invVP * glm::vec4(kNdcCorners[i], 1.0f);
+            out[i] = glm::vec3(p) / p.w;
+        }
 
+		auto frustumWS = out;
+
+        glm::vec3 center(0.0f);
+        //float maxRadius = 0.0f;
+        for (auto& c : frustumWS) { center += c; }
+        center *= 1.0f / 8.0f;
+        for (auto& c : frustumWS) { shadowConfig.lightDistance = std::max(shadowConfig.lightDistance, glm::length(c - center)); }
+
+        float zExtrude = 10.0f;
+
+        lightPos = center - lightDir * (shadowConfig.lightDistance + zExtrude);
+		//lightPos = activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
+
+        //glm::mat4 lightView = glm::lookAt(lightPos, activeCamera->GetEntity()->transform->position, up);
+        glm::mat4 lightView = glm::lookAt(lightPos, center, up);
+
+        glm::vec3 minLS(+FLT_MAX), maxLS(-FLT_MAX);
+        for (auto& c : frustumWS) {
+            glm::vec3 ls = glm::vec3(lightView * glm::vec4(c, 1.0f));
+            minLS = glm::min(minLS, ls);
+            maxLS = glm::max(maxLS, ls);
+        }
+        // marge en profondeur pour capter ce qui projette des ombres
+        minLS.z -= zExtrude;
+        maxLS.z += zExtrude;
+
+        // 3) Projection orthographique (attention au signe z avec lookAt)
+        float l = minLS.x, r = maxLS.x;
+        float b = minLS.y, t = maxLS.y;
+        float n = -maxLS.z; // lookAt: -Z vers l’avant
+        float f = -minLS.z;
+
+        glm::mat4 lightProj = glm::ortho(l, r, b, t, n, f);
         // Ortho couvrant une boîte fixe (simple pour démarrer)
-        const float l = -shadowConfig.orthoHalfSize, r = +shadowConfig.orthoHalfSize;
+        /*const float l = -shadowConfig.orthoHalfSize, r = +shadowConfig.orthoHalfSize;
         const float b = -shadowConfig.orthoHalfSize, t = +shadowConfig.orthoHalfSize;
-        glm::mat4 proj = glm::ortho(l, r, b, t, shadowConfig.nearPlane, shadowConfig.farPlane);
+        glm::mat4 proj = glm::ortho(l, r, b, t, shadowConfig.nearPlane, shadowConfig.farPlane);*/
 
-        proj[1][1] *= -1.0f;
+        lightProj[1][1] *= -1.0f;
 
         glm::mat4 bias = glm::mat4(
             0.5f, 0.0f, 0.0f, 0.0f,
@@ -1427,7 +1459,7 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
             0.5f, 0.5f, 0.5f, 1.0f
         ); 
 
-        globalUBO.lightSpace = proj * lightView * bias;
+        globalUBO.lightSpace = bias * lightProj * lightView ;
 
     }
     memcpy(uniformBuffersMapped[currentImage], &globalUBO, sizeof(globalUBO));
