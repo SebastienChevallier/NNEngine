@@ -1,6 +1,8 @@
 #include "MeshComponent.h"
 #include <iostream>
-#include <imgui_widgets.cpp>
+#include <imgui.h>
+#include <array>
+#include <cstring>
 
 /**
  * <summary>
@@ -39,13 +41,34 @@ void NNE::Component::Render::MeshComponent::SetTexturePath(std::string path)
 
 void NNE::Component::Render::MeshComponent::DrawImGui()
 {
-    ImGui::Text("Model Path: %s", modelPath.c_str());
-	ImGui::Text("Texture Path: %s", material.texturePath.c_str());
+    ImGui::TextUnformatted("Mesh");
+    ImGui::Separator();
 
-    //Modify Material Offset and tilling
-	ImGui::DragFloat("Tiling X", &material.tiling.x, 0.01f);
-	ImGui::DragFloat("Tiling Y", &material.tiling.y, 0.01f);
-    
+    std::array<char, 256> modelBuffer{};
+    std::strncpy(modelBuffer.data(), modelPath.c_str(), modelBuffer.size() - 1);
+    if (ImGui::InputText("Model Path", modelBuffer.data(), modelBuffer.size())) {
+        SetModelPath(modelBuffer.data());
+    }
+
+    std::array<char, 256> textureBuffer{};
+    std::strncpy(textureBuffer.data(), material.texturePath.c_str(), textureBuffer.size() - 1);
+    if (ImGui::InputText("Texture Path", textureBuffer.data(), textureBuffer.size())) {
+        SetTexturePath(textureBuffer.data());
+    }
+
+    const char* primitiveLabels[] = { "None", "Cube", "Sphere" };
+    int primitiveIndex = static_cast<int>(primitive);
+    if (ImGui::Combo("Primitive", &primitiveIndex, primitiveLabels, IM_ARRAYSIZE(primitiveLabels))) {
+        primitive = static_cast<PrimitiveType>(primitiveIndex);
+    }
+
+    bool isSkybox = skybox;
+    if (ImGui::Checkbox("Skybox", &isSkybox)) {
+        skybox = isSkybox;
+    }
+
+    ImGui::DragFloat2("Tiling", &material.tiling[0], 0.01f);
+    ImGui::DragFloat2("Offset", &material.offset[0], 0.01f);
 }
 
 /**

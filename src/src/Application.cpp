@@ -32,6 +32,11 @@ NNE::Systems::Application::Application()
     manager->AddSystem(new InputSystem());
     manager->AddSystem(new ScriptSystem());
     delta = 0;
+    _playMode = false;
+    _sceneViewActive = true;
+    _deltaTime = 0.0f;
+    _gameDeltaTime = 0.0f;
+    _lastFrameTime = std::chrono::high_resolution_clock::now();
 }
 
 /**
@@ -87,8 +92,15 @@ void NNE::Systems::Application::Update()
 {
     auto* manager = NNE::Systems::SystemManager::GetInstance();
     while (!glfwWindowShouldClose(VKManager->window)) {
-        delta = GetDeltaTime();
-        float dtMs = delta * 1000.0f;
+        auto currentFrame = std::chrono::high_resolution_clock::now();
+        float realDelta = std::chrono::duration<float>(currentFrame - _lastFrameTime).count();
+        _lastFrameTime = currentFrame;
+
+        _deltaTime = realDelta;
+        _gameDeltaTime = _playMode ? realDelta : 0.0f;
+        delta = _gameDeltaTime;
+
+        float dtMs = realDelta * 1000.0f;
         static float smooth = dtMs;
         smooth = 0.9f * smooth + 0.1f * dtMs;
         g_FrameTimeMs = smooth;
@@ -97,18 +109,18 @@ void NNE::Systems::Application::Update()
 
         glfwGetWindowSize(VKManager->window, &WIDTH,&HEIGHT);
 
-        manager->UpdateAll(delta);
+        manager->UpdateAll(_gameDeltaTime);
 
         for (NNE::AEntity* entity : _entities)
         {
-            entity->Update(delta);
+            entity->Update(_gameDeltaTime);
         }
 
-        manager->LateUpdateAll(delta);
+        manager->LateUpdateAll(_gameDeltaTime);
 
         for (NNE::AEntity* entity : _entities)
         {
-            entity->LateUpdate(delta);
+            entity->LateUpdate(_gameDeltaTime);
         }
     }
     vkDeviceWaitIdle(VKManager->device);
@@ -152,13 +164,47 @@ NNE::AEntity* NNE::Systems::Application::CreateEntity()
  * Calcule le temps écoulé depuis la dernière frame.
  * </summary>
  */
-float NNE::Systems::Application::GetDeltaTime()
+float NNE::Systems::Application::GetDeltaTime() const
 {
-    static auto lastFrame = std::chrono::high_resolution_clock::now();
-    auto currentFrame = std::chrono::high_resolution_clock::now();
-    float dt = std::chrono::duration<float>(currentFrame - lastFrame).count();
-    lastFrame = currentFrame;
-    return dt;
+    return _deltaTime;
+}
+
+float NNE::Systems::Application::GetGameDeltaTime() const
+{
+    return _gameDeltaTime;
+}
+
+bool NNE::Systems::Application::IsPlayMode() const
+{
+    return _playMode;
+}
+
+void NNE::Systems::Application::SetPlayMode(bool playing)
+{
+    if (_playMode == playing)
+        return;
+
+    _playMode = playing;
+    _lastFrameTime = std::chrono::high_resolution_clock::now();
+    _gameDeltaTime = 0.0f;
+    delta = 0.0f;
+}
+
+bool NNE::Systems::Application::IsSceneViewActive() const
+{
+    return _sceneViewActive;
+}
+
+void NNE::Systems::Application::SetSceneViewActive(bool active)
+{
+    if (_sceneViewActive == active)
+        return;
+
+    _sceneViewActive = active;
+    if (_sceneViewActive)
+    {
+        SetPlayMode(false);
+    }
 }
 
 /**

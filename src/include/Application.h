@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <chrono>
 
 #include <Jolt/Jolt.h>
 
@@ -17,10 +18,15 @@ class Application
                 /*GLFWwindow* window;*/
                 float delta;
 
-		
 
-	private:
-		/*VkInstance instance;*/
+
+        private:
+                /*VkInstance instance;*/
+                bool _playMode = false;
+                bool _sceneViewActive = true;
+                float _deltaTime = 0.0f;
+                float _gameDeltaTime = 0.0f;
+                std::chrono::high_resolution_clock::time_point _lastFrameTime;
 
 
 	public:
@@ -38,7 +44,12 @@ class Application
                  * Calcule le temps écoulé entre deux frames.
                  * </summary>
                  */
-                float GetDeltaTime();
+                float GetDeltaTime() const;
+                float GetGameDeltaTime() const;
+                bool IsPlayMode() const;
+                void SetPlayMode(bool playing);
+                bool IsSceneViewActive() const;
+                void SetSceneViewActive(bool active);
 
                 /**
                  * <summary>
