@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ISystem.h"
+#include <imgui.h>
 
 namespace NNE { class AEntity; }
 namespace NNE { namespace Component { class AComponent; class TransformComponent; } }
