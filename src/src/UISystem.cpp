@@ -31,7 +31,8 @@ void UISystem::Update(float deltaTime) {
 
     _vkManager->beginImGuiFrame();
 
-    ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGuiDockNodeFlags dockFlags = ImGuiDockNodeFlags_None;
+    ImGuiID dockspace_id = ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockFlags);
     static ImGuiID hierarchyDockID = 0;
     static ImGuiID inspectorDockID = 0;
     static ImGuiID viewportDockID = 0;
@@ -203,19 +204,56 @@ void UISystem::DrawViewportWindow(ImGuiID dockId) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     if (ImGui::Begin("Viewport", nullptr, flags)) {
+        VkDescriptorSet viewportTexture = VK_NULL_HANDLE;
+        VkExtent2D viewportExtent{ 0, 0 };
+        if (_vkManager) {
+            viewportTexture = _vkManager->getViewportDescriptor();
+            viewportExtent = _vkManager->getViewportExtent();
+        }
+
+        auto drawViewportTexture = [&]() {
+            if (viewportTexture == VK_NULL_HANDLE || viewportExtent.width == 0 || viewportExtent.height == 0) {
+                ImGui::TextUnformatted("Renderer output unavailable.");
+                return;
+            }
+
+            ImVec2 avail = ImGui::GetContentRegionAvail();
+            if (avail.x <= 0.0f || avail.y <= 0.0f) {
+                return;
+            }
+
+            float aspect = static_cast<float>(viewportExtent.width) / static_cast<float>(viewportExtent.height);
+            ImVec2 imageSize = avail;
+            if (aspect > 0.0f) {
+                float availAspect = avail.x / avail.y;
+                if (availAspect > aspect) {
+                    imageSize.x = avail.y * aspect;
+                    imageSize.y = avail.y;
+                } else {
+                    imageSize.x = avail.x;
+                    imageSize.y = avail.x / aspect;
+                }
+            }
+
+            ImVec2 cursor = ImGui::GetCursorPos();
+            ImVec2 padding = { (avail.x - imageSize.x) * 0.5f, (avail.y - imageSize.y) * 0.5f };
+            if (padding.x > 0.0f) cursor.x += padding.x;
+            if (padding.y > 0.0f) cursor.y += padding.y;
+            ImGui::SetCursorPos(cursor);
+            ImGui::Image((ImTextureID)viewportTexture, imageSize, ImVec2(0, 1), ImVec2(1, 0));
+        };
+
         if (ImGui::BeginTabBar("ViewportTabs")) {
             bool sceneActive = false;
             if (ImGui::BeginTabItem("Scene")) {
                 sceneActive = true;
-                ImGui::TextWrapped("Scene view active. Physics and scripted time are paused.");
-                ImGui::Dummy(ImGui::GetContentRegionAvail());
+                drawViewportTexture();
                 ImGui::EndTabItem();
             }
             bool gameActive = false;
             if (ImGui::BeginTabItem("Game")) {
                 gameActive = true;
-                ImGui::TextWrapped("Game view. Use Play to start the simulation.");
-                ImGui::Dummy(ImGui::GetContentRegionAvail());
+                drawViewportTexture();
                 ImGui::EndTabItem();
             }
             ImGui::EndTabBar();

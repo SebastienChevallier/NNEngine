@@ -184,16 +184,23 @@ namespace NNE::Systems {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
-		uint32_t mipLevels;
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
-		VkImageView textureImageView;
-		VkDescriptorSetLayout descriptorSetLayout;		
-		VkSampler textureSampler;
+                uint32_t mipLevels;
+                VkImage textureImage;
+                VkDeviceMemory textureImageMemory;
+                VkImageView textureImageView;
+                VkDescriptorSetLayout descriptorSetLayout;
+                VkSampler textureSampler;
 
-		VkImage colorImage;
-		VkDeviceMemory colorImageMemory;
-		VkImageView colorImageView;
+                VkImage colorImage;
+                VkDeviceMemory colorImageMemory;
+                VkImageView colorImageView;
+
+                std::vector<VkImage> viewportImages;
+                std::vector<VkDeviceMemory> viewportImageMemory;
+                std::vector<VkImageView> viewportImageViews;
+                std::vector<VkDescriptorSet> viewportImageDescriptors;
+                VkSampler viewportImageSampler = VK_NULL_HANDLE;
+                VkDescriptorSet currentViewportDescriptor = VK_NULL_HANDLE;
 
         VkDescriptorPool descriptorPool;
         VkDescriptorPool imguiPool;
@@ -311,6 +318,9 @@ namespace NNE::Systems {
             * </summary>
             */
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+        void createViewportImages();
+        void destroyViewportImages();
+        void copySwapchainToViewport(uint32_t imageIndex, VkCommandBuffer commandBuffer);
         /**
             * <summary>
             * Établit le render pass.
@@ -555,6 +565,7 @@ namespace NNE::Systems {
             * </summary>
             */
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+        void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask);
         /**
             * <summary>
             * Copie les données d'un buffer vers une image.
@@ -575,6 +586,8 @@ namespace NNE::Systems {
         void debugShadowMap();
         void requestShadowDebug();
         VkDescriptorSet getShadowMapDebugDescriptor();
+        VkDescriptorSet getViewportDescriptor() const;
+        VkExtent2D getViewportExtent() const;
         /**
             * <summary>
             * Crée un module de shader à partir de code binaire.

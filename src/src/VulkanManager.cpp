@@ -117,6 +117,7 @@ void NNE::Systems::VulkanManager::initVulkan()
 
     createFramebuffers();           // 🖼 Associer toutes les ressources au framebuffer
     initImGui();
+    createViewportImages();
 }
 
 
@@ -548,6 +549,101 @@ VkImageView NNE::Systems::VulkanManager::createImageView(VkImage image, VkFormat
     }
 
     return imageView;
+}
+
+void NNE::Systems::VulkanManager::createViewportImages()
+{
+    if (swapChainExtent.width == 0 || swapChainExtent.height == 0 || swapChainImages.empty()) {
+        return;
+    }
+
+    destroyViewportImages();
+
+    if (viewportImageSampler == VK_NULL_HANDLE) {
+        VkSamplerCreateInfo samplerInfo{};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.anisotropyEnable = VK_FALSE;
+        samplerInfo.maxAnisotropy = 1.0f;
+        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+        samplerInfo.compareEnable = VK_FALSE;
+        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerInfo.minLod = 0.0f;
+        samplerInfo.maxLod = 0.0f;
+        samplerInfo.mipLodBias = 0.0f;
+
+        if (vkCreateSampler(device, &samplerInfo, nullptr, &viewportImageSampler) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create viewport sampler!");
+        }
+    }
+
+    const size_t imageCount = swapChainImages.size();
+    viewportImages.resize(imageCount, VK_NULL_HANDLE);
+    viewportImageMemory.resize(imageCount, VK_NULL_HANDLE);
+    viewportImageViews.resize(imageCount, VK_NULL_HANDLE);
+    viewportImageDescriptors.resize(imageCount, VK_NULL_HANDLE);
+
+    for (size_t i = 0; i < imageCount; ++i) {
+        createImage(swapChainExtent.width, swapChainExtent.height, 1, VK_SAMPLE_COUNT_1_BIT,
+            swapChainImageFormat, VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, viewportImages[i], viewportImageMemory[i]);
+
+        viewportImageViews[i] = createImageView(viewportImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+
+        transitionImageLayout(viewportImages[i], swapChainImageFormat,
+            VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
+
+        viewportImageDescriptors[i] = ImGui_ImplVulkan_AddTexture(
+            viewportImageSampler, viewportImageViews[i], VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
+
+    currentViewportDescriptor = imageCount > 0 ? viewportImageDescriptors[0] : VK_NULL_HANDLE;
+}
+
+void NNE::Systems::VulkanManager::destroyViewportImages()
+{
+    for (VkDescriptorSet& descriptor : viewportImageDescriptors) {
+        if (descriptor != VK_NULL_HANDLE) {
+            ImGui_ImplVulkan_RemoveTexture(descriptor);
+            descriptor = VK_NULL_HANDLE;
+        }
+    }
+    viewportImageDescriptors.clear();
+
+    for (VkImageView& view : viewportImageViews) {
+        if (view != VK_NULL_HANDLE) {
+            vkDestroyImageView(device, view, nullptr);
+            view = VK_NULL_HANDLE;
+        }
+    }
+    viewportImageViews.clear();
+
+    for (size_t i = 0; i < viewportImages.size(); ++i) {
+        if (viewportImages[i] != VK_NULL_HANDLE) {
+            vkDestroyImage(device, viewportImages[i], nullptr);
+            viewportImages[i] = VK_NULL_HANDLE;
+        }
+        if (viewportImageMemory.size() > i && viewportImageMemory[i] != VK_NULL_HANDLE) {
+            vkFreeMemory(device, viewportImageMemory[i], nullptr);
+            viewportImageMemory[i] = VK_NULL_HANDLE;
+        }
+    }
+    viewportImages.clear();
+    viewportImageMemory.clear();
+
+    if (viewportImageSampler != VK_NULL_HANDLE) {
+        vkDestroySampler(device, viewportImageSampler, nullptr);
+        viewportImageSampler = VK_NULL_HANDLE;
+    }
+
+    currentViewportDescriptor = VK_NULL_HANDLE;
 }
 
 void NNE::Systems::VulkanManager::createRenderPass()
@@ -1381,6 +1477,9 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
 
     renderImGui(commandBuffer);
     vkCmdEndRenderPass(commandBuffer);
+    if (!viewportImages.empty()) {
+        copySwapchainToViewport(imageIndex, commandBuffer);
+    }
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("❌ Erreur : Échec de la finalisation du command buffer !");
     }
@@ -1954,6 +2053,7 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
     // Lors d'une recréation du swapchain, le render pass change et les
     // pipelines ImGui deviennent incompatibles (mismatch de format/samples).
     // On détruit donc proprement ImGui avant de recréer les ressources.
+    destroyViewportImages();
     cleanupImGui();
 
     cleanupSwapChain(); // Nettoyer correctement les ressources liées au swapchain
@@ -1976,6 +2076,7 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
 
     // Recréer les ressources ImGui avec le nouveau render pass / swapchain
     initImGui();
+    createViewportImages();
 
     updateCameraAspectRatio();
 }
@@ -2494,6 +2595,102 @@ void NNE::Systems::VulkanManager::transitionImageLayout(VkImage image, VkFormat 
     endSingleTimeCommands(commandBuffer);
 }
 
+void NNE::Systems::VulkanManager::transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask)
+{
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = aspectMask;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+
+    if (oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = 0;
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else {
+        throw std::runtime_error("Unsupported image layout transition in command buffer");
+    }
+
+    vkCmdPipelineBarrier(
+        commandBuffer,
+        sourceStage,
+        destinationStage,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+}
+
+void NNE::Systems::VulkanManager::copySwapchainToViewport(uint32_t imageIndex, VkCommandBuffer commandBuffer)
+{
+    if (imageIndex >= swapChainImages.size() || imageIndex >= viewportImages.size()) {
+        return;
+    }
+
+    VkImage srcImage = swapChainImages[imageIndex];
+    VkImage dstImage = viewportImages[imageIndex];
+
+    transitionImageLayout(commandBuffer, dstImage,
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+    transitionImageLayout(commandBuffer, srcImage,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+
+    VkImageCopy region{};
+    region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.srcSubresource.mipLevel = 0;
+    region.srcSubresource.baseArrayLayer = 0;
+    region.srcSubresource.layerCount = 1;
+    region.srcOffset = { 0, 0, 0 };
+    region.dstSubresource = region.srcSubresource;
+    region.dstOffset = { 0, 0, 0 };
+    region.extent = { swapChainExtent.width, swapChainExtent.height, 1 };
+
+    vkCmdCopyImage(commandBuffer,
+        srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        1, &region);
+
+    transitionImageLayout(commandBuffer, srcImage,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_ASPECT_COLOR_BIT);
+    transitionImageLayout(commandBuffer, dstImage,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+
+    if (imageIndex < viewportImageDescriptors.size()) {
+        currentViewportDescriptor = viewportImageDescriptors[imageIndex];
+    }
+}
+
 void NNE::Systems::VulkanManager::createColorResources()
 {
     VkFormat colorFormat = swapChainImageFormat;
@@ -2646,6 +2843,16 @@ VkDescriptorSet NNE::Systems::VulkanManager::getShadowMapDebugDescriptor()
     return shadowDebugDescriptor;
 }
 
+VkDescriptorSet NNE::Systems::VulkanManager::getViewportDescriptor() const
+{
+    return currentViewportDescriptor;
+}
+
+VkExtent2D NNE::Systems::VulkanManager::getViewportExtent() const
+{
+    return swapChainExtent;
+}
+
 VkShaderModule NNE::Systems::VulkanManager::createShaderModule(const std::vector<char>& code)
 {
     VkShaderModuleCreateInfo createInfo{};
@@ -2695,6 +2902,7 @@ void NNE::Systems::VulkanManager::CleanUp()
 
     vkDeviceWaitIdle(device);
 
+    destroyViewportImages();
     cleanupImGui();
 
     for (NNE::Component::Render::MeshComponent* mesh : loadedMeshes) {
