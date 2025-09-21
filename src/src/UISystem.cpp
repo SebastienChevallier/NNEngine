@@ -135,6 +135,7 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
     NNE::AEntity* entity = transform->GetEntity();
     if (!entity) return;
 
+    ImGui::PushID(entity);
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
     if (transform->children.empty()) {
         flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -143,8 +144,8 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
         flags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    bool open = ImGui::TreeNodeEx(entity, flags, "%s", entity->GetName().c_str());
-    if (ImGui::IsItemClicked()) {
+    bool open = ImGui::TreeNodeEx("EntityNode", flags, "%s", entity->GetName().c_str());
+    if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen()) {
         _selectedEntity = entity;
     }
 
@@ -154,6 +155,7 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
         }
         ImGui::TreePop();
     }
+    ImGui::PopID();
 }
 
 void UISystem::DrawInspectorWindow(ImGuiID dockId) {
@@ -173,7 +175,9 @@ void UISystem::DrawInspectorWindow(ImGuiID dockId) {
             ImGui::Text("Id: %u", static_cast<unsigned>(_selectedEntity->GetID()));
             auto& buf = nameBuffers[_selectedEntity];
             if (buf[0] == '\0') {
-                std::strncpy(buf.data(), _selectedEntity->GetName().c_str(), buf.size());
+                const std::string& name = _selectedEntity->GetName();
+                std::strncpy(buf.data(), name.c_str(), buf.size() - 1);
+                buf.back() = '\0';
             }
             if (ImGui::InputText("Name", buf.data(), buf.size())) {
                 _selectedEntity->SetName(buf.data());

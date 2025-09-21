@@ -44,6 +44,7 @@ NNE::Systems::VulkanManager::VulkanManager()
     physicalDevice = VK_NULL_HANDLE;
     swapChain = VK_NULL_HANDLE;
     renderPass = VK_NULL_HANDLE;
+    uiRenderPass = VK_NULL_HANDLE;
     pipelineLayout = VK_NULL_HANDLE;
     graphicsPipeline = VK_NULL_HANDLE;
     commandPool = VK_NULL_HANDLE;
@@ -676,7 +677,7 @@ void NNE::Systems::VulkanManager::createRenderPass()
     colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference colorAttachmentResolveRef{};
     colorAttachmentResolveRef.attachment = 2;
@@ -720,6 +721,46 @@ void NNE::Systems::VulkanManager::createRenderPass()
 
     if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
+    }
+
+    VkAttachmentDescription uiColorAttachment{};
+    uiColorAttachment.format = swapChainImageFormat;
+    uiColorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    uiColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+    uiColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    uiColorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    uiColorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    uiColorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    uiColorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference uiColorRef{};
+    uiColorRef.attachment = 0;
+    uiColorRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription uiSubpass{};
+    uiSubpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    uiSubpass.colorAttachmentCount = 1;
+    uiSubpass.pColorAttachments = &uiColorRef;
+
+    VkSubpassDependency uiDependency{};
+    uiDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    uiDependency.dstSubpass = 0;
+    uiDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    uiDependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    uiDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    uiDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo uiPassInfo{};
+    uiPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    uiPassInfo.attachmentCount = 1;
+    uiPassInfo.pAttachments = &uiColorAttachment;
+    uiPassInfo.subpassCount = 1;
+    uiPassInfo.pSubpasses = &uiSubpass;
+    uiPassInfo.dependencyCount = 1;
+    uiPassInfo.pDependencies = &uiDependency;
+
+    if (vkCreateRenderPass(device, &uiPassInfo, nullptr, &uiRenderPass) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create UI render pass!");
     }
 }
 
@@ -1145,6 +1186,7 @@ void NNE::Systems::VulkanManager::createVertexBuffer()
 void NNE::Systems::VulkanManager::createFramebuffers()
 {
     swapChainFramebuffers.resize(swapChainImageViews.size());
+    uiFramebuffers.resize(swapChainImageViews.size());
 
     for (size_t i = 0; i < swapChainImageViews.size(); i++) {
         std::array<VkImageView, 3> attachments = {
@@ -1164,6 +1206,23 @@ void NNE::Systems::VulkanManager::createFramebuffers()
 
         if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
+        }
+
+        VkImageView uiAttachments[] = {
+            swapChainImageViews[i]
+        };
+
+        VkFramebufferCreateInfo uiInfo{};
+        uiInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        uiInfo.renderPass = uiRenderPass;
+        uiInfo.attachmentCount = 1;
+        uiInfo.pAttachments = uiAttachments;
+        uiInfo.width = swapChainExtent.width;
+        uiInfo.height = swapChainExtent.height;
+        uiInfo.layers = 1;
+
+        if (vkCreateFramebuffer(device, &uiInfo, nullptr, &uiFramebuffers[i]) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create UI framebuffer!");
         }
     }
 }
@@ -1215,7 +1274,7 @@ void NNE::Systems::VulkanManager::initImGui()
             throw std::runtime_error("ImGui Vulkan backend error");
         }
     };
-    init_info.RenderPass = renderPass;
+    init_info.RenderPass = uiRenderPass;
     ImGui_ImplVulkan_Init(&init_info);
 
     VkCommandBuffer cmd = beginSingleTimeCommands();
@@ -1475,11 +1534,23 @@ void NNE::Systems::VulkanManager::recordCommandBuffer(VkCommandBuffer commandBuf
         drawMesh(pair.first, pair.second);
     }
 
-    renderImGui(commandBuffer);
     vkCmdEndRenderPass(commandBuffer);
     if (!viewportImages.empty()) {
         copySwapchainToViewport(imageIndex, commandBuffer);
     }
+
+    VkRenderPassBeginInfo uiPassInfo{};
+    uiPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    uiPassInfo.renderPass = uiRenderPass;
+    uiPassInfo.framebuffer = uiFramebuffers[imageIndex];
+    uiPassInfo.renderArea.offset = { 0, 0 };
+    uiPassInfo.renderArea.extent = swapChainExtent;
+    uiPassInfo.clearValueCount = 0;
+    uiPassInfo.pClearValues = nullptr;
+
+    vkCmdBeginRenderPass(commandBuffer, &uiPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    renderImGui(commandBuffer);
+    vkCmdEndRenderPass(commandBuffer);
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("❌ Erreur : Échec de la finalisation du command buffer !");
     }
@@ -2626,11 +2697,23 @@ void NNE::Systems::VulkanManager::transitionImageLayout(VkCommandBuffer commandB
         sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     }
+    else if (oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
     else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
         barrier.dstAccessMask = 0;
         sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     }
     else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
         barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -2671,7 +2754,7 @@ void NNE::Systems::VulkanManager::copySwapchainToViewport(uint32_t imageIndex, V
     transitionImageLayout(commandBuffer, dstImage,
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
     transitionImageLayout(commandBuffer, srcImage,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 
     VkImageCopy region{};
     region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -2689,7 +2772,7 @@ void NNE::Systems::VulkanManager::copySwapchainToViewport(uint32_t imageIndex, V
         1, &region);
 
     transitionImageLayout(commandBuffer, srcImage,
-        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_ASPECT_COLOR_BIT);
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
     transitionImageLayout(commandBuffer, dstImage,
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 
@@ -3119,6 +3202,14 @@ void NNE::Systems::VulkanManager::cleanupSwapChain()
         }
     }
 
+    for (auto& framebuffer : uiFramebuffers) {
+        if (framebuffer != VK_NULL_HANDLE) {
+            vkDestroyFramebuffer(device, framebuffer, nullptr);
+            framebuffer = VK_NULL_HANDLE;
+        }
+    }
+    uiFramebuffers.clear();
+
     //// Détruire aussi toutes les textures entités si vous les recréez après:
     //    if (NNE::Component::Render::MeshComponent* mesh = entity->GetComponent<NNE::Component::Render::MeshComponent>()) {
     //        if (mesh->textureSampler) {
@@ -3242,6 +3333,10 @@ void NNE::Systems::VulkanManager::cleanupSwapChain()
     if (renderPass != VK_NULL_HANDLE) {
         vkDestroyRenderPass(device, renderPass, nullptr);
         renderPass = VK_NULL_HANDLE;
+    }
+    if (uiRenderPass != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(device, uiRenderPass, nullptr);
+        uiRenderPass = VK_NULL_HANDLE;
     }
 }
 

@@ -147,10 +147,12 @@ namespace NNE::Systems {
 
 		std::vector<VkImageView> swapChainImageViews;
 
-		VkRenderPass renderPass;
-		VkPipelineLayout pipelineLayout;
-		VkPipeline graphicsPipeline;
-		std::vector<VkFramebuffer> swapChainFramebuffers;
+                VkRenderPass renderPass;
+                VkRenderPass uiRenderPass = VK_NULL_HANDLE;
+                VkPipelineLayout pipelineLayout;
+                VkPipeline graphicsPipeline;
+                std::vector<VkFramebuffer> swapChainFramebuffers;
+                std::vector<VkFramebuffer> uiFramebuffers;
 		VkCommandPool commandPool;
 		std::vector<VkCommandBuffer> commandBuffers;
 		std::vector < VkSemaphore> imageAvailableSemaphores;
