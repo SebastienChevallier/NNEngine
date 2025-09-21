@@ -1268,7 +1268,9 @@ void NNE::Systems::VulkanManager::initImGui()
     init_info.DescriptorPool = imguiPool;
     init_info.MinImageCount = static_cast<uint32_t>(swapChainImages.size());
     init_info.ImageCount = static_cast<uint32_t>(swapChainImages.size());
-    init_info.MSAASamples = msaaSamples;
+    // ImGui's render pass resolves directly into the swapchain image, which is single-sampled.
+    // Forcing MSAA here would create a pipeline/render pass mismatch.
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
     init_info.CheckVkResultFn = [](VkResult err) {
         if (err != VK_SUCCESS) {
             throw std::runtime_error("ImGui Vulkan backend error");

@@ -135,7 +135,6 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
     NNE::AEntity* entity = transform->GetEntity();
     if (!entity) return;
 
-    ImGui::PushID(entity);
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
     if (transform->children.empty()) {
         flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -144,7 +143,7 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
         flags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    bool open = ImGui::TreeNodeEx("EntityNode", flags, "%s", entity->GetName().c_str());
+    bool open = ImGui::TreeNodeEx(static_cast<void*>(transform), flags, "%s", entity->GetName().c_str());
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen()) {
         _selectedEntity = entity;
     }
@@ -155,7 +154,6 @@ void UISystem::DrawHierarchyNode(NNE::Component::TransformComponent* transform) 
         }
         ImGui::TreePop();
     }
-    ImGui::PopID();
 }
 
 void UISystem::DrawInspectorWindow(ImGuiID dockId) {
@@ -185,9 +183,8 @@ void UISystem::DrawInspectorWindow(ImGuiID dockId) {
 
             const auto& comps = _selectedEntity->components;
             for (auto* c : comps) {
-                ImGui::PushID(c);
                 std::string typeName = typeid(*c).name();
-                if (ImGui::TreeNodeEx("##comp", ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen,
+                if (ImGui::TreeNodeEx(static_cast<void*>(c), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_DefaultOpen,
                     "%s", typeName.c_str())) {
                     if (auto* ui = dynamic_cast<NNE::IDebugUI*>(c)) {
                         ui->DrawImGui();
@@ -196,7 +193,6 @@ void UISystem::DrawInspectorWindow(ImGuiID dockId) {
                     }
                     ImGui::TreePop();
                 }
-                ImGui::PopID();
             }
         }
     }
