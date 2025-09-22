@@ -240,7 +240,7 @@ void UISystem::DrawViewportWindow(ImGuiID dockId) {
             if (padding.x > 0.0f) cursor.x += padding.x;
             if (padding.y > 0.0f) cursor.y += padding.y;
             ImGui::SetCursorPos(cursor);
-            ImGui::Image((ImTextureID)viewportTexture, imageSize, ImVec2(0, 1), ImVec2(1, 0));
+            ImGui::Image((ImTextureID)viewportTexture, imageSize, ImVec2(0, 0), ImVec2(1, 1));
         };
 
         if (ImGui::BeginTabBar("ViewportTabs")) {
@@ -305,7 +305,7 @@ void UISystem::DrawDebugWindow(ImGuiID dockId) {
             if (ImGui::BeginTabItem("Shadow Map")) {
                 VkDescriptorSet desc = _vkManager->getShadowMapDebugDescriptor();
                 if (desc != VK_NULL_HANDLE) {
-                    ImGui::Image((ImTextureID)desc, ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
+                    ImGui::Image((ImTextureID)desc, ImVec2(256, 256), ImVec2(0, 0), ImVec2(1, 1));
                 } else {
                     ImGui::TextUnformatted("Shadow map unavailable");
                 }
