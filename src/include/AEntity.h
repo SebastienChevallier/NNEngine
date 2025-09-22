@@ -12,6 +12,7 @@ namespace NNE {
         protected:
                 int _ID;
                 std::string _Name;
+                bool _visibleInHierarchy = true;
 
         public:
                 /**
@@ -42,7 +43,9 @@ namespace NNE {
                  */
                 std::string GetName();
 
-				void SetName(const std::string& name);
+                void SetName(const std::string& name);
+                bool IsVisibleInHierarchy() const { return _visibleInHierarchy; }
+                void SetVisibleInHierarchy(bool visible);
 
                 /**
                  * <summary>

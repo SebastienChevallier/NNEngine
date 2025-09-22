@@ -147,10 +147,12 @@ namespace NNE::Systems {
 
 		std::vector<VkImageView> swapChainImageViews;
 
-		VkRenderPass renderPass;
-		VkPipelineLayout pipelineLayout;
-		VkPipeline graphicsPipeline;
-		std::vector<VkFramebuffer> swapChainFramebuffers;
+                VkRenderPass renderPass;
+                VkRenderPass uiRenderPass = VK_NULL_HANDLE;
+                VkPipelineLayout pipelineLayout;
+                VkPipeline graphicsPipeline;
+                std::vector<VkFramebuffer> swapChainFramebuffers;
+                std::vector<VkFramebuffer> uiFramebuffers;
 		VkCommandPool commandPool;
 		std::vector<VkCommandBuffer> commandBuffers;
 		std::vector < VkSemaphore> imageAvailableSemaphores;
@@ -184,16 +186,23 @@ namespace NNE::Systems {
 		VkBuffer stagingBuffer;
 		VkDeviceMemory stagingBufferMemory;
 
-		uint32_t mipLevels;
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
-		VkImageView textureImageView;
-		VkDescriptorSetLayout descriptorSetLayout;		
-		VkSampler textureSampler;
+                uint32_t mipLevels;
+                VkImage textureImage;
+                VkDeviceMemory textureImageMemory;
+                VkImageView textureImageView;
+                VkDescriptorSetLayout descriptorSetLayout;
+                VkSampler textureSampler;
 
-		VkImage colorImage;
-		VkDeviceMemory colorImageMemory;
-		VkImageView colorImageView;
+                VkImage colorImage;
+                VkDeviceMemory colorImageMemory;
+                VkImageView colorImageView;
+
+                std::vector<VkImage> viewportImages;
+                std::vector<VkDeviceMemory> viewportImageMemory;
+                std::vector<VkImageView> viewportImageViews;
+                std::vector<VkDescriptorSet> viewportImageDescriptors;
+                VkSampler viewportImageSampler = VK_NULL_HANDLE;
+                VkDescriptorSet currentViewportDescriptor = VK_NULL_HANDLE;
 
         VkDescriptorPool descriptorPool;
         VkDescriptorPool imguiPool;
@@ -222,10 +231,13 @@ namespace NNE::Systems {
 
     private:
         bool shadowDebugRequested;
+        NNE::Component::Render::CameraComponent* _activeCamera = nullptr;
+        NNE::Component::Render::CameraComponent* _gameCamera = nullptr;
+        NNE::Component::Render::CameraComponent* _sceneCamera = nullptr;
+        bool _usingSceneCamera = true;
 
     public :
         ShadowConfig shadowConfig{};
-        NNE::Component::Render::CameraComponent* activeCamera = nullptr;
         NNE::Component::Render::LightComponent* activeLight = nullptr;
         VkInstance instance = VK_NULL_HANDLE;
         std::vector<Vertex> vertices;
@@ -311,6 +323,9 @@ namespace NNE::Systems {
             * </summary>
             */
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+        void createViewportImages();
+        void destroyViewportImages();
+        void copySwapchainToViewport(uint32_t imageIndex, VkCommandBuffer commandBuffer);
         /**
             * <summary>
             * Établit le render pass.
@@ -555,6 +570,7 @@ namespace NNE::Systems {
             * </summary>
             */
         void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+        void transitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask);
         /**
             * <summary>
             * Copie les données d'un buffer vers une image.
@@ -575,6 +591,14 @@ namespace NNE::Systems {
         void debugShadowMap();
         void requestShadowDebug();
         VkDescriptorSet getShadowMapDebugDescriptor();
+        VkDescriptorSet getViewportDescriptor() const;
+        VkExtent2D getViewportExtent() const;
+        void SetGameCamera(NNE::Component::Render::CameraComponent* camera);
+        void SetSceneCamera(NNE::Component::Render::CameraComponent* camera);
+        void UseSceneView(bool enabled);
+        NNE::Component::Render::CameraComponent* GetActiveCamera() const { return _activeCamera; }
+        NNE::Component::Render::CameraComponent* GetGameCamera() const { return _gameCamera; }
+        NNE::Component::Render::CameraComponent* GetSceneCamera() const { return _sceneCamera; }
         /**
             * <summary>
             * Crée un module de shader à partir de code binaire.

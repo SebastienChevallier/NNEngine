@@ -64,7 +64,7 @@ int main() {
     NNE::Component::Render::CameraComponent* CC = camera->AddComponent<NNE::Component::Render::CameraComponent>();
     NNE::Component::TransformComponent* TC2 = camera->AddComponent<NNE::Component::TransformComponent>();
     TC2->position = glm::vec3(0.0f, 0.0f, 30.0f);
-    app.VKManager->activeCamera = CC;
+    app.VKManager->SetGameCamera(CC);
     
     app.Init();
     app.Update();

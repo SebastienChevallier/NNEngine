@@ -19,6 +19,7 @@ namespace NNE::Component::Physics {
         glm::bvec3 lockRotation;
         glm::vec3 lastPosition;
         glm::vec3 lastRotation;
+        void RecreateBody();
 
     public:
         /**

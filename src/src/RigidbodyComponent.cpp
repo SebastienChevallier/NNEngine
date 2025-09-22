@@ -11,6 +11,9 @@
 #include <Jolt/Physics/Body/MotionProperties.h>
 #include <glm/gtc/quaternion.hpp>
 #include <imgui.h>
+#include <algorithm>
+#include <limits>
+#include <cmath>
 #include <iostream>
 
 
@@ -183,7 +186,7 @@ void RigidbodyComponent::ApplyImpulse(glm::vec3 impulse) {
     auto& bodyInterface = physicsSystem->GetBodyInterface();
     if (!bodyID.IsInvalid()) {
         JPH::Vec3 joltImpulse(impulse.x, impulse.y, impulse.z);
-        bodyInterface.AddImpulse(bodyID, joltImpulse);        
+        bodyInterface.AddImpulse(bodyID, joltImpulse);
     }
 }
 
@@ -227,10 +230,73 @@ glm::vec3 RigidbodyComponent::GetLinearVelocity() const {
 }
 
 void RigidbodyComponent::DrawImGui() {
-    ImGui::Text("Mass: %.2f", mass);
-    ImGui::Text("Kinematic: %s", isKinematic ? "true" : "false");
-    ImGui::Text("Lock Position: %d %d %d", lockPosition.x, lockPosition.y, lockPosition.z);
-    ImGui::Text("Lock Rotation: %d %d %d", lockRotation.x, lockRotation.y, lockRotation.z);
+    ImGui::TextUnformatted("Rigidbody");
+    ImGui::Separator();
+
+    bool changed = false;
+
+    float newMass = mass;
+    if (ImGui::DragFloat("Mass", &newMass, 0.1f, 0.0f, 1000.0f)) {
+        newMass = std::max(newMass, 0.0f);
+        if (std::fabs(newMass - mass) > std::numeric_limits<float>::epsilon()) {
+            mass = newMass;
+            changed = true;
+        }
+    }
+
+    bool kinematic = isKinematic;
+    if (ImGui::Checkbox("Kinematic", &kinematic)) {
+        isKinematic = kinematic;
+        changed = true;
+    }
+
+    bool lockPosX = lockPosition.x;
+    bool lockPosY = lockPosition.y;
+    bool lockPosZ = lockPosition.z;
+    if (ImGui::Checkbox("Lock Pos X", &lockPosX)) { lockPosition.x = lockPosX; changed = true; }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Lock Pos Y", &lockPosY)) { lockPosition.y = lockPosY; changed = true; }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Lock Pos Z", &lockPosZ)) { lockPosition.z = lockPosZ; changed = true; }
+
+    bool lockRotX = lockRotation.x;
+    bool lockRotY = lockRotation.y;
+    bool lockRotZ = lockRotation.z;
+    if (ImGui::Checkbox("Lock Rot X", &lockRotX)) { lockRotation.x = lockRotX; changed = true; }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Lock Rot Y", &lockRotY)) { lockRotation.y = lockRotY; changed = true; }
+    ImGui::SameLine();
+    if (ImGui::Checkbox("Lock Rot Z", &lockRotZ)) { lockRotation.z = lockRotZ; changed = true; }
+
+    glm::vec3 velocity = GetLinearVelocity();
+    ImGui::Text("Velocity: %.2f %.2f %.2f", velocity.x, velocity.y, velocity.z);
+    if (ImGui::Button("Reset Velocity")) {
+        SetLinearVelocity(glm::vec3(0.0f));
+    }
+
+    if (changed) {
+        RecreateBody();
+    }
+}
+
+void RigidbodyComponent::RecreateBody() {
+    auto* system = NNE::Systems::PhysicsSystem::GetInstance();
+    if (!system)
+        return;
+
+    auto* physicsSystem = system->GetPhysicsSystem();
+    if (!physicsSystem)
+        return;
+
+    auto& bodyInterface = physicsSystem->GetBodyInterface();
+    if (!bodyID.IsInvalid()) {
+        bodyInterface.RemoveBody(bodyID);
+        bodyInterface.DestroyBody(bodyID);
+        system->UnregisterCollider(bodyID);
+        bodyID = JPH::BodyID();
+    }
+
+    Awake();
 }
 
 } // namespace NNE::Component::Physics
