@@ -11,6 +11,9 @@
 #include "ScriptSystem.h"
 #include "LightSystem.h"
 #include "InputManager.h"
+#include "CameraComponent.h"
+#include "EditorCameraController.h"
+#include <glm/glm.hpp>
 
 std::clock_t lastFrameTime;
 NNE::Systems::Application* NNE::Systems::Application::Instance = nullptr;
@@ -37,6 +40,35 @@ NNE::Systems::Application::Application()
     _deltaTime = 0.0f;
     _gameDeltaTime = 0.0f;
     _lastFrameTime = std::chrono::high_resolution_clock::now();
+
+    _editorCameraEntity = new NNE::AEntity();
+    if (_editorCameraEntity)
+    {
+        _editorCameraEntity->SetName("EditorCamera");
+        _editorCameraEntity->SetVisibleInHierarchy(false);
+        auto* editorTransform = _editorCameraEntity->transform;
+        if (editorTransform)
+        {
+            editorTransform->position = glm::vec3(0.0f, 3.0f, -8.0f);
+            editorTransform->rotation = glm::vec3(-15.0f, 0.0f, 0.0f);
+            editorTransform->scale = glm::vec3(1.0f);
+        }
+
+        auto* editorCamera = _editorCameraEntity->AddComponent<NNE::Component::Render::CameraComponent>();
+        if (editorCamera)
+        {
+            float aspect = HEIGHT > 0 ? static_cast<float>(WIDTH) / static_cast<float>(HEIGHT) : (16.0f / 9.0f);
+            editorCamera->SetPerspective(55.0f, aspect, 0.1f, 500.0f);
+        }
+
+        _editorCameraEntity->AddComponent<NNE::Component::EditorCameraController>();
+
+        if (VKManager)
+        {
+            VKManager->SetSceneCamera(_editorCameraEntity->GetComponent<NNE::Component::Render::CameraComponent>());
+            VKManager->UseSceneView(_sceneViewActive);
+        }
+    }
 }
 
 /**
@@ -50,6 +82,12 @@ NNE::Systems::Application::~Application()
         VKManager->CleanUp();
         delete VKManager;
         VKManager = nullptr;
+    }
+
+    if (_editorCameraEntity)
+    {
+        delete _editorCameraEntity;
+        _editorCameraEntity = nullptr;
     }
 
     for (NNE::AEntity* entity : _entities) {
@@ -75,6 +113,12 @@ void NNE::Systems::Application::Init()
 
     uint32_t extensionCount = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+    if (_editorCameraEntity)
+    {
+        _editorCameraEntity->Awake();
+        _editorCameraEntity->Start();
+    }
 
     for (NNE::AEntity* entity : _entities)
     {
@@ -116,11 +160,21 @@ void NNE::Systems::Application::Update()
             entity->Update(_gameDeltaTime);
         }
 
+        if (_editorCameraEntity)
+        {
+            _editorCameraEntity->Update(_deltaTime);
+        }
+
         manager->LateUpdateAll(_gameDeltaTime);
 
         for (NNE::AEntity* entity : _entities)
         {
             entity->LateUpdate(_gameDeltaTime);
+        }
+
+        if (_editorCameraEntity)
+        {
+            _editorCameraEntity->LateUpdate(_deltaTime);
         }
     }
     vkDeviceWaitIdle(VKManager->device);
@@ -204,6 +258,11 @@ void NNE::Systems::Application::SetSceneViewActive(bool active)
     if (_sceneViewActive)
     {
         SetPlayMode(false);
+    }
+
+    if (VKManager)
+    {
+        VKManager->UseSceneView(_sceneViewActive);
     }
 }
 

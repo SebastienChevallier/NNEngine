@@ -26,6 +26,13 @@ void PlayerController::Awake()
 
 void PlayerController::Update(float deltaTime)
 {
+        auto* app = NNE::Systems::Application::GetInstance();
+        if (app && (app->IsSceneViewActive() || !app->IsPlayMode()))
+        {
+                lastMousePos = NNE::Systems::InputManager::GetMousePosition();
+                return;
+        }
+
         auto* ui = NNE::Systems::SystemManager::GetInstance()->GetSystem<NNE::Systems::UISystem>();
         if (ui && ui->showPerf) return;
 

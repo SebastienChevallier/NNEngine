@@ -53,7 +53,12 @@ std::string NNE::AEntity::GetName()
 
 void NNE::AEntity::SetName(const std::string& name)
 {
-	_Name = name;
+        _Name = name;
+}
+
+void NNE::AEntity::SetVisibleInHierarchy(bool visible)
+{
+        _visibleInHierarchy = visible;
 }
 
 /**

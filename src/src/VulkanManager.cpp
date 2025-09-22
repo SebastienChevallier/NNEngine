@@ -94,6 +94,37 @@ NNE::Systems::VulkanManager::~VulkanManager()
     CleanUp();
 }
 
+void NNE::Systems::VulkanManager::SetGameCamera(NNE::Component::Render::CameraComponent* camera)
+{
+    _gameCamera = camera;
+    if (!_usingSceneCamera)
+    {
+        _activeCamera = _gameCamera ? _gameCamera : _sceneCamera;
+    }
+}
+
+void NNE::Systems::VulkanManager::SetSceneCamera(NNE::Component::Render::CameraComponent* camera)
+{
+    _sceneCamera = camera;
+    if (_usingSceneCamera)
+    {
+        _activeCamera = _sceneCamera ? _sceneCamera : _gameCamera;
+    }
+}
+
+void NNE::Systems::VulkanManager::UseSceneView(bool enabled)
+{
+    _usingSceneCamera = enabled;
+    if (_usingSceneCamera)
+    {
+        _activeCamera = _sceneCamera ? _sceneCamera : _gameCamera;
+    }
+    else
+    {
+        _activeCamera = _gameCamera ? _gameCamera : _sceneCamera;
+    }
+}
+
 void NNE::Systems::VulkanManager::initVulkan()
 {
     CreateVulkanInstance();        // 1️⃣ Créer une instance Vulkan
@@ -1564,26 +1595,26 @@ void NNE::Systems::VulkanManager::updateUniformBuffer(uint32_t currentImage)
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    if (!activeCamera) return;
+    if (!_activeCamera) return;
 
     GlobalUniformBufferObject globalUBO{};
-    globalUBO.view = activeCamera->GetViewMatrix();
-    globalUBO.proj = activeCamera->GetProjectionMatrix();
+    globalUBO.view = _activeCamera->GetViewMatrix();
+    globalUBO.proj = _activeCamera->GetProjectionMatrix();
 
     globalUBO.lightSpace = glm::mat4(1.0f);
 
     if (activeLight) {
         glm::vec3 lightPos{ 0.0f };        
         
-		lightPos = activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
-		//lightPos = activeCamera->GetEntity()->transform->position;
+                lightPos = _activeCamera->GetEntity()->transform->position - glm::normalize(activeLight->GetDirection()) * shadowConfig.lightDistance;
+                //lightPos = _activeCamera->GetEntity()->transform->position;
 
         glm::vec3 lightDir = activeLight->GetDirection();
         glm::vec3 up = (glm::abs(lightDir.y) > 0.99f)
             ? glm::vec3(0.0f, 0.0f, 1.0f)
             : glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 lightView = glm::lookAt(lightPos, activeCamera->GetEntity()->transform->position, up);
+        glm::mat4 lightView = glm::lookAt(lightPos, _activeCamera->GetEntity()->transform->position, up);
 
         // Ortho couvrant une boîte fixe (simple pour démarrer)
         const float l = -shadowConfig.orthoHalfSize, r = +shadowConfig.orthoHalfSize;
@@ -2156,13 +2187,30 @@ void NNE::Systems::VulkanManager::recreateSwapChain()
 
 void NNE::Systems::VulkanManager::updateCameraAspectRatio()
 {
-    if (activeCamera) {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        if (width == 0 || height == 0) return; // Éviter les divisions par zéro
+    if (!window) return;
+    int width = 0, height = 0;
+    glfwGetFramebufferSize(window, &width, &height);
+    if (width == 0 || height == 0) return;
 
-        float newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
-        activeCamera->SetPerspective(activeCamera->GetFOV(), newAspectRatio, activeCamera->GetNearPlane(), activeCamera->GetFarPlane());
+    float newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+
+    if (_gameCamera)
+    {
+        _gameCamera->SetPerspective(_gameCamera->GetFOV(), newAspectRatio, _gameCamera->GetNearPlane(), _gameCamera->GetFarPlane());
+    }
+
+    if (_sceneCamera && _sceneCamera != _gameCamera)
+    {
+        _sceneCamera->SetPerspective(_sceneCamera->GetFOV(), newAspectRatio, _sceneCamera->GetNearPlane(), _sceneCamera->GetFarPlane());
+    }
+
+    if (_usingSceneCamera)
+    {
+        _activeCamera = _sceneCamera ? _sceneCamera : _gameCamera;
+    }
+    else
+    {
+        _activeCamera = _gameCamera ? _gameCamera : _sceneCamera;
     }
 }
 

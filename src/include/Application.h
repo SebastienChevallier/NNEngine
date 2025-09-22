@@ -24,6 +24,7 @@ class Application
                 /*VkInstance instance;*/
                 bool _playMode = false;
                 bool _sceneViewActive = true;
+                NNE::AEntity* _editorCameraEntity = nullptr;
                 float _deltaTime = 0.0f;
                 float _gameDeltaTime = 0.0f;
                 std::chrono::high_resolution_clock::time_point _lastFrameTime;
@@ -50,6 +51,7 @@ class Application
                 void SetPlayMode(bool playing);
                 bool IsSceneViewActive() const;
                 void SetSceneViewActive(bool active);
+                NNE::AEntity* GetEditorCameraEntity() const { return _editorCameraEntity; }
 
                 /**
                  * <summary>

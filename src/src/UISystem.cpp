@@ -118,6 +118,7 @@ void UISystem::DrawHierarchyWindow(ImGuiID dockId) {
             bool hasEntities = false;
             for (NNE::AEntity* entity : _app->_entities) {
                 if (!entity || !entity->transform) continue;
+                if (!entity->IsVisibleInHierarchy()) continue;
                 if (entity->transform->parent) continue;
                 hasEntities = true;
                 DrawHierarchyNode(entity->transform);

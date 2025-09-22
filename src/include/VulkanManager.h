@@ -231,10 +231,13 @@ namespace NNE::Systems {
 
     private:
         bool shadowDebugRequested;
+        NNE::Component::Render::CameraComponent* _activeCamera = nullptr;
+        NNE::Component::Render::CameraComponent* _gameCamera = nullptr;
+        NNE::Component::Render::CameraComponent* _sceneCamera = nullptr;
+        bool _usingSceneCamera = true;
 
     public :
         ShadowConfig shadowConfig{};
-        NNE::Component::Render::CameraComponent* activeCamera = nullptr;
         NNE::Component::Render::LightComponent* activeLight = nullptr;
         VkInstance instance = VK_NULL_HANDLE;
         std::vector<Vertex> vertices;
@@ -590,6 +593,12 @@ namespace NNE::Systems {
         VkDescriptorSet getShadowMapDebugDescriptor();
         VkDescriptorSet getViewportDescriptor() const;
         VkExtent2D getViewportExtent() const;
+        void SetGameCamera(NNE::Component::Render::CameraComponent* camera);
+        void SetSceneCamera(NNE::Component::Render::CameraComponent* camera);
+        void UseSceneView(bool enabled);
+        NNE::Component::Render::CameraComponent* GetActiveCamera() const { return _activeCamera; }
+        NNE::Component::Render::CameraComponent* GetGameCamera() const { return _gameCamera; }
+        NNE::Component::Render::CameraComponent* GetSceneCamera() const { return _sceneCamera; }
         /**
             * <summary>
             * Crée un module de shader à partir de code binaire.
